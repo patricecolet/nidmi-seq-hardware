@@ -93,12 +93,19 @@ Affectation provisoire (à figer avec le contrôleur TFT exact) — éviter stra
   matériel, zéro perte de pas même en rotation rapide). Ne pas mettre A/B sur I2C.
 - **Push (4)** → déportés sur MCP23017 (pas critique) → économise 4 GPIO ESP32.
 
-### LEDs — SK6812 RGB adressables, 1 bus (cahier §10.5)
-- Le cahier **exige** WS2812/SK6812 sur les 16 blanches (différenciation de couche).
-  **SK6812 préféré** à WS2812 : meilleur à basse luminosité, option RGBW, plus stable.
-- 1 broche data, chaîne ≥16 (blanches) extensible à 27+ (toutes touches) — couleur
-  libre par LED. À FIGER : 5V ou 3.3V (niveau data → level-shifter si LED en 5V),
-  nombre exact, budget courant (≈ 20 mA/LED max à blanc plein).
+### LEDs — RGB adressables 1-fil, 1 bus (cahier §10.5)
+- Le cahier **exige** du RGB adressable sur les 16 blanches (différenciation de couche).
+- **Choix touches « pas » : LED WS2811 5 mm THT diffusée** (Adafruit #1938 / Pololu
+  #2535 ; 8 mm = Pololu #2536) — voir `ETUDE_PRIX_TOUCHES.md`. Critère : **le moins
+  cher + 100 % soudable main** (petites mains). WS281x = même protocole 1-fil que
+  SK6812 → même bus, même firmware.
+- Bouton « pas » : tact switch carré **12×12×7,3 mm THT** + capuchon carré translucide.
+- ⚠️ Intégration mécanique : LED ronde sous cap carré → capuchon/light-pipe diffusant
+  (impression 3D / acrylique), à prototyper.
+- Alternative rendu « pad » net : SK6812 MINI-E CMS posé en **PCBA** (tu ne soudes
+  que les switches THT), ~20 € fixe. À reconsidérer plus tard.
+- À FIGER : 5V/3.3V (level-shifter data si 5V), budget courant (WS2811 5 mm ≈ 50 mA
+  à blanc plein → 16 pas ≈ 0,8 A crête ; dimensionner l'alim 5V).
 
 ### MIDI
 - OUT : UART TX + driver de ligne.
@@ -116,7 +123,9 @@ Affectation provisoire (à figer avec le contrôleur TFT exact) — éviter stra
 - [ ] Encodeurs : modèle, détente, push intégré.
 - [ ] PB86 : confirmer A0 pour les 27 touches ; statuer A0-vs-A1/A2 sur transport/Shift.
 - [ ] Connecteurs MIDI : **TRS type A** (cahier penche TRS) vs DIN5.
-- [ ] SK6812 : modèle (RGB/RGBW), tension, nombre (16 ou 27+), level-shifter data ?
+- [x] LED pas : **WS2811 5 mm THT diffusée** (Adafruit #1938 / Pololu #2535) +
+      tact carré 12×12 THT + cap translucide. À FIGER : nb (16 ou 27+), 5V/3.3V,
+      level-shifter data, budget courant alim 5V.
 
 ## Flux de travail KiCad
 1. Figer la BOM (ci-dessus).

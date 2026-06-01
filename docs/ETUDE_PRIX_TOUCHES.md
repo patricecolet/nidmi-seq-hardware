@@ -54,6 +54,20 @@ Si on illumine aussi les 11 noires + Shift (même bus) :
 - Option 1 : **~11 → 47 €** (×27)
 - Option 2a : ~18 → 39 € ; 2b : + ~20 € fixe
 
+## Références retenues — Option 1 (décidée 2026-06)
+
+**LED RGB adressable 5 mm THT diffusée (driver WS2811, bus 1-fil = compat. SK6812) :**
+- Adafruit **#1938** (pack 5) — https://www.adafruit.com/product/1938
+- Pololu **#2535** (pack 10) — https://www.pololu.com/product/2535
+- Variante 8 mm (meilleure diffusion sous cap carré) : Pololu **#2536** — https://www.pololu.com/product/2536
+- Budget : AliExpress/LCSC « WS2811 5mm DIP RGB LED » (4 pattes).
+
+**Bouton tactile carré THT (commodité) :**
+- Spec : tact switch **12×12×7,3 mm, 4 broches DIP, traversant, momentané**
+  + **capuchon carré translucide** 12×12 mm (vendu à part, lots 100).
+- Repère : https://www.aliexpress.com/item/32843369435.html — chercher même spec
+  sur LCSC/Mouser pour une réf. distributeur traçable.
+
 ## Conclusion
 - **Critère « moins cher + plus facile à souder » → Option 1 (tout traversant).**
   Gagnante sur les deux axes pour un proto ; seul travail = capuchon/light-pipe.
