@@ -24,6 +24,32 @@
 
 ## Décisions actées
 
+### Module : ESP32-S3-WROOM-1-N16R8 (16 Mo flash + 8 Mo PSRAM octale)
+- **La PSRAM additionnelle est non-négociable** (banque de patterns, cahier §11.2) :
+  s'en passer risquerait de bloquer le projet. On garde donc les **8 Mo**.
+- 8 Mo ⇒ **PSRAM octale (R8)** ⇒ réserve en interne **GPIO 26-37** (flash + PSRAM).
+- **Sans conséquence ici** : les 37 boutons sont sur I2C, donc seuls ~20 GPIO sont
+  requis pour ~25 exploitables sur le N16R8 → marge confortable (voir budget GPIO).
+
+### Budget GPIO ESP32-S3 (N16R8, pins 26-37 réservés exclus)
+| Fonction                  | GPIO                         | Nb |
+|---------------------------|------------------------------|----|
+| I2C (3× MCP23017)         | SDA, SCL                     | 2  |
+| TFT SPI                   | SCK, MOSI, CS, DC, RST, BL   | 6  |
+| MIDI UART                 | TX, RX                       | 2  |
+| SK6812 data               | 1 ligne                      | 1  |
+| Encodeurs quadrature A/B  | 4× (A+B)                     | 8  |
+| MCP INT (chaîné)          | 1 ligne                      | 1  |
+| **Total requis**          |                              | **20** |
+| USB-MIDI                  | D-/D+ (19,20 natifs)         | (2)|
+| **Exploitables N16R8**    | hors 0/3/45/46 (strap), 19/20 (USB), 43/44 (UART0) | **~25** |
+
+Affectation provisoire (à figer avec le contrôleur TFT exact) — éviter strapping
+(0,3,45,46), flash/PSRAM (26-37), USB (19,20) :
+- I2C : SDA=8, SCL=9 · TFT(FSPI) : SCK=12, MOSI=11, CS=10, DC=13, RST=14, BL=21
+- MIDI : TX=17, RX=18 · SK6812 : 47 · INT MCP : 38
+- Encodeurs A/B : 1,2,4,5,6,7,15,16 · USB-MIDI : 19,20
+
 ### Lecture des touches : expandeurs I2C MCP23017 (×3)
 - Bus I2C = 2 fils ; jusqu'à 8 MCP23017 (adr. 0x20→0x27 via leurs broches A0/A1/A2).
 - **3× MCP23017 = 48 entrées** pour 37 boutons → marge confortable (0x20/0x21/0x22).
@@ -84,8 +110,8 @@
 - TFT / WS2812 possiblement 5V → vérifier datasheets.
 
 ## BOM à figer avant le schéma
-- [ ] Modèle ESP32-S3 exact : WROOM-1 vs WROVER/N16R8 (PSRAM octale mange GPIO 33-37).
-      Le cahier §11.2 veut **8 Mo PSRAM** → vérifier les GPIO restants.
+- [x] Module : **ESP32-S3-WROOM-1-N16R8** (16 Mo flash + 8 Mo PSRAM octale). PSRAM
+      non-négociable ; GPIO 26-37 réservés mais sans impact (budget GPIO OK).
 - [ ] Écran TFT ~320×240 : référence, contrôleur (ILI9341/ST7789…), SPI, tension, connecteur.
 - [ ] Encodeurs : modèle, détente, push intégré.
 - [ ] PB86 : confirmer A0 pour les 27 touches ; statuer A0-vs-A1/A2 sur transport/Shift.
