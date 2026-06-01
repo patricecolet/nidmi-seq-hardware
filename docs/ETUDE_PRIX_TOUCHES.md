@@ -68,6 +68,23 @@ Si on illumine aussi les 11 noires + Shift (même bus) :
 - Repère : https://www.aliexpress.com/item/32843369435.html — chercher même spec
   sur LCSC/Mouser pour une réf. distributeur traçable.
 
+## Liste d'achat — Option A (voyant RGB à côté du pas), 16 pas
+
+| Pièce | Source | Lien | Prix |
+|---|---|---|---|
+| Tact switch 12×12×7,3 mm THT | AliExpress | item 1005007660622508 | ~0,05–0,15 €/u |
+| Capuchons carrés translucides 12×12 (100) | AliExpress | item 32844716405 | ~1,70 €/100 |
+| LED WS2811 5 mm 🇫🇷 fiable | Gotronic ADA1938 (pack 5) | gotronic.fr art 22883 | ~6 €/5 |
+| LED WS2811 8 mm 🇫🇷 (diffuse mieux) | Gotronic ADA1734 (pack 5) | gotronic.fr art 22882 | ~6 €/5 |
+| LED WS2811 5 mm 💰 lot | AliExpress 20–1000 pcs | item 32713415299 | ~0,15–0,30 €/u |
+
+Stratégie : 2–3 LED test chez Gotronic (valider rendu+soudure, livraison FR), puis
+lot AliExpress pour les 16/27. Total 16 pads ≈ **< 10 €** en lot.
+
+### Support (étape schéma)
+- ESP32-S3-WROOM-1-N16R8 (figé) · 3× MCP23017 · 74AHCT125 (level-shifter 3,3→5V) ·
+  R ~330 Ω data, 100 nF/LED, 1000 µF alim 5V.
+
 ## Conclusion
 - **Critère « moins cher + plus facile à souder » → Option 1 (tout traversant).**
   Gagnante sur les deux axes pour un proto ; seul travail = capuchon/light-pipe.
