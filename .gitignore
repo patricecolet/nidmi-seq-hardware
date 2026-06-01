@@ -1,0 +1,22 @@
+# KiCad backups & autosave
+*-backups/
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*.kicad_prl
+fp-info-cache
+~*.lck
+*.bak
+*.000
+
+# KiCad project local state (user-specific window/layout)
+*.kicad_pro.lock
+
+# Generated outputs (regenerate from sources)
+gerbers/
+*.zip
+*.drl
+*.gbr
+*.pos
+
+# OS
+.DS_Store
