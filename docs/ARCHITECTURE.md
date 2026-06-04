@@ -93,18 +93,28 @@ Affectation provisoire (à figer avec le contrôleur TFT exact) — éviter stra
   matériel, zéro perte de pas même en rotation rapide). Ne pas mettre A/B sur I2C.
 - **Push (4)** → déportés sur MCP23017 (pas critique) → économise 4 GPIO ESP32.
 
-### LEDs — RGB adressables 1-fil, 1 bus (cahier §10.5)
-- Le cahier **exige** du RGB adressable sur les 16 blanches (différenciation de couche).
-- **Choix touches « pas » : LED WS2811 5 mm THT diffusée** (Adafruit #1938 / Pololu
-  #2535 ; 8 mm = Pololu #2536) — voir `ETUDE_PRIX_TOUCHES.md`. Critère : **le moins
-  cher + 100 % soudable main** (petites mains). WS281x = même protocole 1-fil que
-  SK6812 → même bus, même firmware.
-- Bouton « pas » : tact switch carré **12×12×7,3 mm THT** + capuchon carré translucide.
-- ⚠️ Intégration mécanique : LED ronde sous cap carré → capuchon/light-pipe diffusant
-  (impression 3D / acrylique), à prototyper.
-- Alternative rendu « pad » net : SK6812 MINI-E CMS posé en **PCBA** (tu ne soudes
-  que les switches THT), ~20 € fixe. À reconsidérer plus tard.
-- À FIGER : 5V/3.3V (level-shifter data si 5V), budget courant (WS2811 5 mm ≈ 50 mA
+### Pads « pas » (16 blanches) — FIGÉ : galette silicone + SK6812 CMS
+Décision : **Famille 1** (pad silicone translucide + LED RGB adressable sous le PCB),
+le geste « groovebox » (MPC/Push/Launchpad). Remplit le §10.5 (couleur par pas).
+- **Bouton = galette silicone élastomère 4×4** (Adafruit #1611 ; pack 2 #4021 ;
+  équiv. eMagTech). 16 pas = 1 galette. Boutons 10 mm, course 3 mm, silencieux.
+  **0 soudure** : se pose sur le PCB, contact par pastilles conductrices → vu comme
+  un bouton NO normal → câblé sur MCP comme les autres.
+- **LED = SK6812 CMS** (obligatoire : la galette loge une LED plate/3 mm, la 5 mm THT
+  ne rentre pas ; l'adressable n'existe pas proprement en 3 mm THT). Reste sur le
+  **bus 1-fil** SK6812 du §10.5.
+- **Géométrie figée par la galette** : 4×4, ~60×60 mm, ~11,5 mm de haut.
+- PCB : dessiner les **pastilles de contact interdigitées** (layout documenté Trellis)
+  + 1 SK6812 centrée par cellule.
+
+#### Assemblage — À FIGER (différé : décider avec PCB/échantillon en main)
+- **1a (reco)** : PCB custom + 16 SK6812 **posées en PCBA** (~20 € fixe) → section pad
+  quasi sans soudure manuelle (tu poses juste la galette). S'intègre à l'archi finale.
+- **1b (proto rapide)** : module **NeoTrellis #3954** (16 SK6812 pré-soudées, I2C,
+  même bus) — 0 soudure, ~40 €, mais ajoute une puce *seesaw* et diverge de l'archi finale.
+- **1a-main** : souder les 16 SK6812 soi-même (fer fin+flux / air chaud) — économise
+  le PCBA, plus difficile pour petites mains.
+- À FIGER aussi : 5V/3.3V (level-shifter data si 5V), budget courant (SK6812 ≈ 50 mA
   à blanc plein → 16 pas ≈ 0,8 A crête ; dimensionner l'alim 5V).
 
 ### MIDI
@@ -123,9 +133,10 @@ Affectation provisoire (à figer avec le contrôleur TFT exact) — éviter stra
 - [ ] Encodeurs : modèle, détente, push intégré.
 - [ ] PB86 : confirmer A0 pour les 27 touches ; statuer A0-vs-A1/A2 sur transport/Shift.
 - [ ] Connecteurs MIDI : **TRS type A** (cahier penche TRS) vs DIN5.
-- [x] LED pas : **WS2811 5 mm THT diffusée** (Adafruit #1938 / Pololu #2535) +
-      tact carré 12×12 THT + cap translucide. À FIGER : nb (16 ou 27+), 5V/3.3V,
-      level-shifter data, budget courant alim 5V.
+- [x] Pads pas : **galette silicone 4×4 (Adafruit #1611) + SK6812 CMS** (Famille 1).
+      À FIGER : assemblage (1a PCBA / 1b NeoTrellis / 1a-main), réf. SK6812 exacte,
+      5V/3.3V, level-shifter data, budget courant alim 5V.
+- Note : tact 12×12 THT + cap translucide reste pertinent pour les **11 noires** (fonctions).
 
 ## Flux de travail KiCad
 1. Figer la BOM (ci-dessus).
