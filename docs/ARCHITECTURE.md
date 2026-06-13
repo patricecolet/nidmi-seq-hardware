@@ -10,7 +10,7 @@
                               │      ESP32-S3            │
                               │  (dual-core, USB natif)  │
                               └─────────────────────────┘
-        I2C (2 fils) ────────────┤ SDA/SCL          SPI ├──── TFT ~320×240 (SCK,MOSI,CS,DC,RST,BL)
+        I2C (2 fils) ────────────┤ SDA/SCL          SPI ├──── TFT 3,2″ 320×240 (SCK,MOSI,CS,DC,RST,BL)
              │                   │                       │
     ┌────────┼────────┐          │              UART TX ├──── MIDI OUT (TRS-A ou DIN5)
     │        │        │          │              UART RX ├──── MIDI IN (via opto 6N138/H11L1)
@@ -117,6 +117,18 @@ le geste « groovebox » (MPC/Push/Launchpad). Remplit le §10.5 (couleur par pa
 - À FIGER aussi : 5V/3.3V (level-shifter data si 5V), budget courant (SK6812 ≈ 50 mA
   à blanc plein → 16 pas ≈ 0,8 A crête ; dimensionner l'alim 5V).
 
+### Écran — FIGÉ : TFT 320×240 couleur, 3,2″, SPI, non tactile
+- **Source : cahier VST §10.1 (révision 2026-05)** — supersède l'OLED 256×64 mono.
+  L'écran est **le hub d'édition** (Vues PATTERN multi-row, PIANO ROLL tuplet-aware,
+  HARMONIE, AUTO, GLOBAL, SONG), pas un simple afficheur de valeurs.
+- **Résolution 320×240 (4:3), bus SPI** haute fréquence (refresh fluide du playhead).
+- **Diagonale 3,2″** (module ~56×78 mm, zone active ~49×65 mm) : lisibilité de la
+  grille multi-row et du piano-roll (le 2,4″/2,8″ est trop juste pour ce cahier).
+- **Non tactile** : l'ergonomie reste touches + encodeurs ; le capacitif est pour les
+  touches, jamais pour l'écran.
+- À préciser : contrôleur (ILI9341 vs ST7789), tension rétroéclairage (PWM via MOSFET),
+  connecteur (header 2,54 vs FPC).
+
 ### MIDI
 - OUT : UART TX + driver de ligne.
 - IN : **opto-coupleur obligatoire** (6N138 ou H11L1) pour isolation (norme MIDI).
@@ -129,7 +141,9 @@ le geste « groovebox » (MPC/Push/Launchpad). Remplit le §10.5 (couleur par pa
 ## BOM à figer avant le schéma
 - [x] Module : **ESP32-S3-WROOM-1-N16R8** (16 Mo flash + 8 Mo PSRAM octale). PSRAM
       non-négociable ; GPIO 26-37 réservés mais sans impact (budget GPIO OK).
-- [ ] Écran TFT ~320×240 : référence, contrôleur (ILI9341/ST7789…), SPI, tension, connecteur.
+- [x] **Écran TFT 320×240 couleur, 3,2″, bus SPI, non tactile** (cf. cahier VST §10.1
+      rév. 2026-05, supersède l'OLED 256×64 mono). Reste à préciser : contrôleur
+      (ILI9341/ST7789), tension BL, connecteur (header/FPC).
 - [ ] Encodeurs : modèle, détente, push intégré.
 - [ ] PB86 : confirmer A0 pour les 27 touches ; statuer A0-vs-A1/A2 sur transport/Shift.
 - [ ] Connecteurs MIDI : **TRS type A** (cahier penche TRS) vs DIN5.

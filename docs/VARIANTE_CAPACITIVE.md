@@ -87,10 +87,13 @@ interchangeables, marge flash/PSRAM partout). **Commande : 3× N16R8 ≈ 17 €.
 
 ## Écran TFT (sujet explicite)
 
+- **FIGÉ** : **TFT 320×240 couleur, 3,2″, SPI, non tactile** (cf. [`ARCHITECTURE.md`]
+  (ARCHITECTURE.md) → Écran ; source cahier VST §10.1 rév. 2026-05). Module ~56×78 mm,
+  zone active ~49×65 mm.
 - **Qui pilote** : le **maître**, en **SPI** (contrôleur FSPI), sur GPIO non-touch
   (>14) pour laisser GPIO 1-14 au capacitif.
 - **Broches** : SCK, MOSI, CS, DC, RST, BL (~6) ; MISO en option (souvent inutile).
-- **Contrôleur** : **ST7789** (240×320) ou ILI9341 — **à FIGER** (dispo, lib, vitesse).
+- **Contrôleur** : ILI9341 vs ST7789 — à préciser (dispo, lib, vitesse).
 - **Alim** : logique 3,3 V ; **rétroéclairage (BL)** parfois 5 V → piloter en **PWM
   via transistor** (gradation + on/off, économie veille).
 - **Intégration plexi** : fenêtre de visualisation dédiée (pas de capacitif par-dessus
@@ -120,7 +123,7 @@ n'a plus la place. Push-encodeurs (4) → GPIO esclave ou canaux *touch*.
 - [ ] Lien inter-MCU (I2C reco vs UART) + protocole d'événements + ligne INT.
 - [ ] Level-shifter data SK6812 (74AHCT125 ?) + tension LED (5 V vs 3,3 V).
 - [ ] Dimensionnement alim 5 V (courant LED) + plafond luminosité firmware.
-- [ ] Contrôleur TFT (ST7789/ILI9341) + brochage SPI sur pins >14.
+- [ ] Contrôleur TFT (ST7789/ILI9341) + brochage SPI sur pins >14 (diagonale 3,2″ figée).
 - [ ] Géométrie pastilles capacitives + épaisseur/matière overlay plexi (test réel).
 - [ ] Encodeurs : quel esclave porte la quadrature PCNT ; sort des push.
 - [ ] Diffusion LED sous plexi (uniformité, séparation entre cellules).
