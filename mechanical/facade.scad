@@ -36,7 +36,7 @@ key_clr    = 1.2;     // garde autour des noires (notch des blanches)
 n_enc      = 5;
 enc_knob   = 20;
 enc_shaft  = 7;
-enc_pitch  = 40;
+enc_pitch  = 33;      // resserré pour tenir à droite du PCB écran (108)
 
 // --- Boutons de fonction (8 : PB86, corps 12×17 PCB-mount, cap illuminé) ---
 //     ROW HARMONY PROJET SHIFT PLAY STOP REC EXPORT — mécaniques, LED mono/bi-couleur
@@ -46,15 +46,17 @@ btn_l      = 17;      // longueur corps/cap PB86
 btn_hole_w = 12.5;    // perçage plexi
 btn_hole_l = 17.5;
 btn_cap_h  = 10;      // hauteur du cap au-dessus du PCB
-btn_pitch  = 24;
+btn_pitch  = 20;
 
 // --- Ruban capacitif (slider tactile natif ESP32-S3, sous le plexi) ---
 ribbon_len = 180;
 ribbon_w   = 10;
 
-// --- Écran 4,0" 480x320 ILI9488 SPI (zone active ~85x56, paysage) ---
-screen_w   = 85;
-screen_h   = 56;
+// --- Écran 4,0" 480x320 ILI9488 SPI ---
+scr_board_w = 108;    // PCB module, paysage (mesurer l'exemplaire réel)
+scr_board_h = 62;
+screen_w    = 84;     // fenêtre active visible (cutout plexi)
+screen_h    = 56;
 
 // LED
 led_size   = 3.5;
@@ -97,9 +99,9 @@ black_list = [ for (i=[0:white_n-2]) if (has_black(i))
                  [ white_cx(i) + pitch_w/2, kb_y0 + Wh - Bh ] ];
 
 // Zone haute (écran + encodeurs + boutons)
-scr_cx = margin + screen_w/2;
-scr_cy = H - margin - screen_h/2;
-ctrl_x0 = margin + screen_w + 20;          // début zone contrôles (droite de l'écran)
+scr_cx = margin + scr_board_w/2;           // centre module = centre fenêtre
+scr_cy = H - margin - scr_board_h/2;
+ctrl_x0 = margin + scr_board_w + 15;       // contrôles à droite du PCB écran (108)
 enc_y  = H - margin - enc_knob/2 - 6;
 enc_pos = [ for (j=[0:n_enc-1]) [ ctrl_x0 + enc_knob/2 + j*enc_pitch, enc_y ] ];
 btn_y  = enc_y - 32;
@@ -129,7 +131,8 @@ module whites_2d() {
 }
 module blacks_2d() { for (b=black_list) translate([b[0]-Wb/2, b[1]]) square([Wb, Bh]); }
 module ribbon_2d() { translate([ribbon_x, ribbon_y-ribbon_w/2]) square([ribbon_len, ribbon_w]); }
-module screen_2d() { translate([scr_cx-screen_w/2, scr_cy-screen_h/2]) square([screen_w, screen_h]); }
+module screen_2d()    { translate([scr_cx-screen_w/2, scr_cy-screen_h/2]) square([screen_w, screen_h]); }       // fenêtre active
+module scr_board_2d() { translate([scr_cx-scr_board_w/2, scr_cy-scr_board_h/2]) square([scr_board_w, scr_board_h]); } // PCB module
 
 // =====================================================================
 //  COUCHE PCB : électrodes + LEDs + encodeurs + écran
@@ -152,9 +155,9 @@ module layer_pcb() {
             led(p);
             color(C_CAP) translate([p[0]-btn_w/2, p[1]-btn_l/2, pcb_t]) cube([btn_w, btn_l, btn_cap_h]);
         }
-        // module écran
-        color([0.1,0.1,0.1]) translate([scr_cx-screen_w/2, scr_cy-screen_h/2, pcb_t]) cube([screen_w, screen_h, 4]);
-        color([0.15,0.15,0.22]) translate([scr_cx-screen_w/2+2, scr_cy-screen_h/2+2, pcb_t+4]) cube([screen_w-4, screen_h-4, 0.5]);
+        // module écran : PCB 108×62 + dalle active visible 84×56
+        color([0.1,0.1,0.1]) translate([scr_cx-scr_board_w/2, scr_cy-scr_board_h/2, pcb_t]) cube([scr_board_w, scr_board_h, 4]);
+        color([0.15,0.15,0.22]) translate([scr_cx-screen_w/2, scr_cy-screen_h/2, pcb_t+4]) cube([screen_w, screen_h, 0.5]);
     }
 }
 module led(p) { color(C_LED) translate([p[0]-led_size/2, p[1]-led_size/2, pcb_t]) cube([led_size, led_size, led_h]); }
@@ -169,7 +172,7 @@ module layer_spacer() {
         translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) whites_2d();
         translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) blacks_2d();
         translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) ribbon_2d();
-        translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) screen_2d();
+        translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) scr_board_2d();
         for (p=enc_pos) translate([p[0],p[1],-1]) cylinder(d=enc_knob+2, h=spacer_t+2);
         for (p=btn_pos) translate([p[0]-btn_w/2-1, p[1]-btn_l/2-1, -1]) cube([btn_w+2, btn_l+2, spacer_t+2]);
     }
@@ -237,8 +240,9 @@ module cotes() {
     cote_h(white_left(0), white_left(0)+Ww, kb_y0+8, str(Ww));
     cote_h(white_left(0), white_left(1), kb_y0+18, str("pitch ", pitch_w));
     txt([black_list[0][0]+18, black_list[0][1]+Bh/2], str("noire ", Wb), 4);
-    cote_v(scr_cy-screen_h/2, scr_cy+screen_h/2, scr_cx-screen_w/2-3, str(screen_h));
-    cote_h(scr_cx-screen_w/2, scr_cx+screen_w/2, scr_cy+screen_h/2+3, str("ecran ", screen_w, "x", screen_h));
+    cote_v(scr_cy-screen_h/2, scr_cy+screen_h/2, scr_cx-scr_board_w/2-3, str(screen_h));
+    cote_h(scr_cx-screen_w/2, scr_cx+screen_w/2, scr_cy-scr_board_h/2-6, str("actif ", screen_w, "x", screen_h));
+    cote_h(scr_cx-scr_board_w/2, scr_cx+scr_board_w/2, scr_cy+scr_board_h/2+3, str("PCB ecran ", scr_board_w, "x", scr_board_h));
     cote_h(enc_pos[0][0], enc_pos[1][0], enc_y+enc_knob/2+4, str("enc ", enc_pitch));
     cote_h(ribbon_x, ribbon_x+ribbon_len, ribbon_y+ribbon_w/2+3, str("ruban ", ribbon_len));
 }

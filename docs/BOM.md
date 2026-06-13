@@ -53,8 +53,8 @@
   composant externe (R série éventuelle).
 
 ## 6. Écran — 4,0″ 480×320 SPI 🟡 + ⚠️ impact boîtier
-- **Contrôleur** : 🔴 **ST7796 reco** (RGB565 16 bpp, ~40-80 MHz, rapide) **vs
-  ILI9488** (18 bpp, plus lent) — **même PCB, drop-in**. Module Elecrow 4,0″ ST7796.
+- **Contrôleur** : 🟢 **ILI9488** (choix utilisateur ; 18 bpp, OK en *partial
+  refresh*). ST7796 = alternative plus rapide (même PCB) si jamais dispo.
 - Cotes : **PCB 61,74 × 108,04 mm**, **actif 55,68 × 83,52 mm**, ép. 1,6 mm,
   verre +3-4 mm, **header 14 broches** sur petit bord, trous M3 aux coins (à mesurer).
 - Pilotage : **cerveau, SPI ~6 fils** (SCK MOSI CS DC RST + LED PWM), 3,3 V logique.
@@ -97,7 +97,7 @@
   cavité ~22 mm. Profondeur ~31 mm (à recaler sur EC11 ~31-32 mm + connecteurs).
 
 ## Décisions ouvertes (récap) 🔴
-1. Écran **ST7796 vs ILI9488** (même boîtier).
+1. ✅ Écran = **ILI9488 4,0″ 480×320** (ST7796 = alt. rapide possible).
 2. CV **0–5 V vs 0–10 V** (le 10 V impose un rail +12 V).
 3. PB86 **A1 vs A2** + pilotage switches+LED (expandeur/driver). ✅ **Diodes figées** :
    matrice + diode sur **SHIFT/PLAY/REC** seulement (voir §4).
@@ -105,6 +105,7 @@
 5. Encodeurs : **ratio détentes/PPR** (firmware).
 6. SK6812 **3535 vs MINI-E** (selon dessin de cellule).
 
-## Implications boîtier à traiter
-- **Écran PCB 108 × 62 mm** → re-layout du bandeau / élargir la façade.
+## Implications boîtier
+- ✅ **Écran PCB 108 × 62 mm** intégré au modèle (fenêtre active 84×56, contrôles
+  reculés à droite du PCB ; enc pitch 33 / boutons 20 → tient en W=320).
 - Profondeur cavité à recaler sur encodeurs (~32 mm) + jacks PJ-320A board-edge.
