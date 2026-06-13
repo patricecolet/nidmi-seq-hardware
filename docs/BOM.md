@@ -88,10 +88,15 @@
 - Budget LED : 27× SK6812 ≈ 1,6 A crête → **plafonner luminosité** (USB-C 15 W).
 - CV en **0–5 V** → pas de rail +12 V. **LDO 5 V propre** dédié DAC/Vref (anti-bruit).
 
-## 11. Mécanique 🟢
-- Plexi **2 mm** (overlay capacitif + fenêtre écran + perçages enc/boutons).
-- Grille espaceur **3 mm** (puits de lumière). PCB **1,6 mm**. Boîtier parois 2,5 mm,
-  cavité ~22 mm. Profondeur ~31 mm (à recaler sur EC11 ~31-32 mm + connecteurs).
+## 11. Mécanique 🟢 (profondeur recalée)
+- Empilement (haut→bas) : plexi **2 mm** · **entrefer avant 7 mm** (dégage le corps
+  EC11 ~6,5 + PB86 + module écran) · PCB **1,6 mm** · **cavité 12 mm** (3× ESP32 ~3 +
+  connecteurs) · fond **2,5 mm**. → **profondeur totale ≈ 25 mm.**
+- ⚠️ **2 PCB** : sous-couche **électrodes capacitives** près du plexi (touches + ruban,
+  gap ~2-3 mm pour la sensibilité) **+ PCB principal** en bas (encodeurs, électronique,
+  connecteurs). L'entrefer 7 mm = dégagement du corps des encodeurs entre les deux.
+- Jacks **PJ-320A board-edge** (~5 mm) + USB-C sur la **tranche arrière**, au niveau du
+  PCB principal. Boîtier parois **2,5 mm**.
 
 ## 12. Budget IO / répartition 3 puces 🟡
 **Tactile = 32 canaux (27 touches + ruban ~5) → les 3 puces en font** :

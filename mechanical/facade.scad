@@ -20,7 +20,8 @@ margin     = 12;
 
 // Épaisseurs
 plexi_t    = 2;
-spacer_t   = 3;
+spacer_t   = 7;       // entrefer avant : dégage le corps EC11 (~6,5) + PB86 + écran.
+                      // (touches capacitives = sous-couche électrodes près du plexi → 2 PCB)
 pcb_t      = 1.6;
 
 // --- Clavier piano ---
@@ -45,7 +46,7 @@ btn_w      = 12;      // largeur corps/cap PB86
 btn_l      = 17;      // longueur corps/cap PB86
 btn_hole_w = 12.5;    // perçage plexi
 btn_hole_l = 17.5;
-btn_cap_h  = 10;      // hauteur du cap au-dessus du PCB
+btn_cap_h  = 13;      // cap PB86 (dépasse le plexi pour être pressable)
 btn_pitch  = 20;
 
 // --- Ruban capacitif (slider tactile natif ESP32-S3, sous le plexi) ---
@@ -65,7 +66,7 @@ led_h      = 1.6;
 // --- Boîtier ---
 show_box   = false;   // true = parois + fond (objet fermé)
 box_wall   = 2.5;
-box_cavity = 22;      // profondeur cavité sous le PCB (modules ESP32 + connecteurs)
+box_cavity = 12;      // cavité sous le PCB : 3× ESP32 (~3) + connecteurs PJ-320A (~5) + fils
 
 $fn = 40;
 
