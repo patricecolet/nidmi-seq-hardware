@@ -39,13 +39,10 @@
   / 20 mA. **Hauteur/cap non publiés** → récupérer du STEP GrabCAD (pb86-switches-1).
 - 🔴 **IO** : 8 switches + LED bi-couleur (16 lignes) = ~24 IO → via **expandeur
   I2C (MCP23017 ×1-2)** ou driver LED dédié. À figer. LED PB86 **hors** bus SK6812.
-- **Diodes anti-ghosting 🟢** (matrice scannée) : diode **1N4148 / BAT54** sur
-  **SHIFT · PLAY · REC** seulement (peuvent être tenus dans un appui ≥3) ; **aucune**
-  sur **STOP · EXPORT · ROW · HARMONY · PROJET** (solo ou combo à 2 → pas de ghosting).
-  Hypothèse : les boutons sans diode ne sont jamais la 3ᵉ touche d'un combo.
-  Rappel : ghosting = ≥3 touches ; un combo à 2 (Shift+X) ne ghoste jamais.
-  Alternatives : diode sur **les 8** (zéro-risque, ~0,16 €) ; ou **câblage direct**
-  (1 broche/switch → **0 diode**, mais +broches).
+- **Diodes 🟢 → finalement AUCUNE** : les 16 lignes de LED imposent des **MCP23017**
+  (voir §12) ; les 8 switches se câblent donc **en direct** sur l'expandeur (1 broche
+  chacun) → **pas de matrice → pas de ghosting → pas de diode**. (La table « diode sur
+  Shift/Play/Rec » ne s'appliquait qu'à une matrice scannée, abandonnée.)
 
 ## 5. Ruban capacitif — slider tactile natif 🟢
 - Électrode PCB ~**180 × 10 mm** (motif triangulaire/interdigité), **~5 canaux**
@@ -96,11 +93,32 @@
 - Grille espaceur **3 mm** (puits de lumière). PCB **1,6 mm**. Boîtier parois 2,5 mm,
   cavité ~22 mm. Profondeur ~31 mm (à recaler sur EC11 ~31-32 mm + connecteurs).
 
+## 12. Budget IO / répartition 3 puces 🟡
+**Tactile = 32 canaux (27 touches + ruban ~5) → les 3 puces en font** :
+
+| Ressource | A (cerveau) | B | C |
+|---|---|---|---|
+| Touch (canaux) | **5** (ruban) | **14** (touches) | **13** (touches) |
+| Écran SPI (6) · MIDI (2) · USB (2) · LED SK6812 (1, RMT) · I2C master (2) | ✓ | | |
+| Gate / Clock / Reset (3 GPIO) | ✓ | | |
+| Encodeurs A/B (PCNT) | | 3 enc | 2 enc |
+| Comms inter-puces | maître | ✓ | ✓ |
+
+- **I2C (cerveau)** : 2× **MCP23017** (0x20/0x21) + **MCP4728** (0x60). Les MCP23017
+  portent **8 switches PB86 (direct) + 16 lignes LED bi-couleur + 5 push encodeurs**
+  = 29 / 32 IO. CV (DAC) = 0 GPIO.
+- **PCNT** = 4 unités/puce → 5 encodeurs répartis B(3)/C(2).
+- 🔴 **Lien inter-puces** : I2C (simple) vs **UART dédié** (latence basse, mieux pour
+  le jeu des touches) — à figer (impact latence musicale).
+- Cerveau : ribbon (5) + gate/clk/rst (3) sur GPIO 1-14 ; écran/MIDI/LED/I2C sur
+  GPIO >14 (12 dispo) ; USB 19/20. **Tient, mais serré** → pinout exact à valider au schéma.
+
 ## Décisions ouvertes (récap) 🔴
 1. ✅ Écran = **ILI9488 4,0″ 480×320** (ST7796 = alt. rapide possible).
 2. CV **0–5 V vs 0–10 V** (le 10 V impose un rail +12 V).
-3. PB86 **A1 vs A2** + pilotage switches+LED (expandeur/driver). ✅ **Diodes figées** :
-   matrice + diode sur **SHIFT/PLAY/REC** seulement (voir §4).
+3. PB86 **A1 vs A2** (mono vs bi-couleur). ✅ Pilotage figé : **2× MCP23017** (switches
+   direct + LED + push encodeurs) → **aucune diode** (voir §4, §12).
+7. 🔴 **Lien inter-puces** : I2C vs UART (latence touches).
 4. MIDI **TRS type-A vs DIN5** ; driver OUT **5 V vs 3,3 V**.
 5. Encodeurs : **ratio détentes/PPR** (firmware).
 6. SK6812 **3535 vs MINI-E** (selon dessin de cellule).
