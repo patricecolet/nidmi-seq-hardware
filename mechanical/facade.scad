@@ -209,10 +209,14 @@ module layer_box() {
         translate([box_wall, box_wall, z_floor]) cube([W-2*box_wall, H-2*box_wall, wall_top - z_floor + 1]);
         // évidement pour loger l'empilement plexi/spacer/PCB par le haut
         translate([box_wall, box_wall, pcb_t]) cube([W-2*box_wall, H-2*box_wall, spacer_t + plexi_t + 1]);
-        // connecteurs sur la paroi arrière (+Y) : USB-C + 2× MIDI TRS 3,5
-        translate([W*0.30, H-box_wall-1, z_floor+7]) cube([9, box_wall+2, 3.5]);              // USB-C
-        translate([W*0.50, H-box_wall-1, z_floor+9]) rotate([-90,0,0]) cylinder(d=6, h=box_wall+2); // MIDI A
-        translate([W*0.50+13, H-box_wall-1, z_floor+9]) rotate([-90,0,0]) cylinder(d=6, h=box_wall+2); // MIDI B
+        // ---- Connecteurs sur la tranche arrière (+Y) ----
+        // de gauche à droite : USB-C | MIDI IN | MIDI OUT | CV | GATE | CLK | RST
+        conn_z = z_floor + 9;
+        // USB-C (rectangulaire)
+        translate([34, H-box_wall-1, conn_z-1.75]) cube([9, box_wall+2, 3.5]);
+        // 6 jacks 3,5 mm (MIDI IN/OUT + CV/GATE/CLK/RST)
+        for (x = [78, 106, 150, 178, 206, 234])
+            translate([x, H-box_wall-1, conn_z]) rotate([-90,0,0]) cylinder(d=6, h=box_wall+2);
     }
 }
 

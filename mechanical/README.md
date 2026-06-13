@@ -27,6 +27,10 @@ openscad -o facade_explode.png --imgsize=1500,1100 \
 # Boîtier fermé (parois + fond + connecteurs)
 openscad -o facade_box.png --imgsize=1700,1200 \
   --camera=160,80,-6,62,0,205,560 -D 'show_box=true' -D 'show_dims=false' -D 'explode=0' facade.scad
+
+# Vue arrière (connecteurs : USB-C | MIDI IN/OUT | CV GATE CLK RST)
+openscad -o facade_rear.png --imgsize=1800,900 \
+  --camera=160,150,-8,74,0,180,360 -D 'show_box=true' -D 'show_dims=false' -D 'explode=0' facade.scad
 ```
 `explode` : 0 = assemblé, >0 = écarte les couches en Z.
 `show_dims` : true = affiche les côtes paramétriques (auto-lues des variables).
