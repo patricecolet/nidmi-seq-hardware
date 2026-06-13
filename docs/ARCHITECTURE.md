@@ -1,5 +1,12 @@
 # Architecture matérielle — NiDMI Seq
 
+> ⚠️ **LEGACY / divergente.** Ce doc décrit l'**ancienne** archi (boutons mécaniques
+> PB86 lus en MCP23017, 4 encodeurs, 5 transport, pads 4×4 silicone), antérieure à la
+> refonte ergo 2026-06. Le **design actif** = clavier piano **capacitif** + ruban +
+> 5 encodeurs + 8 PB86 + écran 4,0″ : voir [`VARIANTE_CAPACITIVE.md`](VARIANTE_CAPACITIVE.md)
+> (concept) et [`BOM.md`](BOM.md) (specs figées). Garder ce doc pour l'historique et la
+> section Écran (à jour). Ne pas s'y fier pour la surface de contrôle.
+
 > Document vivant. Décisions actées avec l'utilisateur ; certaines restent à
 > trancher (marquées **À FIGER**).
 
