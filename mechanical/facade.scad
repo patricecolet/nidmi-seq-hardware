@@ -41,9 +41,9 @@ n_btn      = 8;
 btn        = 13;
 btn_pitch  = 30;
 
-// --- Écran 3,2" (zone active ~49x65) ---
-screen_w   = 50;
-screen_h   = 66;
+// --- Écran 4,0" 480x320 ILI9488 SPI (zone active ~85x56, paysage) ---
+screen_w   = 85;
+screen_h   = 56;
 
 // LED
 led_size   = 3.5;
