@@ -16,19 +16,16 @@ OpenSCAD (installé via `brew install --cask openscad`). Binaire : `openscad`.
 ```sh
 cd mechanical
 
-# Vue éclatée (montre les 3 couches)
-openscad -o facade_explode.png --imgsize=1400,1400 \
-  --camera=85,131,15,62,0,28,560 -D 'explode=28' facade.scad
+# Vue de dessus + côtes (layout façade)
+openscad -o facade_top.png --imgsize=1900,1050 --projection=p \
+  --camera=184,75,0,0,0,0,650 -D 'show_dims=true' -D 'explode=0' facade.scad
 
-# Vue assemblée
-openscad -o facade_assembled.png --imgsize=1400,1400 \
-  --camera=85,131,15,62,0,28,560 -D 'explode=0' facade.scad
-
-# Vue de dessus (layout façade)
-openscad -o facade_top.png --imgsize=1000,1500 \
-  --camera=85,131,0,0,0,0,640 --projection=p -D 'explode=0' facade.scad
+# Vue éclatée (montre les 3 couches), sans côtes
+openscad -o facade_explode.png --imgsize=1500,1100 \
+  --camera=184,72,10,60,0,22,640 -D 'show_dims=false' -D 'explode=26' facade.scad
 ```
 `explode` : 0 = assemblé, >0 = écarte les couches en Z.
+`show_dims` : true = affiche les côtes paramétriques (auto-lues des variables).
 
 ## Édition interactive
 Ouvrir `facade.scad` dans l'app OpenSCAD → fenêtre de preview, on tourne/zoome,

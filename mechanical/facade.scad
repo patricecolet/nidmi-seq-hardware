@@ -1,180 +1,189 @@
 // =====================================================================
-//  NiDMI Seq — Façade plexi + touches capacitives + LEDs (variante)
-//  Modèle paramétrique OpenSCAD — vue de l'empilement
+//  NiDMI Seq — Façade plexi (variante capacitive)  — LAYOUT VISION
+//  Clavier PIANO 27 touches (16 blanches + 11 noires) + 5 encodeurs
+//  + 8 boutons + écran 3,2".  Source ergo : VST/VISION_ERGO_HARMONIE.md §3
 //
-//  Empilement (de haut en bas) :
-//    1. PLEXI         : couvercle, légendes + cellules gravées, fenêtre écran
-//    2. GRILLE        : espaceur opaque = "light wells" (1 puits par cellule)
-//    3. PCB           : électrodes capacitives (anneaux cuivre) + SK6812 au centre
+//  Empilement : PLEXI / GRILLE espaceur (light wells) / PCB (électrodes
+//  capacitives + SK6812).  explode = 0 assemblé, >0 éclaté.
+//  show_dims = true -> côtes paramétriques (auto-lues des variables).
 //
-//  Usage :
-//    explode = 0   -> assemblé
-//    explode = 25  -> vue éclatée (couches séparées en Z)
-//
-//  Rendu CLI :
-//    openscad -o facade.png --imgsize=1400,1400 \
-//             --camera=85,130,40,60,0,25,650 facade.scad
+//  Rendus : voir README.md
 // =====================================================================
 
-// ---------------- PARAMÈTRES (tout est ajustable ici) ----------------
-explode      = 25;     // 0 = assemblé ; >0 = écarte les couches
+// ---------------- PARAMÈTRES ----------------
+explode    = 0;       // 0 = assemblé ; >0 = écarte les couches
+show_dims  = true;    // côtes paramétriques (vue de dessus)
 
-// Façade
-W            = 170;    // largeur façade (mm)
-H            = 262;    // hauteur façade (mm)
-margin       = 12;
+margin     = 12;
 
 // Épaisseurs
-plexi_t      = 2;      // plexi acrylique
-spacer_t     = 3;      // entrefer / hauteur des puits de lumière
-pcb_t        = 1.6;
+plexi_t    = 2;
+spacer_t   = 3;
+pcb_t      = 1.6;
 
-// Pads "pas" (grille 4x4)
-pad_step     = 22;     // côté du pad capacitif
-pitch_step   = 32;     // entraxe
-ring_w       = 3;      // largeur de l'anneau cuivre
-led_hole     = 6;      // trou central (SK6812)
-led_size     = 3.5;    // boîtier SK6812 3535
-led_h        = 1.6;    // hauteur LED
+// --- Clavier piano ---
+white_n    = 16;      // blanches (= 16 pas en vue PATTERN)
+Ww         = 20;      // largeur blanche
+gap_w      = 1.5;     // jeu entre blanches
+Wh         = 58;      // hauteur blanche
+Wb         = 12;      // largeur noire
+Bh         = 36;      // hauteur noire
+key_clr    = 1.2;     // garde autour des noires (notch des blanches)
 
-// Pads fonctions / transport
-pad_fn       = 12;
-n_fn         = 11;     // noires (fonctions)
-n_transport  = 5;
+// --- Encodeurs (5, tous push) ---
+n_enc      = 5;
+enc_knob   = 20;
+enc_shaft  = 7;
+enc_pitch  = 40;
 
-// Encodeurs
-enc_knob     = 20;
-enc_shaft    = 7;
+// --- Boutons (8 : ROW HARMONY PROJET SHIFT PLAY STOP REC EXPORT) ---
+n_btn      = 8;
+btn        = 13;
+btn_pitch  = 30;
 
-// Écran 3,2" (zone active ~49x65 -> fenêtre)
-screen_w     = 50;
-screen_h     = 66;
+// --- Écran 3,2" (zone active ~49x65) ---
+screen_w   = 50;
+screen_h   = 66;
 
-$fn          = 48;
+// LED
+led_size   = 3.5;
+led_h      = 1.6;
+
+$fn = 40;
 
 // ---------------- COULEURS ----------------
-C_PLEXI   = [0.55, 0.75, 0.95, 0.30];  // bleuté translucide
-C_SPACER  = [0.20, 0.20, 0.22];         // gris foncé opaque
-C_PCB     = [0.05, 0.35, 0.15];         // vert PCB
-C_COPPER  = [0.80, 0.55, 0.20];
-C_LED     = [0.95, 0.95, 0.85];
-C_KNOB    = [0.10, 0.10, 0.12];
+C_PLEXI  = [0.55,0.75,0.95,0.30];
+C_SPACER = [0.20,0.20,0.22];
+C_PCB    = [0.05,0.35,0.15];
+C_WHITE  = [0.85,0.85,0.88];   // électrode blanche
+C_BLACK  = [0.15,0.15,0.18];   // électrode noire
+C_COPPER = [0.80,0.55,0.20];
+C_LED    = [0.95,0.95,0.85];
+C_KNOB   = [0.10,0.10,0.12];
+C_DIM    = [0.85,0.10,0.10];
 
-// ---------------- LAYOUT (positions des cellules) ----------------
-// Grille 4x4 centrée horizontalement
-gx0 = W/2 - 1.5*pitch_step;
-gy_top = H - margin - screen_h - 18;        // sous la zone écran/encodeurs
-step_pos = [ for (r=[0:3]) for (c=[0:3]) [ gx0 + c*pitch_step, gy_top - r*pitch_step ] ];
+// ---------------- GÉOMÉTRIE DÉRIVÉE ----------------
+pitch_w  = Ww + gap_w;
+kb_x0    = margin;                 // bord gauche 1ère blanche
+kb_y0    = margin;                 // bas du clavier
+kb_w     = white_n * pitch_w;      // largeur clavier
 
-// Rangée fonctions (11 + Shift = 12 cellules)
-fn_count  = n_fn + 1;
-fn_pitch  = (W - 2*margin) / fn_count;
-fn_y      = gy_top - 3*pitch_step - 30;
-fn_pos    = [ for (i=[0:fn_count-1]) [ margin + fn_pitch*(i+0.5), fn_y ] ];
+W = 2*margin + kb_w;               // largeur façade (calculée)
+H = 160;                           // hauteur façade
 
-// Rangée transport (5 cellules centrées)
-tr_pitch  = 24;
-tr_y      = fn_y - 26;
-tr_pos    = [ for (i=[0:n_transport-1]) [ W/2 + tr_pitch*(i-(n_transport-1)/2), tr_y ] ];
+function white_left(i)   = kb_x0 + i*pitch_w;
+function white_cx(i)     = white_left(i) + Ww/2;
+function has_black(i)    = let(n = i % 7) (n==0||n==1||n==3||n==4||n==5);  // C D F G A
+// noires : [x centre, y bas]
+black_list = [ for (i=[0:white_n-2]) if (has_black(i))
+                 [ white_cx(i) + pitch_w/2, kb_y0 + Wh - Bh ] ];
 
-// Encodeurs : 2x2 en haut à droite
-enc_pitch = 34;
-enc_cx    = W - margin - enc_pitch - enc_knob/2;
-enc_cy    = H - margin - enc_knob/2 - 6;
-enc_pos   = [ for (r=[0:1]) for (c=[0:1]) [ enc_cx + c*enc_pitch, enc_cy - r*enc_pitch ] ];
+// Zone haute (écran + encodeurs + boutons)
+scr_cx = margin + screen_w/2;
+scr_cy = H - margin - screen_h/2;
+ctrl_x0 = margin + screen_w + 20;          // début zone contrôles (droite de l'écran)
+enc_y  = H - margin - enc_knob/2 - 6;
+enc_pos = [ for (j=[0:n_enc-1]) [ ctrl_x0 + enc_knob/2 + j*enc_pitch, enc_y ] ];
+btn_y  = enc_y - 32;
+btn_pos = [ for (j=[0:n_btn-1]) [ ctrl_x0 + btn/2 + j*btn_pitch, btn_y ] ];
 
-// Écran : en haut à gauche
-screen_cx = margin + screen_w/2;
-screen_cy = H - margin - screen_h/2;
-
-// ---------------- HAUTEURS EN Z (avec éclaté) ----------------
+// Hauteurs Z (éclaté)
 z_pcb    = 0;
 z_spacer = pcb_t + explode;
 z_plexi  = pcb_t + spacer_t + 2*explode;
 
 // =====================================================================
-//  MODULES
+//  FORMES 2D (réutilisées par les 3 couches)
 // =====================================================================
+module whites_2d() {
+    difference() {
+        for (i=[0:white_n-1]) translate([white_left(i), kb_y0]) square([Ww, Wh]);
+        // notch : on creuse l'emprise des noires (+ garde)
+        for (b=black_list)
+            translate([b[0]-Wb/2-key_clr, b[1]-key_clr])
+                square([Wb+2*key_clr, (kb_y0+Wh)-(b[1]-key_clr)+0.1]);
+    }
+}
+module blacks_2d() { for (b=black_list) translate([b[0]-Wb/2, b[1]]) square([Wb, Bh]); }
+module btns_2d()   { for (p=btn_pos) translate([p[0]-btn/2, p[1]-btn/2]) square([btn, btn]); }
+module screen_2d() { translate([scr_cx-screen_w/2, scr_cy-screen_h/2]) square([screen_w, screen_h]); }
 
-// --- PCB : substrat + anneaux cuivre + LEDs + corps encodeurs + écran
+// =====================================================================
+//  COUCHE PCB : électrodes + LEDs + encodeurs + écran
+// =====================================================================
 module layer_pcb() {
     translate([0,0,z_pcb]) {
         color(C_PCB) cube([W, H, pcb_t]);
-
-        // pads "pas" : anneau cuivre + LED centrale
-        for (p = step_pos) pad_ring(p, pad_step, z=pcb_t);
-        // pads fonctions + shift
-        for (p = fn_pos)   pad_ring(p, pad_fn, z=pcb_t);
-        // pads transport
-        for (p = tr_pos)   pad_ring(p, pad_fn, z=pcb_t);
-
-        // corps des encodeurs
-        for (p = enc_pos)
-            color(C_KNOB) translate([p[0], p[1], pcb_t])
-                cylinder(d=enc_knob, h=14);
-
-        // module écran (boîte derrière la fenêtre)
-        color([0.1,0.1,0.1]) translate([screen_cx-screen_w/2, screen_cy-screen_h/2, pcb_t])
-            cube([screen_w, screen_h, 4]);
-        color([0.15,0.15,0.2]) translate([screen_cx-screen_w/2+2, screen_cy-screen_h/2+2, pcb_t+4])
-            cube([screen_w-4, screen_h-4, 0.5]);  // dalle
+        // électrodes capacitives
+        color(C_WHITE) translate([0,0,pcb_t]) linear_extrude(0.25) whites_2d();
+        color(C_BLACK) translate([0,0,pcb_t]) linear_extrude(0.5)  blacks_2d();
+        color(C_COPPER) translate([0,0,pcb_t]) linear_extrude(0.25) btns_2d();
+        // LEDs par touche
+        for (i=[0:white_n-1]) led([white_cx(i), kb_y0+11]);
+        for (b=black_list)    led([b[0], b[1]+Bh/2]);
+        for (p=btn_pos)       led(p);
+        // encodeurs
+        for (p=enc_pos) color(C_KNOB) translate([p[0],p[1],pcb_t]) cylinder(d=enc_knob, h=14);
+        // module écran
+        color([0.1,0.1,0.1]) translate([scr_cx-screen_w/2, scr_cy-screen_h/2, pcb_t]) cube([screen_w, screen_h, 4]);
+        color([0.15,0.15,0.22]) translate([scr_cx-screen_w/2+2, scr_cy-screen_h/2+2, pcb_t+4]) cube([screen_w-4, screen_h-4, 0.5]);
     }
 }
+module led(p) { color(C_LED) translate([p[0]-led_size/2, p[1]-led_size/2, pcb_t]) cube([led_size, led_size, led_h]); }
 
-// Un pad = anneau cuivre (carré évidé) + LED au centre
-module pad_ring(p, size, z) {
-    translate([p[0], p[1], z]) {
-        color(C_COPPER) linear_extrude(0.2)
-            difference() {
-                square([size, size], center=true);
-                square([size-2*ring_w, size-2*ring_w], center=true);
-            }
-        // LED SK6812 au centre
-        color(C_LED) translate([-led_size/2,-led_size/2,0]) cube([led_size, led_size, led_h]);
-    }
-}
-
-// --- GRILLE espaceur : plaque pleine - puits par cellule - trous enc/écran
+// =====================================================================
+//  COUCHE GRILLE espaceur : puits de lumière + passages
+// =====================================================================
 module layer_spacer() {
     translate([0,0,z_spacer])
     color(C_SPACER) difference() {
         cube([W, H, spacer_t]);
-        // puits de lumière (un par pad, légèrement plus grand que le pad)
-        for (p = step_pos) well(p, pad_step+1);
-        for (p = fn_pos)   well(p, pad_fn+1);
-        for (p = tr_pos)   well(p, pad_fn+1);
-        // passages encodeurs
-        for (p = enc_pos)  translate([p[0],p[1],-1]) cylinder(d=enc_knob+2, h=spacer_t+2);
-        // passage écran
-        translate([screen_cx-screen_w/2-1, screen_cy-screen_h/2-1, -1])
-            cube([screen_w+2, screen_h+2, spacer_t+2]);
+        translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) whites_2d();
+        translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) blacks_2d();
+        translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) btns_2d();
+        translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) screen_2d();
+        for (p=enc_pos) translate([p[0],p[1],-1]) cylinder(d=enc_knob+2, h=spacer_t+2);
     }
 }
 
-module well(p, size) {
-    translate([p[0]-size/2, p[1]-size/2, -1]) cube([size, size, spacer_t+2]);
-}
-
-// --- PLEXI : dalle translucide + cellules gravées + fenêtre + perçages enc
+// =====================================================================
+//  COUCHE PLEXI : dalle translucide + gravures + perçages + fenêtre
+// =====================================================================
 module layer_plexi() {
     translate([0,0,z_plexi])
     color(C_PLEXI) difference() {
         cube([W, H, plexi_t]);
-        // gravures de cellules (poches peu profondes en sous-face = repère/diffuseur)
-        for (p = step_pos) engrave(p, pad_step+4);
-        for (p = fn_pos)   engrave(p, pad_fn+3);
-        for (p = tr_pos)   engrave(p, pad_fn+3);
+        // gravures de repère (sous-face, peu profondes)
+        translate([0,0,-0.01]) linear_extrude(0.4) offset(r=1.5) whites_2d();
+        translate([0,0,-0.01]) linear_extrude(0.4) offset(r=1.5) blacks_2d();
+        translate([0,0,-0.01]) linear_extrude(0.4) offset(r=1.5) btns_2d();
         // perçages encodeurs (traversants)
-        for (p = enc_pos)  translate([p[0],p[1],-1]) cylinder(d=enc_shaft, h=plexi_t+2);
+        for (p=enc_pos) translate([p[0],p[1],-1]) cylinder(d=enc_shaft, h=plexi_t+2);
         // fenêtre écran (traversante)
-        translate([screen_cx-screen_w/2, screen_cy-screen_h/2, -1])
-            cube([screen_w, screen_h, plexi_t+2]);
+        translate([0,0,-1]) linear_extrude(plexi_t+2) screen_2d();
     }
 }
 
-module engrave(p, size) {
-    translate([p[0]-size/2, p[1]-size/2, -0.01])
-        cube([size, size, 0.4]);   // gravure 0,4 mm en sous-face
+// =====================================================================
+//  CÔTES paramétriques (valeurs auto-lues des variables)
+// =====================================================================
+zdim = 20;   // plan des côtes, au-dessus de tout (encodeurs inclus)
+module txt(p, s, sz=5, rot=0) color(C_DIM) translate([p[0],p[1],zdim]) rotate([0,0,rot]) linear_extrude(0.6) text(s, size=sz, halign="center", valign="center");
+module bar(x,y,dx,dy) color(C_DIM) translate([x,y,zdim]) cube([dx,dy,0.5]);
+
+module cote_h(x1,x2,y,s) { bar(x1,y,x2-x1,0.5); bar(x1,y-2,0.5,4); bar(x2,y-2,0.5,4); txt([(x1+x2)/2, y+4], s); }
+module cote_v(y1,y2,x,s) { bar(x,y1,0.5,y2-y1); bar(x-2,y1,4,0.5); bar(x-2,y2,4,0.5); txt([x-7,(y1+y2)/2], s, 5, 90); }
+
+module cotes() {
+    cote_h(0, W, -10, str("W = ", W, " mm"));
+    cote_v(0, H, -10, str("H = ", H, " mm"));
+    cote_h(kb_x0, kb_x0+kb_w, kb_y0+Wh+6, str("clavier = ", kb_w, " mm"));
+    cote_h(white_left(0), white_left(0)+Ww, kb_y0+8, str(Ww));
+    cote_h(white_left(0), white_left(1), kb_y0+18, str("pitch ", pitch_w));
+    txt([black_list[0][0]+18, black_list[0][1]+Bh/2], str("noire ", Wb), 4);
+    cote_v(scr_cy-screen_h/2, scr_cy+screen_h/2, scr_cx-screen_w/2-3, str(screen_h));
+    cote_h(scr_cx-screen_w/2, scr_cx+screen_w/2, scr_cy+screen_h/2+3, str("ecran ", screen_w, "x", screen_h));
+    cote_h(enc_pos[0][0], enc_pos[1][0], enc_y+enc_knob/2+4, str("enc ", enc_pitch));
 }
 
 // =====================================================================
@@ -183,3 +192,4 @@ module engrave(p, size) {
 layer_pcb();
 layer_spacer();
 layer_plexi();
+if (show_dims) cotes();
