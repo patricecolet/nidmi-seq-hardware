@@ -39,6 +39,13 @@
   / 20 mA. **Hauteur/cap non publiés** → récupérer du STEP GrabCAD (pb86-switches-1).
 - 🔴 **IO** : 8 switches + LED bi-couleur (16 lignes) = ~24 IO → via **expandeur
   I2C (MCP23017 ×1-2)** ou driver LED dédié. À figer. LED PB86 **hors** bus SK6812.
+- **Diodes anti-ghosting 🟢** (matrice scannée) : diode **1N4148 / BAT54** sur
+  **SHIFT · PLAY · REC** seulement (peuvent être tenus dans un appui ≥3) ; **aucune**
+  sur **STOP · EXPORT · ROW · HARMONY · PROJET** (solo ou combo à 2 → pas de ghosting).
+  Hypothèse : les boutons sans diode ne sont jamais la 3ᵉ touche d'un combo.
+  Rappel : ghosting = ≥3 touches ; un combo à 2 (Shift+X) ne ghoste jamais.
+  Alternatives : diode sur **les 8** (zéro-risque, ~0,16 €) ; ou **câblage direct**
+  (1 broche/switch → **0 diode**, mais +broches).
 
 ## 5. Ruban capacitif — slider tactile natif 🟢
 - Électrode PCB ~**180 × 10 mm** (motif triangulaire/interdigité), **~5 canaux**
@@ -92,7 +99,8 @@
 ## Décisions ouvertes (récap) 🔴
 1. Écran **ST7796 vs ILI9488** (même boîtier).
 2. CV **0–5 V vs 0–10 V** (le 10 V impose un rail +12 V).
-3. PB86 **A1 vs A2** + **comment piloter switches+LED** (expandeur/driver).
+3. PB86 **A1 vs A2** + pilotage switches+LED (expandeur/driver). ✅ **Diodes figées** :
+   matrice + diode sur **SHIFT/PLAY/REC** seulement (voir §4).
 4. MIDI **TRS type-A vs DIN5** ; driver OUT **5 V vs 3,3 V**.
 5. Encodeurs : **ratio détentes/PPR** (firmware).
 6. SK6812 **3535 vs MINI-E** (selon dessin de cellule).
