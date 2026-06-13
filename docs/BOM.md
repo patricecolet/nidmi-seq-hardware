@@ -33,8 +33,8 @@
 
 ## 4. Boutons de fonction — 8× PB86 🟡
 - ROW · HARMONY · PROJET · SHIFT · PLAY · STOP · REC · EXPORT.
-- **PB86-A2** (bi-couleur rouge/vert, 8 broches) reco pour l'indication d'état ;
-  A1 (mono, 6 pins) / A0 (lampless, 4 pins) en variantes.
+- 🟢 **PLAY + REC = PB86-A2** (bi-couleur rouge/vert, 8 pins) ; **6 autres = PB86-A1**
+  (mono, 6 pins). → LED : 2×bi (4 lignes) + 6×mono (6 lignes) = **10 lignes**.
 - Cotes : corps **12,4 × 17,0 mm**, course 2 mm, force 170 gf, SPDT, LED 1,8-2,4 V
   / 20 mA. **Hauteur/cap non publiés** → récupérer du STEP GrabCAD (pb86-switches-1).
 - 🔴 **IO** : 8 switches + LED bi-couleur (16 lignes) = ~24 IO → via **expandeur
@@ -63,14 +63,14 @@
 ## 7. MIDI — voir [`CONNECTEURS_MIDI.md`](CONNECTEURS_MIDI.md) 🟡
 - IN : opto **H11L1** (reco, sortie logique 3,3 V) + 220 Ω + 1N4148.
 - OUT : buffer **74HC14**, R série 220/220 Ω @5 V (ou 33/10 Ω @3,3 V) 🔴.
-- **TRS type-A** (Ring=+, Tip=signal, Sleeve=shield) 🔴 vs DIN5.
+- 🟢 **TRS type-A** (Ring=+, Tip=signal, Sleeve=shield).
 
-## 8. CV / Gate / Clock / Reset — sous-système analogique 🔴 (nouveau)
+## 8. CV / Gate / Clock / Reset — sous-système analogique 🟢 0–5 V (nouveau)
 - **CV** : **MCP4728** (DAC quad 12-bit I2C, MSOP-10, addr 0x60, **0 GPIO** — sur
   l'I2C existant). 4 CV.
-- **Mise à l'échelle 1V/oct** : AOP **OPA2192** + **Vref ADR4540 (4,096 V)** ;
-  Rf 15 k / Rg 10 k 0,1 % → gain 2,5. 🔴 **0–5 V (simple) vs 0–10 V** : le 0–10 V
-  exige un **rail +12 V** (donc alim +12 V à ajouter) ; le 0–5 V évite ça.
+- **Mise à l'échelle 1V/oct, 0–5 V 🟢** : DAC Vref interne ×2 (0–4,096 V) → AOP
+  **rail-to-rail 5 V** (MCP6022 / MCP6V07), gain ~1,25 (Rf 2,5 k / Rg 10 k) → 0–5,12 V.
+  **Pas de rail +12 V** (alim simplifiée). Vref précision ADR4540 optionnelle (accordage).
 - **Gate/Clock/Reset** : 5 V via **74HCT125** (3,3→5 V), Eurorack = gate +5 V.
   **3 GPIO** (proposition : 40/41/42).
 - Protection/jack : R série 1 kΩ, clamp **BAT54S**, 100 pF. **LDO 5 V propre**
@@ -86,7 +86,7 @@
 - Entrée **USB-C 5 V** → **buck 3,3 V 2 A** (AP63203/MP2315) pour 3× ESP32 + logique.
 - **74AHCT125** (level-shift LED). Bulk **1000 µF** sur 5 V LED, découplage.
 - Budget LED : 27× SK6812 ≈ 1,6 A crête → **plafonner luminosité** (USB-C 15 W).
-- Si **CV 0–10 V** : ajouter rail **+12 V**. **LDO 5 V propre** pour le DAC/Vref.
+- CV en **0–5 V** → pas de rail +12 V. **LDO 5 V propre** dédié DAC/Vref (anti-bruit).
 
 ## 11. Mécanique 🟢
 - Plexi **2 mm** (overlay capacitif + fenêtre écran + perçages enc/boutons).
@@ -105,23 +105,25 @@
 | Comms inter-puces | maître | ✓ | ✓ |
 
 - **I2C (cerveau)** : 2× **MCP23017** (0x20/0x21) + **MCP4728** (0x60). Les MCP23017
-  portent **8 switches PB86 (direct) + 16 lignes LED bi-couleur + 5 push encodeurs**
-  = 29 / 32 IO. CV (DAC) = 0 GPIO.
-- **PCNT** = 4 unités/puce → 5 encodeurs répartis B(3)/C(2).
-- 🔴 **Lien inter-puces** : I2C (simple) vs **UART dédié** (latence basse, mieux pour
-  le jeu des touches) — à figer (impact latence musicale).
+  portent **8 switches PB86 (direct) + 10 lignes LED (2 bi + 6 mono) + 5 push encodeurs**
+  = **23 / 32 IO** (marge confortable). CV (DAC) = 0 GPIO.
+- **PCNT** = 4 unités/puce → 5 encodeurs répartis B(3)/C(2). **1 cran = 1 cycle
+  quadrature** (générique 20/20 ou Bourns 24/24) pour 1 clic = 1 pas.
+- 🟢 **Lien inter-puces = UART dédié** (latence basse pour le jeu des touches).
 - Cerveau : ribbon (5) + gate/clk/rst (3) sur GPIO 1-14 ; écran/MIDI/LED/I2C sur
   GPIO >14 (12 dispo) ; USB 19/20. **Tient, mais serré** → pinout exact à valider au schéma.
 
-## Décisions ouvertes (récap) 🔴
-1. ✅ Écran = **ILI9488 4,0″ 480×320** (ST7796 = alt. rapide possible).
-2. CV **0–5 V vs 0–10 V** (le 10 V impose un rail +12 V).
-3. PB86 **A1 vs A2** (mono vs bi-couleur). ✅ Pilotage figé : **2× MCP23017** (switches
-   direct + LED + push encodeurs) → **aucune diode** (voir §4, §12).
-7. 🔴 **Lien inter-puces** : I2C vs UART (latence touches).
-4. MIDI **TRS type-A vs DIN5** ; driver OUT **5 V vs 3,3 V**.
-5. Encodeurs : **ratio détentes/PPR** (firmware).
-6. SK6812 **3535 vs MINI-E** (selon dessin de cellule).
+## Décisions (récap)
+- ✅ Écran = **ILI9488 4,0″ 480×320 SPI**.
+- ✅ **CV 0–5 V** (pas de rail +12 V).
+- ✅ MIDI = **TRS type-A**.
+- ✅ Encodeurs = **1 cran = 1 cycle quadrature** (20/20 ou 24/24).
+- ✅ Lien inter-puces = **UART dédié** (latence basse).
+- ✅ Boutons : **PLAY/REC = PB86-A2 bi-couleur**, 6 autres = **A1 mono** ; switches en
+  direct sur 2× MCP23017 → **aucune diode**.
+- 🟡 **LED touches (SK6812 3535 vs MINI-E)** + dessin de cellule → **étude diffusion**
+  en cours (voir [`ETUDE_DIFFUSION_LED.md`](ETUDE_DIFFUSION_LED.md)).
+- 🟡 Driver MIDI OUT 5 V vs 3,3 V (mineur).
 
 ## Implications boîtier
 - ✅ **Écran PCB 108 × 62 mm** intégré au modèle (fenêtre active 84×56, contrôles
