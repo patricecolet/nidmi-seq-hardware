@@ -60,6 +60,11 @@ screen_h   = 56;
 led_size   = 3.5;
 led_h      = 1.6;
 
+// --- Boîtier ---
+show_box   = false;   // true = parois + fond (objet fermé)
+box_wall   = 2.5;
+box_cavity = 22;      // profondeur cavité sous le PCB (modules ESP32 + connecteurs)
+
 $fn = 40;
 
 // ---------------- COULEURS ----------------
@@ -72,6 +77,7 @@ C_COPPER = [0.80,0.55,0.20];
 C_LED    = [0.95,0.95,0.85];
 C_KNOB   = [0.10,0.10,0.12];
 C_CAP    = [0.80,0.85,0.90,0.55];  // cap carré translucide (illuminé)
+C_BOX    = [0.30,0.32,0.36];       // boîtier (parois + fond)
 C_DIM    = [0.85,0.10,0.10];
 
 // ---------------- GÉOMÉTRIE DÉRIVÉE ----------------
@@ -107,6 +113,7 @@ ribbon_y = kb_y0 + Wh + 17;
 z_pcb    = 0;
 z_spacer = pcb_t + explode;
 z_plexi  = pcb_t + spacer_t + 2*explode;
+z_floor  = -box_cavity;            // dessus du fond du boîtier
 
 // =====================================================================
 //  FORMES 2D (réutilisées par les 3 couches)
@@ -189,6 +196,27 @@ module layer_plexi() {
 }
 
 // =====================================================================
+//  BOÎTIER : parois + fond + connecteurs (tranche arrière)
+// =====================================================================
+module layer_box() {
+    wall_top = pcb_t + spacer_t + plexi_t;   // hauteur sous le plexi (couvercle)
+    color(C_BOX) difference() {
+        union() {
+            translate([0,0,z_floor-box_wall]) cube([W, H, box_wall]);            // fond
+            translate([0,0,z_floor]) cube([W, H, wall_top - z_floor]);           // bloc parois
+        }
+        // cavité interne
+        translate([box_wall, box_wall, z_floor]) cube([W-2*box_wall, H-2*box_wall, wall_top - z_floor + 1]);
+        // évidement pour loger l'empilement plexi/spacer/PCB par le haut
+        translate([box_wall, box_wall, pcb_t]) cube([W-2*box_wall, H-2*box_wall, spacer_t + plexi_t + 1]);
+        // connecteurs sur la paroi arrière (+Y) : USB-C + 2× MIDI TRS 3,5
+        translate([W*0.30, H-box_wall-1, z_floor+7]) cube([9, box_wall+2, 3.5]);              // USB-C
+        translate([W*0.50, H-box_wall-1, z_floor+9]) rotate([-90,0,0]) cylinder(d=6, h=box_wall+2); // MIDI A
+        translate([W*0.50+13, H-box_wall-1, z_floor+9]) rotate([-90,0,0]) cylinder(d=6, h=box_wall+2); // MIDI B
+    }
+}
+
+// =====================================================================
 //  CÔTES paramétriques (valeurs auto-lues des variables)
 // =====================================================================
 zdim = 20;   // plan des côtes, au-dessus de tout (encodeurs inclus)
@@ -214,6 +242,7 @@ module cotes() {
 // =====================================================================
 //  ASSEMBLAGE
 // =====================================================================
+if (show_box) layer_box();
 layer_pcb();
 layer_spacer();
 layer_plexi();

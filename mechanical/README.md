@@ -23,9 +23,14 @@ openscad -o facade_top.png --imgsize=1900,1050 --projection=p \
 # Vue éclatée (montre les 3 couches), sans côtes
 openscad -o facade_explode.png --imgsize=1500,1100 \
   --camera=184,72,10,60,0,22,640 -D 'show_dims=false' -D 'explode=26' facade.scad
+
+# Boîtier fermé (parois + fond + connecteurs)
+openscad -o facade_box.png --imgsize=1700,1200 \
+  --camera=160,80,-6,62,0,205,560 -D 'show_box=true' -D 'show_dims=false' -D 'explode=0' facade.scad
 ```
 `explode` : 0 = assemblé, >0 = écarte les couches en Z.
 `show_dims` : true = affiche les côtes paramétriques (auto-lues des variables).
+`show_box` : true = ajoute parois + fond + connecteurs (objet fermé).
 
 ## Édition interactive
 Ouvrir `facade.scad` dans l'app OpenSCAD → fenêtre de preview, on tourne/zoome,
