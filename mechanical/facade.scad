@@ -1,7 +1,8 @@
 // =====================================================================
 //  NiDMI Seq — Façade plexi (variante capacitive)  — LAYOUT VISION
 //  Clavier PIANO 27 touches capacitives (16 blanches + 11 noires)
-//  + 5 encodeurs + 8 boutons MÉCANIQUES (PB86) + ruban capacitif
+//  + 5 encodeurs + 8 boutons carrés illuminés (tact 12×12 THT + cap
+//    translucide + LED WS2811 RGB, ETUDE_PRIX_TOUCHES Option 1) + ruban capacitif
 //  + écran 4,0" 480x320.  Source ergo : VST/VISION_ERGO_HARMONIE.md §3
 //
 //  Empilement : PLEXI / GRILLE espaceur (light wells) / PCB (électrodes
@@ -37,11 +38,11 @@ enc_knob   = 20;
 enc_shaft  = 7;
 enc_pitch  = 40;
 
-// --- Boutons de fonction (8, MÉCANIQUES type PB86, traversent le plexi) ---
-//     ROW HARMONY PROJET SHIFT PLAY STOP REC EXPORT
+// --- Boutons de fonction (8 : tact carré 12×12 THT + cap translucide + WS2811 RGB) ---
+//     ROW HARMONY PROJET SHIFT PLAY STOP REC EXPORT — mécaniques, illuminés
 n_btn      = 8;
-btn_d      = 12;      // Ø bouton PB86 (panel-mount)
-btn_hole   = 12.5;    // perçage plexi
+btn_sq     = 12;      // côté du cap carré translucide
+btn_hole   = 12.5;    // perçage plexi (carré)
 btn_cap_h  = 9;       // hauteur du cap au-dessus du PCB
 btn_pitch  = 24;
 
@@ -68,7 +69,7 @@ C_BLACK  = [0.15,0.15,0.18];   // électrode noire
 C_COPPER = [0.80,0.55,0.20];
 C_LED    = [0.95,0.95,0.85];
 C_KNOB   = [0.10,0.10,0.12];
-C_BTN    = [0.25,0.25,0.30];   // cap bouton mécanique
+C_CAP    = [0.80,0.85,0.90,0.55];  // cap carré translucide (illuminé)
 C_DIM    = [0.85,0.10,0.10];
 
 // ---------------- GÉOMÉTRIE DÉRIVÉE ----------------
@@ -94,7 +95,7 @@ ctrl_x0 = margin + screen_w + 20;          // début zone contrôles (droite de 
 enc_y  = H - margin - enc_knob/2 - 6;
 enc_pos = [ for (j=[0:n_enc-1]) [ ctrl_x0 + enc_knob/2 + j*enc_pitch, enc_y ] ];
 btn_y  = enc_y - 32;
-btn_pos = [ for (j=[0:n_btn-1]) [ ctrl_x0 + btn_d/2 + j*btn_pitch, btn_y ] ];
+btn_pos = [ for (j=[0:n_btn-1]) [ ctrl_x0 + btn_sq/2 + j*btn_pitch, btn_y ] ];
 
 // Ruban : bande horizontale au-dessus du clavier
 ribbon_x = kb_x0;
@@ -137,8 +138,11 @@ module layer_pcb() {
         for (b=black_list)    led([b[0], b[1]+Bh/2]);
         // encodeurs
         for (p=enc_pos) color(C_KNOB) translate([p[0],p[1],pcb_t]) cylinder(d=enc_knob, h=14);
-        // boutons mécaniques (caps ronds traversants)
-        for (p=btn_pos) color(C_BTN) translate([p[0],p[1],pcb_t]) cylinder(d=btn_d, h=btn_cap_h);
+        // boutons carrés illuminés : LED RGB sous cap translucide traversant
+        for (p=btn_pos) {
+            led(p);
+            color(C_CAP) translate([p[0]-btn_sq/2, p[1]-btn_sq/2, pcb_t]) cube([btn_sq, btn_sq, btn_cap_h]);
+        }
         // module écran
         color([0.1,0.1,0.1]) translate([scr_cx-screen_w/2, scr_cy-screen_h/2, pcb_t]) cube([screen_w, screen_h, 4]);
         color([0.15,0.15,0.22]) translate([scr_cx-screen_w/2+2, scr_cy-screen_h/2+2, pcb_t+4]) cube([screen_w-4, screen_h-4, 0.5]);
@@ -158,7 +162,7 @@ module layer_spacer() {
         translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) ribbon_2d();
         translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) screen_2d();
         for (p=enc_pos) translate([p[0],p[1],-1]) cylinder(d=enc_knob+2, h=spacer_t+2);
-        for (p=btn_pos) translate([p[0],p[1],-1]) cylinder(d=btn_d+2, h=spacer_t+2);
+        for (p=btn_pos) translate([p[0]-btn_sq/2-1, p[1]-btn_sq/2-1, -1]) cube([btn_sq+2, btn_sq+2, spacer_t+2]);
     }
 }
 
@@ -176,7 +180,7 @@ module layer_plexi() {
         translate([0,0,-0.01]) linear_extrude(0.4) offset(r=1.5) ribbon_2d();
         // perçages encodeurs + boutons (traversants)
         for (p=enc_pos) translate([p[0],p[1],-1]) cylinder(d=enc_shaft, h=plexi_t+2);
-        for (p=btn_pos) translate([p[0],p[1],-1]) cylinder(d=btn_hole, h=plexi_t+2);
+        for (p=btn_pos) translate([p[0]-btn_hole/2, p[1]-btn_hole/2, -1]) cube([btn_hole, btn_hole, plexi_t+2]);
         // fenêtre écran (traversante)
         translate([0,0,-1]) linear_extrude(plexi_t+2) screen_2d();
     }
