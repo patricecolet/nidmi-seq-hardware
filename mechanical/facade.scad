@@ -1,7 +1,8 @@
 // =====================================================================
 //  NiDMI Seq — Façade plexi (variante capacitive)  — LAYOUT VISION
-//  Clavier PIANO 27 touches (16 blanches + 11 noires) + 5 encodeurs
-//  + 8 boutons + écran 3,2".  Source ergo : VST/VISION_ERGO_HARMONIE.md §3
+//  Clavier PIANO 27 touches capacitives (16 blanches + 11 noires)
+//  + 5 encodeurs + 8 boutons MÉCANIQUES (PB86) + ruban capacitif
+//  + écran 4,0" 480x320.  Source ergo : VST/VISION_ERGO_HARMONIE.md §3
 //
 //  Empilement : PLEXI / GRILLE espaceur (light wells) / PCB (électrodes
 //  capacitives + SK6812).  explode = 0 assemblé, >0 éclaté.
@@ -36,10 +37,17 @@ enc_knob   = 20;
 enc_shaft  = 7;
 enc_pitch  = 40;
 
-// --- Boutons (8 : ROW HARMONY PROJET SHIFT PLAY STOP REC EXPORT) ---
+// --- Boutons de fonction (8, MÉCANIQUES type PB86, traversent le plexi) ---
+//     ROW HARMONY PROJET SHIFT PLAY STOP REC EXPORT
 n_btn      = 8;
-btn        = 13;
-btn_pitch  = 30;
+btn_d      = 12;      // Ø bouton PB86 (panel-mount)
+btn_hole   = 12.5;    // perçage plexi
+btn_cap_h  = 9;       // hauteur du cap au-dessus du PCB
+btn_pitch  = 24;
+
+// --- Ruban capacitif (slider tactile natif ESP32-S3, sous le plexi) ---
+ribbon_len = 180;
+ribbon_w   = 10;
 
 // --- Écran 4,0" 480x320 ILI9488 SPI (zone active ~85x56, paysage) ---
 screen_w   = 85;
@@ -60,6 +68,7 @@ C_BLACK  = [0.15,0.15,0.18];   // électrode noire
 C_COPPER = [0.80,0.55,0.20];
 C_LED    = [0.95,0.95,0.85];
 C_KNOB   = [0.10,0.10,0.12];
+C_BTN    = [0.25,0.25,0.30];   // cap bouton mécanique
 C_DIM    = [0.85,0.10,0.10];
 
 // ---------------- GÉOMÉTRIE DÉRIVÉE ----------------
@@ -69,7 +78,7 @@ kb_y0    = margin;                 // bas du clavier
 kb_w     = white_n * pitch_w;      // largeur clavier
 
 W = 2*margin + kb_w;               // largeur façade (calculée)
-H = 160;                           // hauteur façade
+H = 172;                           // hauteur façade (bande ruban au-dessus du clavier)
 
 function white_left(i)   = kb_x0 + i*pitch_w;
 function white_cx(i)     = white_left(i) + Ww/2;
@@ -85,7 +94,11 @@ ctrl_x0 = margin + screen_w + 20;          // début zone contrôles (droite de 
 enc_y  = H - margin - enc_knob/2 - 6;
 enc_pos = [ for (j=[0:n_enc-1]) [ ctrl_x0 + enc_knob/2 + j*enc_pitch, enc_y ] ];
 btn_y  = enc_y - 32;
-btn_pos = [ for (j=[0:n_btn-1]) [ ctrl_x0 + btn/2 + j*btn_pitch, btn_y ] ];
+btn_pos = [ for (j=[0:n_btn-1]) [ ctrl_x0 + btn_d/2 + j*btn_pitch, btn_y ] ];
+
+// Ruban : bande horizontale au-dessus du clavier
+ribbon_x = kb_x0;
+ribbon_y = kb_y0 + Wh + 17;
 
 // Hauteurs Z (éclaté)
 z_pcb    = 0;
@@ -105,7 +118,7 @@ module whites_2d() {
     }
 }
 module blacks_2d() { for (b=black_list) translate([b[0]-Wb/2, b[1]]) square([Wb, Bh]); }
-module btns_2d()   { for (p=btn_pos) translate([p[0]-btn/2, p[1]-btn/2]) square([btn, btn]); }
+module ribbon_2d() { translate([ribbon_x, ribbon_y-ribbon_w/2]) square([ribbon_len, ribbon_w]); }
 module screen_2d() { translate([scr_cx-screen_w/2, scr_cy-screen_h/2]) square([screen_w, screen_h]); }
 
 // =====================================================================
@@ -117,13 +130,15 @@ module layer_pcb() {
         // électrodes capacitives
         color(C_WHITE) translate([0,0,pcb_t]) linear_extrude(0.25) whites_2d();
         color(C_BLACK) translate([0,0,pcb_t]) linear_extrude(0.5)  blacks_2d();
-        color(C_COPPER) translate([0,0,pcb_t]) linear_extrude(0.25) btns_2d();
+        // ruban capacitif (électrode)
+        color(C_COPPER) translate([0,0,pcb_t]) linear_extrude(0.25) ribbon_2d();
         // LEDs par touche
         for (i=[0:white_n-1]) led([white_cx(i), kb_y0+11]);
         for (b=black_list)    led([b[0], b[1]+Bh/2]);
-        for (p=btn_pos)       led(p);
         // encodeurs
         for (p=enc_pos) color(C_KNOB) translate([p[0],p[1],pcb_t]) cylinder(d=enc_knob, h=14);
+        // boutons mécaniques (caps ronds traversants)
+        for (p=btn_pos) color(C_BTN) translate([p[0],p[1],pcb_t]) cylinder(d=btn_d, h=btn_cap_h);
         // module écran
         color([0.1,0.1,0.1]) translate([scr_cx-screen_w/2, scr_cy-screen_h/2, pcb_t]) cube([screen_w, screen_h, 4]);
         color([0.15,0.15,0.22]) translate([scr_cx-screen_w/2+2, scr_cy-screen_h/2+2, pcb_t+4]) cube([screen_w-4, screen_h-4, 0.5]);
@@ -140,9 +155,10 @@ module layer_spacer() {
         cube([W, H, spacer_t]);
         translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) whites_2d();
         translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) blacks_2d();
-        translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) btns_2d();
+        translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) ribbon_2d();
         translate([0,0,-1]) linear_extrude(spacer_t+2) offset(r=1) screen_2d();
         for (p=enc_pos) translate([p[0],p[1],-1]) cylinder(d=enc_knob+2, h=spacer_t+2);
+        for (p=btn_pos) translate([p[0],p[1],-1]) cylinder(d=btn_d+2, h=spacer_t+2);
     }
 }
 
@@ -156,9 +172,11 @@ module layer_plexi() {
         // gravures de repère (sous-face, peu profondes)
         translate([0,0,-0.01]) linear_extrude(0.4) offset(r=1.5) whites_2d();
         translate([0,0,-0.01]) linear_extrude(0.4) offset(r=1.5) blacks_2d();
-        translate([0,0,-0.01]) linear_extrude(0.4) offset(r=1.5) btns_2d();
-        // perçages encodeurs (traversants)
+        // gravure ruban (sous-face)
+        translate([0,0,-0.01]) linear_extrude(0.4) offset(r=1.5) ribbon_2d();
+        // perçages encodeurs + boutons (traversants)
         for (p=enc_pos) translate([p[0],p[1],-1]) cylinder(d=enc_shaft, h=plexi_t+2);
+        for (p=btn_pos) translate([p[0],p[1],-1]) cylinder(d=btn_hole, h=plexi_t+2);
         // fenêtre écran (traversante)
         translate([0,0,-1]) linear_extrude(plexi_t+2) screen_2d();
     }
@@ -184,6 +202,7 @@ module cotes() {
     cote_v(scr_cy-screen_h/2, scr_cy+screen_h/2, scr_cx-screen_w/2-3, str(screen_h));
     cote_h(scr_cx-screen_w/2, scr_cx+screen_w/2, scr_cy+screen_h/2+3, str("ecran ", screen_w, "x", screen_h));
     cote_h(enc_pos[0][0], enc_pos[1][0], enc_y+enc_knob/2+4, str("enc ", enc_pitch));
+    cote_h(ribbon_x, ribbon_x+ribbon_len, ribbon_y+ribbon_w/2+3, str("ruban ", ribbon_len));
 }
 
 // =====================================================================
