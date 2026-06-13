@@ -25,7 +25,7 @@ pcb_t      = 1.6;
 
 // --- Clavier piano ---
 white_n    = 16;      // blanches (= 16 pas en vue PATTERN)
-Ww         = 20;      // largeur blanche
+Ww         = 17;      // largeur blanche (-3 mm)
 gap_w      = 1.5;     // jeu entre blanches
 Wh         = 58;      // hauteur blanche
 Wb         = 12;      // largeur noire
