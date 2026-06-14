@@ -36,6 +36,15 @@ openscad -o facade_rear.png --imgsize=1800,900 \
 `show_dims` : true = affiche les côtes paramétriques (auto-lues des variables).
 `show_box` : true = ajoute parois + fond + connecteurs (objet fermé).
 
+## Cellule plexi épais (branche etude/plexi-epais-grave)
+`cellule_plexi.scad` — coupe d'une cellule touche (électrode dans le plexi).
+```sh
+# Coupe (membrane / électrode / poche / LED)
+openscad -o cellule.png --imgsize=1500,950 \
+  --camera=0,0,5,87,0,182,52 -D 'show_dims=false' cellule_plexi.scad
+```
+Params en tête : `plexi_t` (10), `membrane` (1,5), `wall`, `led_win`. `cut`=coupe.
+
 ## Édition interactive
 Ouvrir `facade.scad` dans l'app OpenSCAD → fenêtre de preview, on tourne/zoome,
 on modifie un paramètre, F5 = aperçu, F6 = rendu final.
