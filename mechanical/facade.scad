@@ -13,9 +13,15 @@
 // =====================================================================
 
 // ---------------- PARAMÈTRES ----------------
-explode    = 0;       // 0 = assemblé ; >0 = écarte les couches
+/* [Affichage] */
+explode    = 0;       // [0:60] 0 = assemblé ; >0 = écarte les couches
 show_dims  = true;    // côtes paramétriques (vue de dessus)
+show_pcb    = true;   // couche PCB (électrodes + LED + encodeurs + écran)
+show_spacer = true;   // grille espaceur (puits de lumière)
+show_plexi  = true;   // plexi (couvercle) — décocher pour voir dessous
+show_box    = false;  // parois + fond + connecteurs (objet fermé)
 
+/* [Géométrie] */
 margin     = 12;
 
 // Épaisseurs
@@ -63,8 +69,7 @@ screen_h    = 56;
 led_size   = 3.5;
 led_h      = 1.6;
 
-// --- Boîtier ---
-show_box   = false;   // true = parois + fond (objet fermé)
+// --- Boîtier --- (show_box est dans la section Affichage en tête)
 box_wall   = 2.5;
 box_cavity = 12;      // cavité sous le PCB : 3× ESP32 (~3) + connecteurs PJ-320A (~5) + fils
 
@@ -251,8 +256,8 @@ module cotes() {
 // =====================================================================
 //  ASSEMBLAGE
 // =====================================================================
-if (show_box) layer_box();
-layer_pcb();
-layer_spacer();
-layer_plexi();
-if (show_dims) cotes();
+if (show_box)    layer_box();
+if (show_pcb)    layer_pcb();
+if (show_spacer) layer_spacer();
+if (show_plexi)  layer_plexi();
+if (show_dims)   cotes();
