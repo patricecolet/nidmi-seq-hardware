@@ -38,12 +38,19 @@ openscad -o facade_rear.png --imgsize=1800,900 \
 
 ## Cellule plexi épais (branche etude/plexi-epais-grave)
 `cellule_plexi.scad` — coupe d'une cellule touche (électrode dans le plexi).
+Deux variantes d'électrode via `elec_mode` :
+- `"ring"` — anneau **cuivre** opaque + trou central, LED par le trou (membrane percée).
+- `"ito"` — film **ITO transparent pleine surface**, la LED traverse l'électrode
+  (membrane pleine, pas de hot-spot) + languette de contact. Cf. `docs/CONCEPT_PLEXI_EPAIS.md`.
 ```sh
-# Coupe (membrane / électrode / poche / LED)
+# Coupe — variante anneau cuivre (cellule.png)
 openscad -o cellule.png --imgsize=1500,950 \
-  --camera=0,0,5,87,0,182,52 -D 'show_dims=false' cellule_plexi.scad
+  --camera=0,0,5,87,0,182,52 -D 'show_dims=false' -D 'elec_mode="ring"' cellule_plexi.scad
+# Coupe — variante ITO pleine surface (cellule_ito.png)
+openscad -o cellule_ito.png --imgsize=1500,950 \
+  --camera=0,0,5,87,0,182,52 -D 'show_dims=false' -D 'elec_mode="ito"' cellule_plexi.scad
 ```
-Params en tête : `plexi_t` (10), `membrane` (1,5), `wall`, `led_win`. `cut`=coupe.
+Params en tête : `plexi_t` (10), `membrane` (1,5), `wall`, `led_win`, `elec_mode`. `cut`=coupe.
 
 ## Édition interactive
 Ouvrir `facade.scad` dans l'app OpenSCAD → fenêtre de preview, on tourne/zoome,
