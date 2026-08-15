@@ -21,7 +21,19 @@
   (3,2 × 2,8 mm) si éclairage par découpe PCB. 🟡 figer 3535 vs MINI-E selon cellule.
 - **Level-shifter data 3,3→5 V : 74AHCT125** (SK6812 VIH ≥ 3,4 V → 3,3 V hors spec).
 
-## 3. Encodeurs — 5× EC11 (avec push) 🟡
+## 3. Encodeurs — 5× EC11 (avec push) 🟡 → **6 demandés** 🔴
+
+> 🔴 **2026-08-15 — la conception en demande SIX.** `nidmi-seq-vst/CONCEPTION.md` §2
+> donne une molette dédiée à chacun des deux niveaux de navigation, `Row` et `Pas`,
+> qui ne sont jamais prêtées. Sans elles, changer de niveau demandait un raccourci à
+> deux mains pour un geste qu'on fait sans arrêt en composant.
+>
+> **Électriquement, ça passe** : PCNT offre 4 unités par puce et les encodeurs sont
+> répartis sur B et C, soit 8 places pour 6 — voir la répartition ci-dessous, à
+> recalculer en B(3)/C(3).
+>
+> **Mécaniquement, à recaler** : le pas de 33 mm entre encodeurs sur une façade de
+> 320 mm de large, et la fenêtre plexi. C'est le seul point ouvert.
 - Réf : **Bourns PEC11R-4220F-S0024** (datasheet sûr, arbre 20 mm) *ou* **Alps
   EC11E18244AU** (LCSC C202365) *ou* générique EC11 5-pin 20 mm.
 - Cotes (CAD) : corps **12,4 × 13,4 × ~6,5 mm**, bossage **M7×0,75 Ø7 × 5 mm**,
@@ -29,7 +41,7 @@
   Perçage panneau Ø7 + ergot anti-rotation. Bouton Ø15-20, alésage Ø6.
 - Élec : A/C/B quadrature (PCNT) + SW/GND push. **Détentes : générique 20/20,
   Alps 15 PPR, Bourns 24** → 🔴 confirmer le ratio avant commande (impact firmware).
-- PCNT = 4 unités/puce → **répartir les 5 encodeurs** sur B+C.
+- PCNT = 4 unités/puce → **répartir les encodeurs** sur B+C : 5 en B(3)/C(2), ou **6 en B(3)/C(3)** si la demande ci-dessus est retenue.
 
 ## 4. Boutons de fonction — 8× PB86 🟡
 - ROW · HARMONY · PROJET · SHIFT · PLAY · STOP · REC · EXPORT.

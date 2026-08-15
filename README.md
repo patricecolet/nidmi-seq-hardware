@@ -2,7 +2,7 @@
 
 Cible matérielle du séquenceur **NiDMI Seq**. Design actif (branche
 `etude/plexi-capacitif`) : **boîtier plexi + clavier piano capacitif 27 touches +
-ruban**, **5 encodeurs**, **8 boutons PB86**, **écran 4,0″ 480×320**, LEDs SK6812,
+ruban**, **5 encodeurs** (→ 6 demandés, cf. BOM §3), **8 boutons PB86**, **écran 4,0″ 480×320**, LEDs SK6812,
 MIDI (TRS), **CV/Gate**, sur **3× ESP32-S3-WROOM-1-N16R8**.
 
 Le firmware embarquera le moteur `nidmi-sequencer-core` ; ce dépôt ne contient
@@ -38,5 +38,7 @@ docs/       architecture, choix de conception, BOM
 
 ## Statut
 
-🚧 Conception avancée : surface de contrôle + BOM figées. **Seul chantier ouvert** :
+🚧 Conception avancée : surface de contrôle + BOM figées, **sauf le nombre
+d'encodeurs** — la conception en demande 6 au lieu de 5 (cf. [`docs/BOM.md`](docs/BOM.md) §3).
+Électriquement acquis, mécaniquement à recaler. **Autre chantier ouvert** :
 étude diffusion LED (cellule touche+LED). Ensuite : schéma KiCad.
