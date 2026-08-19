@@ -66,6 +66,24 @@ fil sur le **métal rapporté**.
 4. **Souder le fil sur le cuivre**, jamais sur l'ITO. Vérifier la continuité ITO↔fil à
    l'ohmmètre : dizaines/centaines d'Ω = **normal et suffisant** pour le tactile.
 
+> **L'ITO se fissure si on le plie.** C'est une couche céramique de quelques centaines de
+> nanomètres sur un PET souple : le support plie, la couche conductrice non. Une pliure ou une
+> marque d'ongle sur la languette crée des micro-fissures et un contact **intermittent** — le
+> défaut se manifeste comme des décrochages francs vers la valeur « broche nue », pas comme du
+> bruit. Garder la languette **plate**, y compris dans la pince.
+
+### Contact de banc (sans matériel spécifique)
+Avant d'avoir le 3M 1181, un contact provisoire suffisant pour mesurer :
+souder le fil sur un **bout de feuille de cuivre** (ou de tresse à dessouder aplatie) **d'abord**,
+loin du film ; poser ce cuivre **à plat** sur la face conductrice de la languette ; **serrer à la
+pince** (pince double-clip, crocodile, ou bornier à vis avec le cuivre en interposition).
+Vérifier à l'ohmmètre fil ↔ électrode : **dizaines/centaines d'Ω**, et **stable quand on remue
+la jonction** — c'est la stabilité qui compte, pas la valeur.
+
+> Ruban cuivre **ordinaire** (adhésif isolant) : la colle ne conduit pas. Le replier **par-dessus
+> le bord** de la languette pour que le cuivre touche l'ITO directement, la colle ne servant qu'à
+> tenir mécaniquement. Le 3M 1181, lui, conduit à travers l'adhésif — d'où son intérêt.
+
 > **Pourquoi ça marche** : le self-cap (ESP32-S3) tolère **plusieurs kΩ** en série → la R
 > de contact ITO n'est pas critique. Mais l'ITO est résistif (5–100 Ω/□) → **garder l'ITO
 > limité à l'électrode**, repartir en **cuivre** dans les rainures vers les pins *touch*.
@@ -93,6 +111,139 @@ Variante **démontable** (carte au dos déconnectable) : languette ITO + **ruban
 | Ruban Z-axis (option démontable) | 3M 9703 | conduction par pression, axe Z uniquement |
 
 > Distributeurs EU : RS, Digi-Key, shop-sks (DE). Prix indicatifs à confirmer à la commande.
+
+## Bascule de design (2026-08-19, après mesure)
+
+La mesure a validé le capacitif **avec une marge telle** que la contrainte d'origine tombe :
+repos 47 000 → doigt 300 000, soit **×6,4**, sur un contact provisoire à la pince croco
+(détail dans [`ESSAI_ITO_ESP32.md`](ESSAI_ITO_ESP32.md)). On n'a donc plus besoin que le plexi
+serve de diélectrique mince.
+
+**Nouvelle direction** : électrode ITO **près de la surface** sous un revêtement transparent fin,
+**pourtour métallique** autour de chaque touche, et le **plexi dédié à la LED** (diffusion) plutôt
+qu'au capacitif. Ça supprime le point le plus risqué du concept : la poche fraisée au Dremel avec
+une membrane régulière à 1–1,5 mm, dont la faisabilité à la main restait douteuse.
+
+**Le revêtement est déjà là.** L'ITO est déposé sur un **PET de ~0,125 mm**. En orientant le film
+**PET vers le doigt, ITO vers l'intérieur**, le PET fait revêtement de protection : le doigt ne
+touche jamais la couche conductrice, et le diélectrique ajouté est négligeable devant le ×6,4
+mesuré. (Inverse la consigne « face conductrice vers le doigt », qui ne valait que pour compenser
+l'épaisseur de plexi.)
+
+**Pourtour métallique = bus bar de l'électrode** (pas une garde). C'est la technique standard des
+dalles ITO et des panneaux EL : ceinturer l'électrode d'un conducteur en laissant le centre libre
+pour la lumière. Deux effets :
+
+- **Résistance de contact effondrée** : elle varie en 1/surface, et un pourtour complet en offre
+  bien plus qu'une languette. Plus de point de fragilité unique, plus de languette à plier — donc
+  plus de fissuration de l'ITO, la cause des décrochages mesurés.
+- **Uniformité du potentiel** : l'ITO fait 5–100 Ω/□. Alimenté par un seul coin, le centre de la
+  cellule voit plusieurs centaines d'ohms ; alimenté par tout le pourtour, la distance maximale au
+  bus tombe à la moitié de la cellule. C'est la raison d'être des bus bars argent sérigraphiés.
+
+**Il s'emboîte avec l'orientation PET-vers-le-doigt** : l'ITO étant tourné vers l'intérieur, le
+pourtour se pose sur la face interne → **caché derrière le film, inaccessible au doigt** (plus de
+souci d'ESD ni d'abrasion sur du métal exposé), et sans contrainte d'affleurement.
+
+> **Conséquence à ne pas manquer** : ce pourtour est **au potentiel de mesure**, il fait partie de
+> l'électrode. Le métal se couplant bien mieux que l'ITO, le **cross-talk se joue entre pourtours
+> voisins** — c'est l'écart entre cadres, et non entre zones ITO, qui fixera le pas du clavier.
+> Si l'écart seul ne suffit pas, prévoir une **piste de masse distincte entre les cellules**
+> (là serait la vraie garde).
+
+Réalisation proto : cadre au **ruban cuivre conducteur 3M 1181**, tracé au **stylo argent
+842AR-P**, ou **broches de résistance** logées dans des rainures fraisées au Dremel (cf. coupon
+ci-dessous). Vérification : résistance fil ↔ **centre** de l'électrode, à comparer au montage à
+languette unique — c'est là que le gain doit se voir.
+
+## Coupon d'essai 3 cellules (rainures Dremel + broches de résistance)
+
+Cadres et garde réalisés en **broches de résistance** logées dans des rainures fraisées au dos du
+plexi. Conductivité largement suffisante : même en acier cuivré, la broche est négligeable devant
+les 5–100 Ω/□ de l'ITO. **Décaper les broches** (papier de verre fin) — vernis ou oxyde suffisent
+à ruiner un contact par pression.
+
+> ⚠️ **Deux conducteurs de nature opposée, physiquement semblables, dans des rainures voisines :**
+> le **cadre** de chaque cellule est **au potentiel de mesure** (→ broche touch) ; la **broche
+> entre cellules** est **à la masse** (la vraie garde). Les inverser sur une cellule la rend
+> muette, et le symptôme imite un défaut de contact plutôt qu'une erreur de câblage.
+
+**Contact fil rond sur film plat = une ligne, pas une surface.** Remède géométrique : creuser la
+rainure **moins profonde que le diamètre du fil**, pour que la broche dépasse de 0,1–0,2 mm. Le
+film plaqué par-dessus est alors pressé contre le fil sur tout le pourtour. Cadre plus simple à
+réaliser en **4 segments droits soudés aux angles** qu'en rectangle plié, fil de liaison soudé sur
+un coin.
+
+### Assemblage : pression par l'arrière (aucune fixation visible)
+
+**Contrainte dominante : l'esthétique.** Une plaque de serrage vissée en face avant, avec des vis
+entre les touches, est mécaniquement correcte et visuellement inacceptable sur un contrôleur.
+→ La pression vient de **derrière**, la face avant reste une plaque continue sans perçage.
+
+```
+   doigt
+ ─────────────────────────   face avant = plaque plexi CONTINUE, sans perçage
+ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   (1,5–2 mm : la surface qu'on voit et qu'on touche)
+ ░░░░░░░░░░░░░░░░░░░░░░░░░   film ITO, couche ITO tournée vers l'arrière
+ ══╡                   ╞══   cadres en broches, dans les rainures du support
+ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   mousse de repartition
+ ═════════════════════════   plaque arriere, vissee EN PERIPHERIE, dans le boitier
+```
+
+- **Aucune fixation visible** : les vis passent au pourtour de la façade, à l'intérieur du boîtier.
+- **Le PET n'est plus la surface de contact** — c'est le plexi. Le problème de rayure disparaît,
+  et avec lui la raison d'être d'une plaque de serrage frontale.
+- **La mousse répartit la pression** bien mieux que des vis ponctuelles (montage classique des
+  claviers à membrane) et absorbe les tolérances d'un usinage à la main.
+- **Les rainures Dremel vont dans le support arrière**, que personne ne voit : la précision
+  d'usinage n'est plus un enjeu esthétique.
+
+> **Conséquence : plus besoin de plexi épais sculpté.** Le bloc épais n'était nécessaire que
+> lorsqu'il devait être structure **et** diélectrique mince. Ici la face avant est une simple
+> plaque plate de 1,5–2 mm : **la poche fraisée à membrane régulière — le point le plus risqué du
+> concept — disparaît**.
+
+**Cadres visibles par transparence → impression en seconde surface.** Décor imprimé ou peint au
+**dos** de la plaque avant : un bandeau opaque dessinant le contour de chaque touche, avec des
+fenêtres claires pour la LED. Les broches et les bords du film se cachent derrière ce bandeau,
+l'encre est protégée par le plexi lui-même, la face avant reste parfaitement lisse — c'est la
+construction des façades d'appareils du commerce. Alternative assumée : laisser les cadres
+visibles comme un liseré net autour de chaque touche (sur un clavier piano, une séparation
+franche entre touches peut être un parti pris).
+
+Mise en œuvre :
+
+- **Fil dépassant de 0,1–0,2 mm**, pas plus : sous une plaque rigide la pression se concentre sur
+  les lignes de fil (ce qu'on veut) sans tendre le film au point de le marquer.
+- **Cyano aux angles des rainures seulement**, jamais dans la zone de contact — de la colle entre
+  fil et ITO et le contact est mort.
+- **Ne pas serrer fort** : au-delà du contact établi la pression n'apporte plus rien. Serrer en
+  surveillant l'histogramme du scope : dès que le pic « broche nue » disparaît, c'est bon.
+- **Centre des cellules libre** de colle et de vis : c'est le chemin de la LED.
+
+> Alternative **permanente** pour la version finale : **adhésif optique transparent** (3M 468MP /
+> OCA) laminant le film au dos de la plaque avant — c'est la construction des écrans de téléphone.
+> La question de la pression disparaît pour le film ; il ne reste qu'à plaquer les broches contre
+> l'ITO par la mousse arrière.
+>
+> À éviter : simple **ruban adhésif en périphérie**. Pression faible et inégale au niveau des
+> fils = retour des décrochages.
+
+**Trois mesures à tirer du coupon :**
+
+1. **Écarts inégaux entre cellules** (p. ex. 2 / 5 / 10 mm) plutôt qu'uniformes → c'est le
+   cross-talk qui fixera le **pas du clavier 27 touches**, donc la largeur de façade.
+2. **Coût de la garde** : Δ avec la broche de masse connectée, puis débranchée. Elle capte des
+   lignes de champ qui allaient au doigt et ajoute de la capacité à la ligne de base — l'A/B dit
+   ce qu'elle coûte en sensibilité pour ce qu'elle rapporte en cross-talk.
+3. **Budget d'épaisseur en façade** : empiler des chutes transparentes sur le coupon et relever le
+   Δ à chaque épaisseur. La question n'est plus « est-ce que ça passe » (réglé, ×6,4) mais
+   « combien d'épaisseur puis-je m'offrir avant de descendre sous SNR 10 ». Nécessaire parce que
+   **le PET exposé se raiera** sous les doigts — un clavier, ça se joue.
+
+**Protection ESD.** Avec 0,125 mm de diélectrique au lieu de 1,5 mm de plexi, une décharge
+statique atteint bien plus facilement la broche. Le self-cap tolérant plusieurs kΩ en série, une
+**résistance série de 1–10 kΩ par canal** ne coûte rien en signal → à porter au schéma KiCad.
 
 ## Points ouverts
 - **Électrode** : **ITO/PET transparent pleine surface** (cf. section ci-dessus) ·

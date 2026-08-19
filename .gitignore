@@ -20,3 +20,7 @@ gerbers/
 
 # OS
 .DS_Store
+
+# Ne pas versionner les binaires de compilation arduino-cli
+firmware/**/build/
+__pycache__/

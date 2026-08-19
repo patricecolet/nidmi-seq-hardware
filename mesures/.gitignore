@@ -1,0 +1,3 @@
+# CSV bruts des campagnes de mesure : gardés hors dépôt, seuls les
+# tableaux de synthèse de docs/ESSAI_ITO_ESP32.md sont versionnés.
+*.csv

@@ -45,3 +45,53 @@
 - Stack de cellule **A vs B** (entrefer) → impacte `spacer_t` et la sensibilité.
 - Finition plexi (dépoli/opale) + film éventuel.
 - Géométrie électrode (anneau/hachure/fenêtre) → routage PCB des touches.
+
+## Source de test : LED bleues de récupération (2026-08-19)
+
+Lot de LED CMS 2 pattes identifiées au banc `firmware/test_led` : **bleues monochromes**
+(seuil ~3 V), encoche = cathode. Identification faite avec le mode auto (LED entre deux GPIO,
+polarité alternée, un éclair long vs trois clignotements pour lire le sens).
+
+**Lot inventorié (2026-08-19)** : **76 oranges, 7 vertes, 3 bleues** (86 au total).
+Provenances probablement différentes → ne pas généraliser une observation d'une couleur à l'autre.
+
+**Méthode imposée par la répartition** : mettre au point la géométrie de poche avec les
+**oranges** (abondantes, sacrifiables au fil des essais Dremel), puis **valider la géométrie
+retenue avec une bleue** — seulement 3 en stock, à ne pas gaspiller en tâtonnements.
+
+**Vertes : famille à déterminer.** Vert traditionnel (seuil ~2,1 V) → brille comme les oranges.
+Vert **InGaN** (~3,2 V) → se comporte comme une bleue, quasi éteint en 3,3 V, rail 5 V obligatoire.
+La sonde `m` de `firmware/test_led` tranche en une mesure.
+
+> **76 oranges > 27 touches** : de quoi monter une **maquette de façade complète illuminée** sans
+> rien acheter. Le choix RGB étant acté (BOM §2), elle ne sert plus à trancher monochrome/RGB mais
+> à répondre à une question indépendante de la couleur : **la lumière d'une cellule déborde-t-elle
+> sur sa voisine ?**
+>
+> ⚠️ **Débordement lumineux et cross-talk capacitif contraignent tous deux le pas du clavier.**
+> Les mesurer sur le **même coupon**, avec les mêmes écarts entre cellules (2 / 5 / 10 mm) — cf.
+> `ESSAI_ITO_ESP32.md`. Fixer l'entraxe sur le seul capacitif exposerait à découvrir ensuite que
+> les halos se chevauchent.
+
+**Repère d'anode (à revalider par couleur)** : inscription sur le flanc du boîtier, lue **cellule
+vers le haut → anode à gauche**. Vérifié au banc en mode sens. Comme le lot est mélangé, revalider
+sur un échantillon de chaque couleur avant de s'y fier pour un montage en série. Vérifier aussi
+que l'encoche et l'inscription latérale désignent bien le même côté.
+
+**Pour l'étude, utiliser les BLEUES** : c'est le cas le plus défavorable (seuil le plus haut donc
+courant le plus faible à montage donné, longueur d'onde la plus courte donc diffusion la plus
+marquée). Une géométrie de poche qui donne un halo homogène en bleu le donnera dans toutes les
+couleurs ; valider sur une rouge bien lumineuse donnerait un résultat trop optimiste. Garder une
+rouge pour comparer dans la **même** poche : l'écart dira si la teinte influe sur l'homogénéité
+perçue, utile avant de figer la géométrie pour du SK6812 RGB.
+
+**À alimenter en 5 V + 100 Ω (≈ 20 mA) pour tout essai de diffusion.** En 3,3 V il ne reste que
+0,1–0,3 V aux bornes de la résistance → ~2 mA, un dixième du nominal : assez pour identifier la
+LED, pas pour juger d'un halo. Corollaire : **une LED bleue ou blanche ne se pilote pas depuis
+une broche d'ESP32** (3,3 V ≈ son seuil) — il lui faut le rail 5 V, que le BOM prévoit déjà pour
+les SK6812.
+
+> Ces bleues servent à étudier la **géométrie** (profondeur de poche, dépoli, homogénéité du
+> halo), pas le rendu final : le BOM prévoit du SK6812 RGB. Conclure sur les formes et les
+> distances, pas sur l'intensité ni la teinte perçues — le bleu diffuse un peu plus que le rouge
+> à géométrie égale.

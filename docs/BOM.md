@@ -20,6 +20,16 @@
   bus 1-fil 800 kbps GRB, **~60 mA/LED** à blanc plein. Variante reverse **MINI-E**
   (3,2 × 2,8 mm) si éclairage par découpe PCB. 🟡 figer 3535 vs MINI-E selon cellule.
 - **Level-shifter data 3,3→5 V : 74AHCT125** (SK6812 VIH ≥ 3,4 V → 3,3 V hors spec).
+- 🟢 **2026-08-19 — RGB confirmé, alternative monochrome écartée.** Une LED unicolore par touche
+  aurait divisé la consommation par ~6 et supprimé le 74AHCT125 et le bus 800 kbps, à budget IO
+  constant (driver matriciel type IS31FL3731 sur l'I2C déjà présent). **Écartée quand même** : la
+  couleur est le seul canal **catégoriel** disponible, or les 27 touches changent de sens selon la
+  vue et Shift bascule note↔fonction — sans couleur il ne reste que luminosité et clignotement,
+  soit 6 à 8 états distinguables, et le clignotement fatigue sur une grille. Différencier pas,
+  accents et swings demande la couleur.
+- Les **1,6 A crête** ci-dessus correspondent au **blanc plein** (3 puces à fond). Une palette de
+  travail en allume rarement plus d'une ou deux à luminosité modérée : le plafonnement reste sage,
+  mais la marge réelle est confortable.
 
 ## 3. Encodeurs — 5× EC11 (avec push) 🟡 → **6 demandés** 🔴
 
