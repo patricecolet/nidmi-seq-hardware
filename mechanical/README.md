@@ -195,3 +195,43 @@ demandaient 340 mm pour 296 disponibles.
 > **Les deux variantes partagent la même rangée haute** (écran + encodeurs,
 > 206 × 62). La modeste = la complète moins la rangée clavier — même
 > sous-ensemble électronique et même firmware d'interface possibles.
+
+## Coupe d'une cellule (`coupe_cellule.scad`)
+
+Coupe **en travers du clavier** : deux blanches et la noire posée à cheval.
+Dessinée **explicitement en 2D** plutôt que découpée dans un modèle 3D — ce qu'on
+voit est exactement ce qu'on a voulu montrer.
+
+```sh
+openscad -o coupe_cellule.png --imgsize=2000,900 --projection=o \
+  --camera=50,-10,0,0,0,0,142 coupe_cellule.scad
+```
+
+| couche | ép. | rôle |
+|---|---|---|
+| plaque avant PMMA | 2 mm | surface touchée, rainures peu profondes côté doigt |
+| ITO + bus bar | 0,125 mm | **électrode, découpée par touche** + garde à la masse |
+| **entrefer** | 1,5 mm | garde la réflexion totale **et** loge les fils de bus bar |
+| guide de lumière | 10 mm | LED en tranche, gravure (points, gradient) au dos |
+| fond sombre | ~0,05 mm | absorbe le halo non extrait → contraste + anti-pollution |
+| mousse | 3 mm | répartit la pression vers l'avant |
+| plaque arrière | 2 mm | vissée **en périphérie** — aucune fixation visible |
+| | **18,7 mm** | + 3 mm de relief pour les noires |
+
+**Pourquoi deux plaques et pas un bloc.** Le guide ne fonctionne que si ses faces
+sont au contact de l'**air**, et le capacitif veut l'électrode **près du doigt**.
+Deux arrangements plus simples ont été écartés :
+
+- **électrode derrière le guide** (doigt → 10 mm) : 1 % de signal mesuré, pas
+  d'aftertouch, et l'ITO plaqué contre la face gravée met le guide en réflexion
+  totale frustrée — la lumière sort partout au lieu de sortir aux points ;
+- **électrode sur la face avant du guide** : capacitif excellent, mais l'indice du
+  PET est proche de celui du PMMA → la lumière s'échappe sur tout le trajet.
+
+L'entrefer résout les deux : il maintient la réflexion totale et sépare l'ITO de
+la face gravée. Il sert en plus de logement aux fils de bus bar.
+
+> ⚠️ **Les noires éloignent le doigt de l'électrode** : 3 mm de relief + 2 mm de
+> plaque = **5 mm**, contre 2 mm sur une blanche. La détection passe, l'aftertouch
+> non. L'épaisseur de la plaque teintée n'est donc **pas** un simple choix
+> d'approvisionnement, c'est un **paramètre capacitif**.

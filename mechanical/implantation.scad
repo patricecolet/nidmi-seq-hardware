@@ -101,7 +101,10 @@ usb_w     = 9;
 //                       -> deviendrait le composant le plus profond de
 //                       l'instrument, devant le CrowPanel (16 mm).
 audio_sym   = true;
-audio_635   = true;      // true = TRS 6,35 mm ; false = PJ-320A 3,5 mm
+// DECIDE 2026-08-21 : 3,5 mm. Le 6,35 aurait impose 25-30 mm de profondeur et
+// serait devenu le composant le plus profond de l'instrument, devant le
+// CrowPanel (16 mm). L'electronique reste symetrique, seul le format change.
+audio_635   = false;
 audio_d     = audio_635 ? 14 : 6;
 audio_prof  = audio_635 ? 28 : 5;
 n_audio     = 2;

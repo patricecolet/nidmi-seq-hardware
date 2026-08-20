@@ -154,10 +154,11 @@ est saturée — la réservation est un volume, pas une surface.
 - **Étage de sortie** : driver différentiel (DRV134, THAT1646, ou paire d'AOP), ou sortie
   *impedance-balanced* (point froid à la masse via résistance de même valeur) — presque aussi
   efficace contre le mode commun, pour deux résistances.
-- 🔴 **Le connecteur est le poste dimensionnant, pas le FPGA.** Un TRS **6,35 mm** fait ~14 mm de
-  diamètre et **25-30 mm de profondeur**, contre ~5 mm pour un PJ-320A. Il deviendrait **le
-  composant le plus profond de l'instrument**, devant le CrowPanel (16 mm), et commanderait donc
-  la profondeur du boîtier. → arbitrer 6,35 mm (format symétrique usuel) contre 3,5 mm (compact).
+- 🟢 **DÉCIDÉ 2026-08-21 : jack 3,5 mm.** Le TRS 6,35 mm aurait fait ~14 mm de diamètre et
+  **25-30 mm de profondeur**, devenant le composant le plus profond de l'instrument devant le
+  CrowPanel (16 mm), et commandant donc l'épaisseur du boîtier. En 3,5 mm (PJ-320A, ~5 mm de
+  profondeur), **le CrowPanel redevient le poste dimensionnant**. La sortie reste
+  électriquement **symétrique** — seul le format de connecteur change.
 
 **Sur le multitimbral** : sur un moteur multiplexé dans le temps, il coûte de la **mémoire, pas
 des multiplieurs** — chaque voix lit les paramètres de sa partie, c'est un index de plus. Les
