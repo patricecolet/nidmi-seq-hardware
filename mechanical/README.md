@@ -246,7 +246,24 @@ Deux arrangements plus simples ont été écartés :
 L'entrefer résout les deux : il maintient la réflexion totale et sépare l'ITO de
 la face gravée. Il sert en plus de logement aux fils de bus bar.
 
-> ⚠️ **Les noires éloignent le doigt de l'électrode** : 3 mm de relief + 2 mm de
-> plaque = **5 mm**, contre 2 mm sur une blanche. La détection passe, l'aftertouch
-> non. L'épaisseur de la plaque teintée n'est donc **pas** un simple choix
-> d'approvisionnement, c'est un **paramètre capacitif**.
+**Ce que la coupe montre au droit d'une noire.** L'électrode de la noire (violet)
+est **dans le même plan** que celles des blanches : un seul film ITO porte le
+**dessin complet du clavier**. Et les électrodes des blanches **s'arrêtent de part
+et d'autre** — c'est l'équivalent électrique exact du talon de blanche sur un
+piano. Sans cette troncature, toucher une noire déclencherait les deux blanches
+sous elle. La géométrie de facteur de piano n'est donc pas qu'une affaire
+d'apparence : **c'est le dessin de l'électrode**.
+
+La noire est par ailleurs **son propre guide de lumière**, gravure sur sa face
+inférieure, injection par la tranche arrière (invisible en coupe transversale).
+
+> ⚠️ **Les noires sont pénalisées deux fois** : le doigt est à **5 mm** au lieu de
+> 2 (3 mm de relief + 2 de plaque), **et** l'électrode est plus petite (~8,4 × 36
+> contre ~16 × 45). Le signal variant en gros comme surface/distance, une noire
+> est de l'ordre de **six fois moins sensible** qu'une blanche. La détection passe
+> largement — seuils par canal, marge de plusieurs centaines. L'**aftertouch**, lui,
+> devient douteux sur les noires.
+>
+> L'épaisseur de la plaque teintée n'est donc **pas** un simple choix
+> d'approvisionnement, c'est un **paramètre capacitif** : à 2 mm au lieu de 3, le
+> rapport tombe de 6 à ~4,5.

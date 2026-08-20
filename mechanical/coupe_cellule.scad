@@ -16,7 +16,7 @@
 
 /* [Affichage] */
 etiquettes = true;
-exag_mince = 8;        // facteur d'exageration des couches minces
+exag_mince = 20;        // facteur d'exageration des couches minces
 
 /* [Empilement — cotes reelles en mm] */
 e_avant    = 2.0;      // plaque avant PMMA : la surface touchee
@@ -49,6 +49,8 @@ C_ARR    = [0.45, 0.47, 0.50];
 C_NOIRE  = [0.10, 0.10, 0.12];
 C_FIL    = [0.72, 0.45, 0.20];
 C_GARDE  = [0.20, 0.30, 0.75];
+C_ITO_N  = [0.60, 0.30, 0.70];   // electrode de la NOIRE — couleur franchement
+                                 // distincte : une nuance de vert etait illisible
 C_TXT    = [0.15, 0.15, 0.15];
 
 function ep(e) = e < 0.5 ? e * exag_mince : e;   // couches minces exagerees
@@ -84,11 +86,26 @@ color(C_PMMA) difference() {
 // ou passe la GARDE A LA MASSE. C'est l'electrode qui separe les touches, pas la
 // matiere — le PMMA, lui, reste un bloc plein.
 j_elec = 2.4;
-for (i = [0 : n_pas-1])
-    color(C_ITO) translate([i*pas_w + j_elec/2, y_ito - ep(e_ito)])
-        square([pas_w - j_elec, ep(e_ito)]);
-for (i = [1 : n_pas-1])
-    color(C_GARDE) translate([i*pas_w, y_ito - ep(e_ito)/2]) circle(d = d_fil, $fn = 20);
+x_n0 = pas_w - larg_noire/2;              // bord gauche de la noire
+x_n1 = x_n0 + larg_noire;                 // bord droit
+
+// Electrodes des BLANCHES : elles s'ARRETENT de part et d'autre de la noire,
+// exactement comme les talons de blanche s'arretent de part et d'autre d'une
+// touche noire sur un piano. Sinon toucher la noire declencherait les blanches.
+module elec(x0, x1)
+    color(C_ITO) translate([x0, y_ito - ep(e_ito)]) square([x1 - x0, ep(e_ito)]);
+
+elec(j_elec/2,            x_n0 - j_elec/2);          // blanche 0, tronquee
+elec(x_n1 + j_elec/2,     2*pas_w - j_elec/2);       // blanche 1, tronquee
+elec(2*pas_w + j_elec/2,  3*pas_w - j_elec/2);       // blanche 2, entiere
+
+// Electrode de la NOIRE : dans le meme plan, dans l'intervalle laisse libre.
+color(C_ITO_N) translate([x_n0 + j_elec/2, y_ito - ep(e_ito)])
+    square([larg_noire - j_elec, ep(e_ito)]);
+
+// Gardes a la masse dans chaque intervalle
+for (x = [x_n0, x_n1, 2*pas_w])
+    color(C_GARDE) translate([x, y_ito - ep(e_ito)/2]) circle(d = d_fil, $fn = 20);
 
 // Entrefer : rien a dessiner, mais il loge les fils de bus bar
 for (i = [0 : n_pas-1])
@@ -107,9 +124,15 @@ couche(y_fond,   ep(e_fond), C_FOND);
 couche(y_mousse, e_mousse,   C_MOUSSE);
 couche(y_arriere, e_arriere, C_ARR);
 
-// Touche noire, a cheval sur la limite entre deux blanches
+// Touche noire : son PROPRE guide de lumiere, avec sa gravure sur la face
+// INFERIEURE et sa LED injectee par la tranche arriere (hors de ce plan de
+// coupe : l'injection se voit en coupe longitudinale, pas transversale).
 x_noire = pas_w - larg_noire/2;
-color(C_NOIRE) translate([x_noire, 0]) square([larg_noire, e_noire]);
+color(C_NOIRE) difference() {
+    translate([x_noire, 0]) square([larg_noire, e_noire]);
+    for (x = [x_noire + 1.2 : 1.8 : x_noire + larg_noire - 1])
+        translate([x, 0]) circle(d = 0.5, $fn = 12);
+}
 
 // ---------------- ETIQUETTES ----------------
 if (etiquettes) {
@@ -125,14 +148,27 @@ if (etiquettes) {
     ];
     for (l = lignes) { trait([L, l[0]], [xr - 0.8, l[0]]); texte([xr, l[0]], l[1]); }
 
-    texte([x_noire + larg_noire/2, e_noire + 2.2],
-          str("noire ", e_noire, " mm — le doigt est ", e_noire + e_avant,
-              " mm de l'electrode"), 1.5, "center");
+    texte([x_noire + larg_noire/2, e_noire + 2.4],
+          str("NOIRE ", e_noire, " mm — guide autonome, gravure au dos"), 1.5, "center");
+    trait([x_noire + larg_noire/2, e_noire], [x_noire + larg_noire/2, e_noire + 1.9]);
+
+    // cotes doigt -> electrode, les deux valeurs du montage
+    // Reperage explicite des deux electrodes, avec traits de rappel
+    y_e = y_ito - ep(e_ito)/2;
+    trait([x_noire + larg_noire/2, y_e], [x_noire + larg_noire/2, y_e - 4.5]);
+    texte([x_noire + larg_noire/2, y_e - 5.6],
+          str("electrode de la NOIRE (violet) — doigt a ", e_noire + e_avant, " mm"),
+          1.5, "center");
+    trait([2*pas_w + pas_w/2, y_e], [2*pas_w + pas_w/2, y_e - 8.5]);
+    texte([2*pas_w + pas_w/2, y_e - 9.6],
+          str("electrode d'une BLANCHE (vert) — doigt a ", e_avant, " mm"), 1.5, "center");
     texte([0, e_noire + 6], "COUPE EN TRAVERS DU CLAVIER — deux blanches, une noire", 2.2);
     texte([0, y_bas - 3],
           "l'entrefer sert deux fois : reflexion totale du guide, et logement des fils de bus bar", 1.5);
     texte([0, y_bas - 5.6],
           "electrode DECOUPEE par touche (vert) ; garde a la masse entre cellules (bleu) ; le PMMA reste plein", 1.5);
-    texte([0, y_bas - 8.2],
+    texte([0, y_bas - 8.0],
+          "les electrodes des blanches s'ARRETENT de part et d'autre de la noire — sinon la toucher les declencherait", 1.5);
+    texte([0, y_bas - 10.4],
           "couches minces exagerees pour la lisibilite ; cotes reelles en regard", 1.3);
 }
