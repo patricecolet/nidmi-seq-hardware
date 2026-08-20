@@ -52,6 +52,49 @@ openscad -o cellule_ito.png --imgsize=1500,950 \
 ```
 Params en tête : `plexi_t` (10), `membrane` (1,5), `wall`, `led_win`, `elec_mode`. `cut`=coupe.
 
+## Clavier piano — géométrie de facteur (`clavier_piano.scad`)
+
+Modèle dédié du clavier 27 touches, avec la **vraie irrégularité du piano** —
+`facade.scad` plaçait les noires sur la limite entre deux blanches, ce qui n'est
+pas un clavier de piano.
+
+**Le modèle** : dans le groupe **do-ré-mi** (3 blanches, 2 noires) les talons de
+blanche sont égaux entre eux ; dans le groupe **fa-sol-la-si** (4 blanches,
+3 noires) ils le sont aussi, mais d'une *autre* valeur. D'où les décalages des
+noires par rapport à la ligne de pas : **−1,25 / +1,25** pour do♯ et ré♯,
+**−1,87 / 0 / +1,87** pour fa♯, sol♯ et la♯. Symétriques dans chaque groupe, et
+**sol♯ exactement sur la ligne** — c'est la signature d'un clavier juste.
+
+**Empilement modélisé** (cf. `../docs/ETUDE_DIFFUSION_LED.md`) : plaque acrylique
+transparente découpée en 16 blanches séparées (chacune guide de lumière) · plaque
+plus fine et sombre découpée en 11 noires, posée dessus · PCB de tranche **avant**
+(16 LED, injection dans les blanches) · PCB de tranche **arrière**, moins haut
+(11 LED, injection dans les noires) · caches avant/arrière masquant les PCB.
+
+```sh
+# Vue de dessus + côtes (décalages des noires, talons, largeur)
+openscad -o clavier_top.png --imgsize=1900,900 --projection=p   --camera=145,29,0,0,0,0,430 -D 'show_dims=true' -D 'explode=0' clavier_piano.scad
+
+# Vue éclatée (les 5 couches)
+openscad -o clavier_explode.png --imgsize=1700,1150   --camera=147,25,12,60,0,22,640 -D 'show_dims=false' -D 'explode=24' clavier_piano.scad
+```
+
+### Échelle : format « mini-touches », pas piano réel
+
+À `pitch_w = 18.5`, le clavier fait **294,8 mm** et tient dans les 320 mm de
+façade. Au pas piano réel de 23,5 mm il faudrait **376 mm** — impossible ici.
+
+Le facteur d'échelle est donc **0,787**… ce qui tombe précisément sur le format
+**mini-touches** des contrôleurs du commerce (Arturia, Novation, Akai : 18–19 mm).
+Ce n'est donc pas un compromis bâtard mais un standard établi, avec lequel les
+joueurs sont déjà familiers.
+
+> ⚠️ La **noire tombe à 7,47 mm** par mise à l'échelle stricte, contre 9,5 mm sur
+> un piano. Les claviers mini-touches élargissent en général leurs noires plus que
+> l'échelle ne le voudrait, et une noire étroite est moins fiable à toucher en
+> capacitif. Essayer `black_ratio` entre 0,45 et 0,50 (→ 8,3 à 9,3 mm) avant de
+> figer. Le paramètre est en tête de fichier.
+
 ## Édition interactive
 Ouvrir `facade.scad` dans l'app OpenSCAD → fenêtre de preview, on tourne/zoome,
 on modifie un paramètre, F5 = aperçu, F6 = rendu final.
