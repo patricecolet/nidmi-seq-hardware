@@ -24,3 +24,6 @@ gerbers/
 # Ne pas versionner les binaires de compilation arduino-cli
 firmware/**/build/
 __pycache__/
+
+# Confidentiel : plan salon, gardé hors du dépôt public
+docs/CAHIER_SUPERBOOTH27.md
