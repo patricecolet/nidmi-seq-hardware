@@ -23,6 +23,8 @@ show_caches   = true;
 vue_plan      = false; // true = vue a plat lisible : blanches OPAQUES, noires
                        // noires, sans PCB ni caches. Sert a verifier a l'oeil que
                        // les proportions sont celles d'un vrai piano.
+piece         = "tout"; // "tout" | "blanches" | "noires" — isole une plaque pour
+                        // juger le travail de decoupe, ou pour exporter un DXF
 coupe         = false; // true = coupe transversale : seul moyen de voir les PCB
                        // de tranche et les caches, qui sont justement faits pour
                        // etre invisibles une fois assembles.
@@ -34,27 +36,30 @@ gap_w       = 1.2;     // trait de découpe entre blanches
 Wh          = 58;      // longueur d'une blanche
 Bh          = 36;      // longueur d'une noire (piano réel : ~0,63 × blanche)
 // LARGEUR DES NOIRES — attention a la cote choisie. Une noire de piano est
-// TRONCONIQUE : ~9.5 mm au sommet (ou le doigt se pose) mais ~13 mm a la base.
+// TRONCONIQUE : ~9.5 mm au sommet (ou le doigt se pose) mais 13.7 mm a la base.
 // Vue de dessus, et a plus forte raison sur une facade PLATE ou il n'y a aucun
-// fruit, c'est la BASE qui fait la largeur apparente. Rapport = 13/23.5 = 0.55.
+// fruit, c'est la BASE qui fait la largeur apparente.
+//   Cotes normalisees : blanche 23.5 mm, noire 13.7 mm -> rapport 0.583.
 // (Prendre 0.404, la cote du sommet, donne des noires visiblement maigres.)
-black_ratio = 0.55;
-// TALONS DES BLANCHES (la partie etroite, entre les noires), do re mi fa sol la si.
+black_ratio = 0.583;
+// TALONS DES BLANCHES (partie etroite entre les noires), do re mi fa sol la si.
 //
-// Sur un vrai piano ils ne sont NI tous egaux, NI egaux par groupe : les blanches
-// mordues d'UN SEUL cote (do, mi, fa, si) ont un talon plus LARGE que celles
-// mordues des DEUX cotes (re, sol, la).
+// Des talons TOUS EGAUX sont mathematiquement IMPOSSIBLES : il faudrait resoudre
+// en meme temps 3W = 3w + 2B (groupe do-re-mi) et 4W = 4w + 3B (groupe
+// fa-sol-la-si), ce qui n'admet de solution que pour B = 0, donc sans noires.
 //
-//   tails = undef  -> deduit du modele par groupes (approximation, talons egaux
-//                     dans chaque groupe). Convient pour degrossir.
-//   tails = [...]  -> sept cotes explicites, a MESURER sur un clavier reel puis
-//                     mettre a l'echelle. Exemple d'un piano (octave 165 mm,
-//                     noire 13 mm) : [15, 14, 15, 14.5, 13.5, 13.5, 14.5]
-//                     -> a l'echelle : chaque valeur x (pitch_w / 23.571).
+// L'arrangement optimal retenu par les facteurs de piano, et le defaut de ce
+// modele (tails = undef) :
+//     do, re, mi        talon = W - 2B/3
+//     fa, sol, la, si   talon = W - 3B/4
+// L'ecart maximal entre les deux vaut B/12 — c'est le minimum atteignable.
+// Refs : mathpages.com/home/kmath043.htm, quadibloc.com/other/cnv05.htm
 //
-// CONTRAINTE : somme des 7 talons + 5 x Wb doit valoir 7 x pitch_w, sinon les
-// talons derivent par rapport aux faces avant (qui restent, elles, a pas egal).
-// Le modele le verifie et le signale par un echo.
+//   tails = [...] -> sept cotes explicites si l'on veut coller a un clavier
+//                    particulier, mesurees puis mises a l'echelle.
+//
+// CONTRAINTE : somme des 7 talons + 5 x Wb = 7 x pitch_w, sinon les talons
+// derivent par rapport aux faces avant (qui restent a pas egal). Verifie par echo.
 tails = undef;
 key_clr     = 0.8;     // garde autour des noires (creusée dans les blanches)
 
@@ -215,10 +220,11 @@ module cotes() {
 coupe_x = black_cx(0);          // coupe passant par la 1re noire (do#)
 
 module tout() {
-    if (show_blanches) plaque_blanches();
-    if (show_noires)   plaque_noires();
-    if (show_pcb && !vue_plan)    { pcb_blanches(); pcb_noires(); }
-    if (show_caches && !vue_plan) { cache_avant(); cache_arriere(); }
+    seul = piece != "tout";
+    if (show_blanches && piece != "noires")   plaque_blanches();
+    if (show_noires   && piece != "blanches") plaque_noires();
+    if (show_pcb    && !vue_plan && !seul) { pcb_blanches(); pcb_noires(); }
+    if (show_caches && !vue_plan && !seul) { cache_avant(); cache_arriere(); }
 }
 
 if (coupe)
