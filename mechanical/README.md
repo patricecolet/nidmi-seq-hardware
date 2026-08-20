@@ -276,8 +276,18 @@ la lumière entre elles, et rien n'a besoin d'être soutenu au milieu — ni cac
 ni PCB.
 
 **Les deux LED restent en tranche**, avant et arrière, avec leur **PCB inséré dans
-le plexi**. La **fente arrière n'occupe que la moitié de la largeur** de la
-touche : l'autre moitié reste pleine et retient la touche au dos.
+le plexi**. La **fente arrière n'entame que 7 mm sur 10, par le dessous** : rien
+ne traverse, la matière du dessus reste continue et retient la touche au dos sur
+toute sa largeur. La demi-largeur n'est donc plus une nécessité mécanique — elle
+peut être élargie si l'optique le demande.
+
+> **Le PCB arrière prend appui sur LE SOCLE**, à travers une découpe de la mousse
+> — et non sur la mousse. Une mousse se comprime : la distance LED↔tranche
+> varierait d'une touche à l'autre, donc la luminosité aussi.
+
+**Aucune découpe ne traverse le bloc.** Cloison du milieu (5 mm sur 10) et fente
+arrière (7 sur 10) sont toutes deux **partielles, par le dessous**. Seuls les
+traits de scie entre blanches traversent, et ils s'arrêtent au dos.
 
 > ⚠️ **La coupe B passe par la moitié PLEINE.** C'est indispensable : une coupe par
 > la moitié ouverte montrerait un peigne sectionné, ce qu'il n'est pas. La fente

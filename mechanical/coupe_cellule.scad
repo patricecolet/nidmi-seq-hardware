@@ -109,9 +109,12 @@ module coupe_courante() {
 Lk      = 52;      // longueur utile d'une blanche
 x_cl    = 24;      // abscisse de la cloison transversale
 Lb      = 32;      // longueur d'une noire (posee a l'arriere)
-fente   = 2.2;     // fente arriere qui recoit la dent du PCB (1.6 de FR4 + jeu).
-                   // Elle n'occupe que la MOITIE de la largeur : l'autre moitie
-                   // retient la touche au dos.
+fente   = 2.2;     // largeur de la fente arriere (1.6 de FR4 + jeu)
+p_fente = 7;       // PROFONDEUR : la fente n'entame que 7 mm sur 10, par le
+                   // DESSOUS. Rien ne traverse — la matiere du dessus reste
+                   // continue et tient la touche au dos sur toute sa largeur.
+                   // La demi-largeur n'est donc plus une necessite mecanique :
+                   // elle peut etre elargie si l'optique le demande.
 p_cloison = 5;     // LA CLOISON DU MILIEU N'ENTAME QUE LA MOITIE DE L'EPAISSEUR.
                    // Suffisant pour bloquer la lumiere entre les deux zones, et
                    // rien n'a besoin d'etre soutenu au milieu de la touche —
@@ -129,6 +132,7 @@ module coupe_longue() {
     color(C_PMMA) difference() {
         translate([0,y_bloc_b]) square([Lt, e_bloc]);
         translate([x_cl-larg_coupe/2, y_bloc_b-0.1]) square([larg_coupe, p_cloison+0.1]);
+        translate([Lk, y_bloc_b-0.1]) square([fente, p_fente+0.1]);
         // zone 1 : trame qui se densifie en s'eloignant de la LED avant
         for (x=[3:3.4:x_cl-2])  translate([x,y_bloc_b]) circle(d=p_grav*(0.9+x/x_cl),$fn=16);
         // zone 2 : trame qui se densifie en s'eloignant de la LED arriere
@@ -139,6 +143,7 @@ module coupe_longue() {
     color(C_FOND) translate([0,y_fond_b]) square([Lt,ep(e_fond)]);
     color(C_MOUS) difference() {
         translate([0,y_mou_b]) square([Lt, e_mousse]);
+        translate([Lk-0.8, y_mou_b-0.1]) square([fente+1.6, e_mousse+0.2]);
     }
     color(C_ARR)  translate([-e_cache,y_arr_b]) square([Lt+2*e_cache,e_arriere]);
     color(C_ITO)  translate([1.5,y_ito_b]) square([Lt-3, ep(e_ito)]);
@@ -151,15 +156,15 @@ module coupe_longue() {
     color(C_PCB) translate([-(jeu_led+e_pcb), y_bloc_b+1]) square([e_pcb, e_bloc-2]);
     color(C_LED) translate([-jeu_led, -e_bloc/2-led_c/2]) square([jeu_led, led_c]);
 
-    // CETTE COUPE PASSE PAR LA MOITIE PLEINE : le bloc n'y est pas interrompu.
-    // La fente arriere, la dent du PCB et sa LED sont dans l'AUTRE moitie, donc
-    // DERRIERE le plan de coupe — figurees ici en teinte pale, comme un detail
-    // cache en dessin technique.
-    color([0.55,0.68,0.60]) translate([Lk + (fente-e_pcb)/2, y_bloc_b+0.5])
-        square([e_pcb, e_bloc-1]);
-    color([0.92,0.82,0.55]) translate([Lk + (fente-e_pcb)/2 - jeu_led - 1,
-                                       -e_bloc/2 - led_c/2])
-        square([jeu_led+1, led_c]);
+    // PCB ARRIERE : vertical, en APPUI SUR LE SOCLE (la plaque arriere), traversant
+    // une decoupe de la mousse, et remontant dans la fente partielle du bloc.
+    // L'appui sur le socle et non sur la mousse est essentiel : une mousse se
+    // comprime, et la distance LED-tranche varierait d'une touche a l'autre.
+    xpcb = Lk + (fente-e_pcb)/2;
+    color(C_PCB) translate([xpcb, y_arr_b + e_arriere])
+        square([e_pcb, (y_bloc_b + p_fente) - (y_arr_b + e_arriere)]);
+    color(C_LED) translate([xpcb - jeu_led, y_bloc_b + p_fente/2 - led_c/2])
+        square([jeu_led, led_c]);
 
     xm0 = -(jeu_led+e_pcb) - e_cache;
     xm1 = Lt;
@@ -171,20 +176,23 @@ module coupe_longue() {
     }
 
     if (etiquettes) {
-        trait([x_cl, y_bloc_b],[x_cl, y_bloc_b-12.2]);
-        txt([x_cl, y_bloc_b-13.5], str("CLOISON TRANSVERSALE : elle n'entame que ", p_cloison, " mm sur ", e_bloc,
+        trait([x_cl, y_bloc_b],[x_cl, y_bloc_b-19.2]);
+        txt([x_cl, y_bloc_b-20.5], str("CLOISON TRANSVERSALE : elle n'entame que ", p_cloison, " mm sur ", e_bloc,
             " — deux zones optiques, et rien a soutenir au milieu"), 1.6, "center");
         txt([x_cl/2, y_pet_h+6], "zone 1 — symbole A", 1.7, "center");
         txt([(x_cl+Lk)/2, y_pet_h+e_noire+6], "zone 2 — symbole B", 1.7, "center");
         trait([x_cl/2, y_pet_h+5.2],[x_cl/2, y_pet_h+1]);
         trait([(x_cl+Lk)/2, y_pet_h+e_noire+5.2],[(x_cl+Lk)/2, y_pet_h+e_noire+0.5]);
         txt([xm0-2, -e_bloc/2], "LED avant", 1.6, "right");
-        trait([Lk+fente/2, -e_bloc/2],[Lk+fente+9, -e_bloc/2+7]);
-        txt([Lk+fente+9.5, -e_bloc/2+7], "LED ARRIERE + son PCB, en teinte pale :", 1.6);
-        txt([Lk+fente+9.5, -e_bloc/2+4.6], "ils sont DERRIERE le plan de coupe", 1.6);
-        trait([Lk+fente/2, y_bloc_b],[Lk+fente/2, y_bloc_b-6]);
-        txt([Lk+fente/2, y_bloc_b-7.3],
-            "coupe par la MOITIE PLEINE : le peigne n'est pas sectionne", 1.6, "center");
+        trait([Lk+fente/2, y_bloc_b+p_fente],[Lk+fente+10, y_bloc_b+p_fente+5]);
+        txt([Lk+fente+10.5, y_bloc_b+p_fente+5],
+            str("la fente n'entame que ", p_fente, " mm sur ", e_bloc, " :"), 1.6);
+        txt([Lk+fente+10.5, y_bloc_b+p_fente+2.6], "la matiere du dessus reste continue", 1.6);
+        trait([Lk+fente/2, y_mou_b],[Lk+fente/2, y_mou_b-6]);
+        txt([Lk+fente/2, y_mou_b-7.3],
+            "le PCB prend appui sur LE SOCLE, a travers une decoupe de la mousse", 1.6, "center");
+        txt([Lk+fente/2, y_mou_b-9.6],
+            "— pas sur la mousse, qui se comprime et ferait varier la distance LED-tranche", 1.6, "center");
         txt([xm1+e_cache+2, -e_bloc/2], "dos du peigne", 1.6);
         txt([0, y_pet_h+e_noire+11], "B — COUPE EN LONG D'UNE BLANCHE", 2.6);
         txt([0, y_arr_b-11], "trame de points DENSIFIEE en s'eloignant de chaque LED : c'est ce qui egalise la luminosite", 1.6);
@@ -221,7 +229,7 @@ module vue_dessus() {
         xd0 = 0.6 + lf/2;
         trait([xd0, yk+fente/2],[xd0, -5]);
         txt([xd0, -6.4], "fente sur la MOITIE de la largeur + dent du PCB avec sa LED", 1.6, "center");
-        txt([0, -10.5], "rien ne traverse au milieu de la touche : la cloison des deux zones n'entame que la mi-epaisseur", 1.6);
+        txt([0, -10.5], "AUCUNE decoupe ne traverse le bloc : cloison du milieu et fente arriere sont partielles, par le dessous", 1.6);
         txt([0, yk+fente+dos+13], "C — VUE DE DESSUS, ZONE ARRIERE", 2.6);
     }
 }
