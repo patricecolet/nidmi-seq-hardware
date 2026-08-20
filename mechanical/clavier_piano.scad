@@ -76,6 +76,17 @@ black_ratio = 0.583;
 tails = undef;
 key_clr     = 0.8;     // garde autour des noires (creusée dans les blanches)
 
+// SOLIDITE — l'acrylique est CASSANT : il ne se deforme pas, il fissure. Tout
+// angle interne vif est une amorce de rupture, et la piece ne casse pas au
+// montage mais des mois plus tard.
+//   conge_r   : congé dans les angles internes des encoches (36.8 mm de
+//               profondeur : c'est l'entaille la plus dangereuse du dessin)
+//   arret_d   : TROU D'ARRET en fond de fente entre dents. Une fente terminee en
+//               angle vif propage une fissure depuis son extremite ; un trou plus
+//               large que la fente l'arrete. Technique d'atelier standard.
+conge_r     = 1.2;
+arret_d     = 2.4;     // diametre ; doit etre > gap_w pour servir a quelque chose
+
 /* [Épaisseurs] */
 t_blanches  = 10;      // guide de lumière
 t_noires    = 5;       // plaque sombre posée dessus (5 mm : plus facile a sourcer)
@@ -138,13 +149,25 @@ y_dents = kb_y0 + Wh - (plaques_entieres ? dos : 0);
 
 // Emprise des noires, servant aussi a creuser les encoches des blanches.
 // Ne mord pas dans le dos, sinon le peigne se separerait en 16 morceaux.
-module blacks_2d(clr = 0) {
+// Les angles CONVEXES de l'outil de coupe deviennent les angles CONCAVES de la
+// piece : arrondir l'outil, c'est mettre un conge dans l'encoche.
+module blacks_2d(clr = 0, conge = 0) {
     for (x = black_list)
         translate([x - Wb/2 - clr, by0 - clr])
-            square([Wb + 2*clr, (y_dents - by0) + clr + 0.1]);
+            offset(r = conge) offset(r = -conge)
+                square([Wb + 2*clr, (y_dents - by0) + clr + 0.1]);
 }
 
 module dos_2d() { translate([kb_x0, y_dents]) square([kb_w, dos]); }
+
+// Trous d'arret en fond des fentes entre dents (peigne uniquement : sans dos,
+// les fentes debouchent et n'ont pas d'extremite a proteger).
+module arrets_2d() {
+    if (plaques_entieres && arret_d > 0)
+        for (i = [0 : white_n-2])
+            translate([white_left(i) + Ww + gap_w/2, y_dents])
+                circle(d = arret_d, $fn = 24);
+}
 
 module whites_2d() {
     difference() {
@@ -153,15 +176,23 @@ module whites_2d() {
                 translate([white_left(i), kb_y0]) square([Ww, Wh - (plaques_entieres ? dos : 0)]);
             if (plaques_entieres) dos_2d();
         }
-        blacks_2d(key_clr);
+        blacks_2d(key_clr, conge_r);
+        arrets_2d();
     }
 }
 
 // Plaque des noires : dents + dos, ou 11 pieces separees.
 module noires_2d() {
-    union() {
-        blacks_2d(0);
-        if (plaques_entieres) dos_2d();
+    difference() {
+        union() {
+            blacks_2d(0);
+            if (plaques_entieres) dos_2d();
+        }
+        // memes trous d'arret en fond des creux entre dents
+        if (plaques_entieres && arret_d > 0)
+            for (i = [0 : len(black_list)-2])
+                translate([(black_list[i] + Wb/2 + black_list[i+1] - Wb/2)/2, y_dents])
+                    circle(d = arret_d, $fn = 24);
     }
 }
 
