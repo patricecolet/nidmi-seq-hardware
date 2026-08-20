@@ -89,14 +89,30 @@ Le facteur d'échelle est donc **0,787**… ce qui tombe précisément sur le fo
 Ce n'est donc pas un compromis bâtard mais un standard établi, avec lequel les
 joueurs sont déjà familiers.
 
-La mise à l'échelle stricte donnerait une **noire de 7,47 mm** contre 9,5 mm sur
-un piano — étroite, et d'autant moins fiable à toucher en capacitif. Les claviers
-mini-touches du commerce (Akai, Arturia, Novation) élargissent leurs noires plus
-que la réduction ne le voudrait. `black_ratio` est donc réglé à **0,48 → 8,9 mm**.
+**Largeur des noires — attention à la cote.** Une noire de piano est
+**tronconique** : ~9,5 mm au sommet (où le doigt se pose) mais ~13 mm à la base.
+Vue de dessus, et à plus forte raison sur une façade **plate** sans aucun fruit,
+c'est la **base** qui fait la largeur apparente. `black_ratio` = 13/23,5 =
+**0,55 → 10,2 mm**. Prendre la cote du sommet donne des noires visiblement
+maigres — erreur commise puis corrigée ici.
 
-> ⚠️ Valeur **estimée**, à recaler en mesurant la largeur d'une noire sur un
-> clavier réel. Le pas de 18–19 mm des mini-claviers est en revanche une donnée
-> fiable, et le modèle est à 18,5.
+**Talons des blanches** (la partie étroite, entre les noires). Sur un vrai piano
+ils ne sont **ni tous égaux, ni égaux par groupe** : les blanches mordues d'**un
+seul côté** (do, mi, fa, si) ont un talon **plus large** que celles mordues des
+**deux côtés** (ré, sol, la). Le modèle par défaut (`tails = undef`) approxime
+avec des talons égaux dans chaque groupe — suffisant pour dégrossir.
+
+Pour la géométrie exacte, renseigner les sept cotes mesurées sur un clavier
+réel :
+
+```scad
+// exemple d'un piano — octave 165 mm, noire 13 mm
+tails = [15, 14, 15, 14.5, 13.5, 13.5, 14.5] * (pitch_w / 23.571);
+```
+
+> **Contrainte** : somme des 7 talons + 5 × largeur de noire = 7 × pas. Sinon les
+> talons dérivent par rapport aux faces avant, qui restent à pas égal. Le modèle
+> vérifie et le signale par un `echo`.
 
 ## Édition interactive
 Ouvrir `facade.scad` dans l'app OpenSCAD → fenêtre de preview, on tourne/zoome,
