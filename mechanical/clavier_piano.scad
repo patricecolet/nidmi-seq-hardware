@@ -23,6 +23,19 @@ show_caches   = true;
 vue_plan      = false; // true = vue a plat lisible : blanches OPAQUES, noires
                        // noires, sans PCB ni caches. Sert a verifier a l'oeil que
                        // les proportions sont celles d'un vrai piano.
+// UNE SEULE PIECE PAR PLAQUE : les touches restent reliees par un DOS plein a
+// l'arriere (peigne), au lieu d'etre 27 pieces separees. Divise le nombre de
+// pieces par plus de deux et supprime tout probleme d'alignement au montage.
+//
+// !! Le dos est un CHEMIN DE LUMIERE. Il doit etre a l'OPPOSE de l'injection :
+//    LED en tranche AVANT, dos ARRIERE. Relier les touches du cote des LED
+//    repartirait la lumiere dans le dos et eclairerait toutes les touches a la
+//    fois — exactement la selectivite qu'on cherche a preserver.
+//    Le dos partage quand meme un peu de lumiere entre touches voisines : le
+//    garder AUSSI ETROIT que la tenue mecanique le permet, et mesurer.
+plaques_entieres = true;
+dos              = 5;   // profondeur du dos (doit rester <= cache_ov pour etre cache)
+
 piece         = "tout"; // "tout" | "blanches" | "noires" — isole une plaque pour
                         // juger le travail de decoupe, ou pour exporter un DXF
 coupe         = false; // true = coupe transversale : seul moyen de voir les PCB
@@ -75,7 +88,7 @@ pcb_h_noir  = 3.5;     // hauteur du PCB arrière (moins large : plaque fine)
 pcb_gap     = 1.0;     // jeu entre PCB et tranche (couplage LED)
 led_size    = 3.5;     // SK6812 3535
 led_h       = 1.6;
-cache_ov    = 4;       // recouvrement du cache sur les touches
+cache_ov    = 6;       // recouvrement du cache (doit couvrir le dos)
 
 /* [Repère] */
 kb_x0 = 0;
@@ -120,17 +133,35 @@ kb_w = white_n * pitch_w - gap_w;
 by0  = kb_y0 + Wh - Bh;
 
 // ---------------- 2D ----------------
+// Fin des DENTS : les touches s'arretent la, le dos occupe le reste.
+y_dents = kb_y0 + Wh - (plaques_entieres ? dos : 0);
+
+// Emprise des noires, servant aussi a creuser les encoches des blanches.
+// Ne mord pas dans le dos, sinon le peigne se separerait en 16 morceaux.
 module blacks_2d(clr = 0) {
     for (x = black_list)
         translate([x - Wb/2 - clr, by0 - clr])
-            square([Wb + 2*clr, Bh + clr + 0.1]);
+            square([Wb + 2*clr, (y_dents - by0) + clr + 0.1]);
 }
+
+module dos_2d() { translate([kb_x0, y_dents]) square([kb_w, dos]); }
 
 module whites_2d() {
     difference() {
-        for (i = [0 : white_n-1])
-            translate([white_left(i), kb_y0]) square([Ww, Wh]);
+        union() {
+            for (i = [0 : white_n-1])
+                translate([white_left(i), kb_y0]) square([Ww, Wh - (plaques_entieres ? dos : 0)]);
+            if (plaques_entieres) dos_2d();
+        }
         blacks_2d(key_clr);
+    }
+}
+
+// Plaque des noires : dents + dos, ou 11 pieces separees.
+module noires_2d() {
+    union() {
+        blacks_2d(0);
+        if (plaques_entieres) dos_2d();
     }
 }
 
@@ -141,7 +172,7 @@ module plaque_blanches() {
 
 module plaque_noires() {
     color(C_NOIR) translate([0, 0, t_blanches + explode])
-        linear_extrude(t_noires) blacks_2d();
+        linear_extrude(t_noires) noires_2d();
 }
 
 // PCB de tranche AVANT : injecte dans la tranche des blanches
