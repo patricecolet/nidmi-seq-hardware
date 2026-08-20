@@ -168,11 +168,11 @@ module coupe_longue() {
 
     xm0 = -(jeu_led+e_pcb) - e_cache;
     xm1 = Lt;
+    // Cache AVANT seulement. A l'arriere, c'est LA BOITE qui fait office de cache :
+    // le clavier y est insere, inutile d'ajouter une piece.
     color(C_CACHE) union() {
         translate([xm0,y_arr_b]) square([e_cache, y_pet_h-y_arr_b+e_cache]);
         translate([xm0,y_pet_h]) square([e_cache+6, e_cache]);
-        translate([xm1,y_arr_b]) square([e_cache, y_pet_h+e_noire-y_arr_b+e_cache]);
-        translate([xm1-6,y_pet_h+e_noire]) square([e_cache+6, e_cache]);
     }
 
     if (etiquettes) {
