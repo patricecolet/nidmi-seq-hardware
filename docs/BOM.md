@@ -89,7 +89,39 @@ lignes RGB — l'obstacle qui avait fait écarter un 5″ RGB au profit du 4,0�
 Une dizaine de broches suffit au cerveau : I2C (2× MCP23017 + MCP4728), UART vers B et C
 plus MIDI, et le ruban tactile.
 
-🔴 **Point de risque : le ruban.** Il demande ~5 canaux tactiles, et seules 4 des broches
+### Modèle retenu : CrowPanel **Advance 7.0-HMI ESP32 AI Display** — 34,90 $
+
+<https://www.elecrow.com/crowpanel-advance-7-hmi-esp32-ai-display-800x480-ai-ips-touch-screen.html>
+
+**ESP32-S3, 8 Mo PSRAM, 16 Mo flash** = exactement le **N16R8** déjà spécifié pour les trois
+puces du projet. Aucun changement de plateforme. 800×480 IPS tactile capacitif (GT911).
+
+⚠️ **Les « 11 broches libres » annoncées sont trompeuses** — « libre » y signifie *sans rôle de
+démarrage*, pas *inutilisée* :
+
+| broches | réalité |
+|---|---|
+| IO7, IO17, IO18, IO21 | **lignes de données de l'écran** → indisponibles |
+| IO15, IO16 | **bus I2C**, partagé avec GT911, RTC PCF8563 (0x51), contrôleur rétroéclairage (0x30) |
+| **IO2, IO4, IO5, IO6, IO8** | **réellement disponibles** — au prix du haut-parleur I2S, du micro, de la microSD et du buzzer (sans usage ici) |
+
+**Bilan cerveau :**
+- **I2C : passe.** Bus partagé, mais aucune collision d'adresse avec MCP23017 (0x20-0x27) ni
+  MCP4728 (0x60-0x67).
+- **Conflit sur les 5 broches restantes** : le **ruban** demande ~5 canaux tactiles et l'**UART**
+  vers B et C en demande 2 à 4. Les deux ne tiennent pas. (IO2/4/5/6/8 sont bien dans la plage
+  tactile du S3, donc le ruban serait faisable — mais alors plus rien pour l'UART.)
+
+→ **Décision : le ruban migre sur l'ESP32-B ou C**, ce qui libère les 5 broches pour la liaison
+inter-puces. Le repli identifié devient la solution de base.
+
+🔴 **Encombrement de la carte : introuvable.** Ni la fiche produit ni espboards ne le publient.
+C'est la cote qui manque pour dessiner la boîte → **mesurer à réception**, ou récupérer le
+schéma/manuel chez Elecrow.
+
+Réf. broches : espboards.dev/esp32/elecrow-crowpanel-advance-7-esp32-s3/
+
+🔴 **Point de risque restant : le ruban.** Il demande ~5 canaux tactiles, et seules 4 des broches
 libres nommées tombent dans la plage tactile du S3. Surtout, **on a mesuré (2026-08-19) que
 « touch-capable » ne veut pas dire « mesure » : sur 14 canaux annoncés d'une carte S3, 4
 seulement rendaient des valeurs exploitables** (cf. `docs/ESSAI_ITO_ESP32.md`, `firmware/scan_touch`).
