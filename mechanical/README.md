@@ -281,7 +281,18 @@ touche : l'autre moitié reste pleine et retient la touche au dos.
 
 > ⚠️ **La coupe B passe par la moitié PLEINE.** C'est indispensable : une coupe par
 > la moitié ouverte montrerait un peigne sectionné, ce qu'il n'est pas. La fente
-> arrière et la dent du PCB se voient dans la **vue C** uniquement.
+> arrière et la dent du PCB se voient dans la **vue C** ; dans la coupe B ils sont
+> figurés en **teinte pâle**, comme un détail caché.
+
+**Le dos du peigne fait 18 mm**, et pas moins. C'est lui qui tient les 16 touches
+ensemble, et c'est la pièce la plus exposée : l'acrylique ne plie pas, il casse.
+Un dos mince percé de 16 fentes est fragile **avant même d'être monté** — à
+l'usinage, au débridage, à la manipulation. C'est là que ça casserait, pas en
+service. Valeur **estimée**, à confirmer sur la première pièce.
+
+> Coût : clavier de 66 à **76 mm** de profondeur, façade complète de 232 à
+> **242 mm**. Ces 10 mm sont entièrement en **zone cachée** sous le cache arrière —
+> ils n'entament ni la surface jouée ni la place de l'écran.
 
 > **Point dur restant : le repérage.** Les traits de gravure de l'ITO doivent
 > tomber au-dessus des coupes de scie, à mieux de 0,5 mm sur 300 mm. Ce n'est pas

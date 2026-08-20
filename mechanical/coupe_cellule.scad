@@ -116,7 +116,13 @@ p_cloison = 5;     // LA CLOISON DU MILIEU N'ENTAME QUE LA MOITIE DE L'EPAISSEUR
                    // Suffisant pour bloquer la lumiere entre les deux zones, et
                    // rien n'a besoin d'etre soutenu au milieu de la touche —
                    // ni cache, ni PCB.
-dos     = 8;       // dos du peigne : ce qui tient les touches ensemble
+// DOS DU PEIGNE — c'est lui qui tient les 16 touches ensemble, et c'est la piece
+// la plus exposee : l'acrylique ne plie pas, il casse. Un dos mince avec 16
+// fentes taillees dedans est fragile AVANT le montage — a l'usinage, au
+// debridage, a la manipulation. C'est la que ca casserait, pas en service.
+// 18 mm est une valeur ESTIMEE ; elle ne coute que de la profondeur en zone
+// cachee, sous le cache arriere.
+dos     = 18;
 Lt      = Lk + fente + dos;   // longueur totale du bloc
 
 module coupe_longue() {
