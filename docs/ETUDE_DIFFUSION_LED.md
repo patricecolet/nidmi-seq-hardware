@@ -95,3 +95,52 @@ les SK6812.
 > halo), pas le rendu final : le BOM prévoit du SK6812 RGB. Conclure sur les formes et les
 > distances, pas sur l'intensité ni la teinte perçues — le bleu diffuse un peu plus que le rouge
 > à géométrie égale.
+
+## Résultat : guide de lumière à éclairage latéral (2026-08-20)
+
+**Principe validé au proto.** LED sur la **tranche** ; la lumière se propage dans le plexi par
+réflexion totale interne et ne sort qu'où la surface est perturbée. La **gravure Dremel** joue le
+rôle de structure d'extraction — même principe que les rétroéclairages de dalles LCD.
+
+**Gravure au DOS, pas en face avant** (comparé au proto) : la face avant reste lisse, donc la
+réflexion totale y est préservée et la lumière rebondit jusqu'à trouver la gravure ; on regarde un
+halo diffus **à travers** de l'acrylique poli, plus net qu'une surface dépolie côté spectateur.
+Bénéfices annexes : façade lisse (pas de rainures à crasse ni à rayures), et **la gravure masque
+l'électrode** → l'impression en seconde surface envisagée pour cacher le bus bar devient inutile.
+
+**Cross-talk optique : faible.** Une gravure s'allume nettement en face de sa LED et « presque
+pas » à côté. C'est la réponse à l'une des deux contraintes qui fixaient le pas du clavier
+(l'autre étant le cross-talk capacitif, cf. `ESSAI_ITO_ESP32.md`).
+
+**Deux leviers, qui s'opposent** : la *densité et la profondeur de gravure* règlent la quantité de
+lumière extraite (plus creusé = plus lumineux, mais diffuse aussi vers les voisines) ; la
+*distance LED↔gravure et l'angle du faisceau* règlent la sélectivité. Chercher le point où la
+touche est lisible sans que sa voisine s'éclaire.
+
+**Renfort possible** : une **rainure entre cellules** fait barrière optique à la lumière rasante.
+Elle tombe au même endroit que la broche de garde à la masse et les vis de fixation — trois
+fonctions dans une zone déjà perdue pour l'optique comme pour le capacitif.
+
+### ⚠️ Tension avec le capacitif — à mesurer
+
+Le guide ne fonctionne que tant que ses faces sont **au contact de l'air**. Plaquer le film ITO
+contre la face arrière met le système en **réflexion totale frustrée** : l'indice du PET (~1,57)
+est proche de celui de l'acrylique (~1,49), donc la lumière sort **partout où le film touche**, et
+plus seulement au niveau de la gravure → perte de la sélectivité. Le capacitif, lui, veut
+l'électrode au plus près. Les deux exigences s'opposent.
+
+**La marge permet de trancher en faveur de l'optique** : ×5,3 dans le cas défavorable, 840× le
+seuil. Une lame d'air de quelques dixièmes de mm ne coûte qu'une fraction de cette marge.
+
+**Mesure à faire** (banc `firmware/banc_cellules`) : relever le Δ **film plaqué** puis **film
+légèrement décollé**, et vérifier à chaque fois si la gravure voisine s'allume. On obtient ce que
+l'entrefer coûte en capacitif contre ce qu'il rapporte en sélectivité optique.
+
+> Montage : **l'ITO se fissure sous contrainte** et une arête de gravure est un point dur. Ne pas
+> presser le film contre la face gravée avec un appui ponctuel.
+
+### Conséquence pour la décision BOM #6 (SK6812 3535 vs MINI-E)
+
+Le critère change : il ne s'agit plus d'éclairer *depuis l'arrière* mais d'**injecter dans la
+tranche** du guide. La question devient celle du couplage LED→tranche (position, angle, logement
+fraisé), pas celle de l'émission frontale.
