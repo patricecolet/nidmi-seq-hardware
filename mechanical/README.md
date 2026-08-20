@@ -161,3 +161,37 @@ openscad -o plexi.stl -D 'explode=0' facade.scad   # (puis isoler la couche voul
 - Entrefer `spacer_t` = compromis sensibilité capacitive ↔ logement LED.
 - Hauteur LED `led_h` à caler sur le boîtier SK6812 réel (3535 ≈ 1,6 mm).
 - Layout façade = format compact 4×4 (~170×262) ; modifiable via les paramètres.
+
+## Implantation de façade — deux variantes (`implantation.scad`)
+
+Toutes les cotes de façade sont **calculées depuis les composants** : changer une
+dimension de composant recalcule l'objet, et les totaux sortent en `echo`. Le
+clavier est **importé** de `clavier_piano.scad`, pas redessiné.
+
+```sh
+openscad -o implantation_complete.png --imgsize=1400,1150 --projection=o \
+  --viewall --autocenter -D 'variante="complete"' implantation.scad
+openscad -o implantation_modeste.png --imgsize=1400,1150 --projection=o \
+  --viewall --autocenter -D 'variante="modeste"' implantation.scad
+```
+
+| variante | façade | contenu |
+|---|---|---|
+| **complete** | **328 × 185 mm** | clavier 27 touches, écran, 6 encodeurs, 8 boutons, ruban 136 mm |
+| **modeste** | **230 × 141 mm** | idem **sans clavier** — module de bureau, notes par MIDI externe |
+
+**Le 6ᵉ encodeur passe** (décision 🔴 du BOM §3), en **deux rangées de trois** au
+pas de 30 mm. En une seule rangée de six au pas de 33 il fallait 306 mm pour 296
+disponibles ; en 2×3 la rangée haute ne fait plus que 206 mm de large.
+
+**Le ruban passe de 180 à 136 mm** : boutons + ruban sur une même rangée
+demandaient 340 mm pour 296 disponibles.
+
+> **Place disponible pour l'écran : 206 mm de large**, contre 108 pour le module
+> 4,0″ actuel. Un **7 pouces** (≈165 × 100 mm) rentre en largeur sans rien
+> déplacer ; il coûte ~38 mm de profondeur (façade complète ~223 mm) et remplit
+> le quadrant supérieur droit, actuellement vide.
+
+> **Les deux variantes partagent la même rangée haute** (écran + encodeurs,
+> 206 × 62). La modeste = la complète moins la rangée clavier — même
+> sous-ensemble électronique et même firmware d'interface possibles.
