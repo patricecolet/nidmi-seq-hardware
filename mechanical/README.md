@@ -1,4 +1,19 @@
-# Mécanique — modèle 3D de la façade (variante plexi capacitive)
+# Mécanique — modèles paramétriques
+
+> ## ⚠️ Deux fichiers sont PÉRIMÉS, gardés pour mémoire
+> - **`facade.scad`** — implantation d'origine. Noires à espacement **régulier**
+>   (ce n'est pas un clavier de piano), 5 encodeurs, écran 4,0″. Remplacé par
+>   **`implantation.scad`**. Reste utile pour une seule chose : c'est le seul
+>   modèle qui esquisse le **boîtier** (`show_box`).
+> - **`cellule_plexi.scad`** — électrode dans une **poche fraisée** du plexi épais,
+>   membrane de 1–1,5 mm. Concept **abandonné** : la pollution lumineuse mesurée
+>   acceptable a permis de revenir au bloc plein, et l'électrode est passée sur une
+>   plaque avant distincte. Remplacé par **`coupe_cellule.scad`**.
+>
+> Leurs rendus ont été supprimés du dépôt : une image fausse coûte plus cher
+> qu'une image absente.
+
+# Modèle d'origine (périmé) — façade plexi capacitive
 
 Modèle **paramétrique OpenSCAD** de l'empilement façade :
 **plexi** (couvercle) + **grille espaceur** (puits de lumière) + **PCB**
