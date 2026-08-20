@@ -211,6 +211,83 @@ demandaient 340 mm pour 296 disponibles.
 > 206 × 62). La modeste = la complète moins la rangée clavier — même
 > sous-ensemble électronique et même firmware d'interface possibles.
 
+## Assemblage du clavier (`coupe_cellule.scad`)
+
+Deux coupes : **A — courante** (en travers, au droit d'une noire et d'une coupe de
+scie) et **B — rive avant** (où le cache capture le film et où la LED injecte).
+Tracées explicitement en 2D, pas découpées dans un modèle 3D.
+
+```sh
+openscad -o coupe_cellule.png --imgsize=1800,1250 --projection=o \
+  --camera=54,-31,0,0,0,0,290 coupe_cellule.scad
+```
+
+| couche | ép. | rôle |
+|---|---|---|
+| touches **noires** | 3 mm | collées **sur** le film — même sous-ensemble |
+| **PET** | 0,125 mm | la surface touchée **et** la protection |
+| **ITO gravé** | ~0 | îlots d'électrodes ; la **garde est la mer** autour |
+| film d'air | ~0,1 mm | le film n'est collé qu'au **pourtour** |
+| **bloc PMMA** | 10 mm | guide de lumière · LED en tranche avant · gravure au dos · **coupes de scie + lamelles noires** entre blanches |
+| fond sombre | ~0,05 mm | absorbe le halo non extrait |
+| mousse | 3 mm | pousse tout vers l'avant |
+| plaque arrière | 2 mm | vissée en périphérie |
+| | **≈ 15,3 mm** | + 3 mm de relief pour les noires |
+
+**Deux pièces, deux sous-ensembles.**
+
+Le **bloc** porte l'optique et la mécanique : guide, gravure, coupes de scie,
+lamelles. Il ne s'use pas.
+
+Le **film + les noires** forment la « **peau** » du clavier : la surface touchée,
+les électrodes, la garde. C'est la pièce d'usure, **pincée sous les caches** et
+remplaçable en deux vis — pas collée. Un bord capturé ne se décolle pas ; il n'y
+a plus d'arête où un ongle s'insère, et c'est toujours par là que ça commence.
+
+> **Point dur restant : le repérage.** Les traits de gravure de l'ITO doivent
+> tomber au-dessus des coupes de scie, à mieux de 0,5 mm sur 300 mm. Ce n'est pas
+> une affaire de précision machine — la CNC est dix fois trop précise pour ça —
+> mais de **références de montage** communes aux deux pièces. C'est là que ce type
+> d'assemblage échoue d'habitude : chaque pièce juste, et les deux qui ne se
+> superposent pas.
+
+Technique complète : `../docs/CONCEPT_PLEXI_EPAIS.md`, section « Technique
+d'électrode ».
+
+## Implantation de façade — deux variantes (`implantation.scad`)
+
+Toutes les cotes de façade sont **calculées depuis les composants** : changer une
+dimension de composant recalcule l'objet, et les totaux sortent en `echo`. Le
+clavier est **importé** de `clavier_piano.scad`, pas redessiné.
+
+```sh
+openscad -o implantation_complete.png --imgsize=1400,1150 --projection=o \
+  --viewall --autocenter -D 'variante="complete"' implantation.scad
+openscad -o implantation_modeste.png --imgsize=1400,1150 --projection=o \
+  --viewall --autocenter -D 'variante="modeste"' implantation.scad
+```
+
+| variante | façade | contenu |
+|---|---|---|
+| **complete** | **328 × 185 mm** | clavier 27 touches, écran, 6 encodeurs, 8 boutons, ruban 136 mm |
+| **modeste** | **230 × 141 mm** | idem **sans clavier** — module de bureau, notes par MIDI externe |
+
+**Le 6ᵉ encodeur passe** (décision 🔴 du BOM §3), en **deux rangées de trois** au
+pas de 30 mm. En une seule rangée de six au pas de 33 il fallait 306 mm pour 296
+disponibles ; en 2×3 la rangée haute ne fait plus que 206 mm de large.
+
+**Le ruban passe de 180 à 136 mm** : boutons + ruban sur une même rangée
+demandaient 340 mm pour 296 disponibles.
+
+> **Place disponible pour l'écran : 206 mm de large**, contre 108 pour le module
+> 4,0″ actuel. Un **7 pouces** (≈165 × 100 mm) rentre en largeur sans rien
+> déplacer ; il coûte ~38 mm de profondeur (façade complète ~223 mm) et remplit
+> le quadrant supérieur droit, actuellement vide.
+
+> **Les deux variantes partagent la même rangée haute** (écran + encodeurs,
+> 206 × 62). La modeste = la complète moins la rangée clavier — même
+> sous-ensemble électronique et même firmware d'interface possibles.
+
 ## Coupe d'une cellule (`coupe_cellule.scad`)
 
 Coupe **en travers du clavier** : deux blanches et la noire posée à cheval.
