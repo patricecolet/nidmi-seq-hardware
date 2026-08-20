@@ -213,14 +213,15 @@ demandaient 340 mm pour 296 disponibles.
 
 ## Assemblage du clavier (`coupe_cellule.scad`)
 
-Deux coupes : **A — courante** (en travers, au droit d'une noire et d'une coupe de
-scie) et **B — en long d'une blanche** (le seul plan où se voient l'injection des
-LED et la **cloison transversale**). Tracées explicitement en 2D, pas découpées
-dans un modèle 3D.
+Trois vues : **A — coupe courante** (en travers, au droit d'une noire et d'une
+coupe de scie), **B — coupe en long d'une blanche** (le seul plan où se voient
+l'injection des LED et la **cloison transversale**), et **C — vue de dessus de la
+zone arrière** (le seul plan où se voient les **ponts** et les **dents du PCB**).
+Tracées explicitement en 2D, pas découpées dans un modèle 3D.
 
 ```sh
-openscad -o coupe_cellule.png --imgsize=1800,1250 --projection=o \
-  --camera=54,-31,0,0,0,0,290 coupe_cellule.scad
+openscad -o coupe_cellule.png --imgsize=1400,2300 --projection=o \
+  --camera=54,-88,0,0,0,0,525 coupe_cellule.scad
 ```
 
 | couche | ép. | rôle |
@@ -254,15 +255,25 @@ guides bout à bout.
 Dans chaque zone, la **trame de points se densifie en s'éloignant de sa LED** :
 c'est ce qui égalise la luminosité sur la longueur.
 
-> ⚠️ **Conséquence : le dos du peigne disparaît.** La LED arrière exige une tranche
-> libre au fond de chaque touche, et un dos commun laisserait en plus la lumière
-> arrière se répartir entre toutes les blanches. Les touches deviennent donc des
-> **pièces réellement séparées** — ce que le film rend possible, puisque c'est lui
-> qui unifie désormais l'ensemble (film par-dessus, mousse et plaque arrière qui
-> poussent, caches qui pincent).
->
-> **Prix à payer : 16 pièces indépendantes à positionner** au lieu d'une. Prévoir
-> un gabarit de montage, ou des ergots d'indexation sur la plaque arrière.
+**Le PCB arrière est un PEIGNE, et il résout l'injection arrière sans sacrifier
+le dos.** Pour chaque touche, une **fente transversale** est taillée à la jonction
+touche/dos, laissant de petits **ponts** sur les côtés qui retiennent la touche.
+Une **dent du PCB** entre dans cette fente : sa LED injecte dans la tranche
+arrière que la fente vient de créer.
+
+Trois fonctions pour une pièce :
+
+- **le bloc reste d'un seul tenant** — on ne retombe pas sur 16 pièces
+  indépendantes, et le repérage reste celui d'une pièce unique ;
+- **le PCB s'indexe tout seul** dans ses fentes : une partie du positionnement
+  devient automatique au lieu d'être soigneuse ;
+- **le FR4 fait la barrière optique** dans la zone du dos — vernis épargne noir,
+  il remplace la lamelle à cet endroit.
+
+Deux cotes à fixer : la **largeur de fente**, imposée par le PCB (1,6 mm + jeu,
+soit ~2,2), et la **largeur des ponts**, qui arbitre entre fuite lumineuse et
+solidité. Congés et trous d'arrêt au pied des ponts — ce sont des concentrations
+de contrainte dans une matière cassante.
 
 > **Point dur restant : le repérage.** Les traits de gravure de l'ITO doivent
 > tomber au-dessus des coupes de scie, à mieux de 0,5 mm sur 300 mm. Ce n'est pas

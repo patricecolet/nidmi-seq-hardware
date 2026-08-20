@@ -106,14 +106,18 @@ module coupe_courante() {
 // Coupe EN LONG d'une blanche : c'est le seul plan ou se voient l'injection des
 // LED et la CLOISON TRANSVERSALE qui coupe la touche en deux zones lumineuses
 // independantes — une par symbole.
-Lk      = 58;      // longueur d'une blanche
-x_cl    = 26;      // abscisse de la cloison transversale
-Lb      = 36;      // longueur d'une noire (posee a l'arriere)
+Lk      = 52;      // longueur utile d'une blanche
+x_cl    = 24;      // abscisse de la cloison transversale
+Lb      = 32;      // longueur d'une noire (posee a l'arriere)
+fente   = 2.2;     // fente qui recoit une dent du PCB (1.6 de FR4 + jeu)
+dos     = 8;       // dos du peigne : ce qui tient les touches ensemble
+pont    = 2.0;     // pont de matiere de chaque cote, qui retient la touche
 
 module coupe_longue() {
     color(C_PMMA) difference() {
-        translate([0,y_bloc_b]) square([Lk,e_bloc]);
+        translate([0,y_bloc_b]) square([Lk+fente+dos, e_bloc]);
         translate([x_cl-larg_coupe/2, y_bloc_b-0.1]) square([larg_coupe, e_bloc+0.2]);
+        translate([Lk, y_bloc_b-0.1]) square([fente, e_bloc+0.2]);
         // zone 1 : trame qui se densifie en s'eloignant de la LED avant
         for (x=[3:3.4:x_cl-2])  translate([x,y_bloc_b]) circle(d=p_grav*(0.9+x/x_cl),$fn=16);
         // zone 2 : trame qui se densifie en s'eloignant de la LED arriere
@@ -121,25 +125,28 @@ module coupe_longue() {
     }
     color(C_LAM) translate([x_cl-0.35, y_bloc_b]) square([0.7, e_bloc]);
 
-    color(C_FOND) translate([0,y_fond_b]) square([Lk,ep(e_fond)]);
-    color(C_MOUS) translate([0,y_mou_b])  square([Lk,e_mousse]);
-    color(C_ARR)  translate([-e_cache,y_arr_b]) square([Lk+2*e_cache,e_arriere]);
-    color(C_ITO)  translate([1.5,y_ito_b]) square([Lk-3, ep(e_ito)]);
-    color(C_PET)  translate([-1.5,y_pet_b]) square([Lk+3, ep(e_pet)]);
+    color(C_FOND) translate([0,y_fond_b]) square([Lk+fente+dos,ep(e_fond)]);
+    color(C_MOUS) translate([0,y_mou_b])  square([Lk+fente+dos,e_mousse]);
+    color(C_ARR)  translate([-e_cache,y_arr_b]) square([Lk+fente+dos+2*e_cache,e_arriere]);
+    color(C_ITO)  translate([1.5,y_ito_b]) square([Lk+fente+dos-3, ep(e_ito)]);
+    color(C_PET)  translate([-1.5,y_pet_b]) square([Lk+fente+dos+3, ep(e_pet)]);
 
     // noire posee a l'arriere, sur le film
     color(C_NOIRE) translate([Lk-Lb, y_pet_h]) square([Lb, e_noire]);
 
-    // PCB + LED avant et arriere
-    for (cote = [0,1]) {
-        xp = cote==0 ? -(jeu_led+e_pcb) : Lk+jeu_led;
-        color(C_PCB) translate([xp, y_bloc_b+1]) square([e_pcb, e_bloc-2]);
-        xl = cote==0 ? xp+e_pcb : Lk;
-        color(C_LED) translate([xl, -e_bloc/2-led_c/2]) square([jeu_led, led_c]);
-    }
-    // caches en L, avant et arriere, qui PINCENT le film
+    // PCB avant, hors du bloc
+    color(C_PCB) translate([-(jeu_led+e_pcb), y_bloc_b+1]) square([e_pcb, e_bloc-2]);
+    color(C_LED) translate([-jeu_led, -e_bloc/2-led_c/2]) square([jeu_led, led_c]);
+
+    // PCB ARRIERE EN PEIGNE : une dent entre dans la fente du dos, sa LED
+    // regarde vers l'avant et injecte dans la tranche que la fente vient de
+    // creer. Le FR4 fait en meme temps barriere optique.
+    color(C_PCB) translate([Lk + (fente-e_pcb)/2, y_bloc_b+0.5]) square([e_pcb, e_bloc-1]);
+    color(C_LED) translate([Lk + (fente-e_pcb)/2 - jeu_led, -e_bloc/2-led_c/2])
+        square([jeu_led, led_c]);
+
     xm0 = -(jeu_led+e_pcb) - e_cache;
-    xm1 = Lk + jeu_led + e_pcb;
+    xm1 = Lk + fente + dos;
     color(C_CACHE) union() {
         translate([xm0,y_arr_b]) square([e_cache, y_pet_h-y_arr_b+e_cache]);
         translate([xm0,y_pet_h]) square([e_cache+6, e_cache]);
@@ -155,16 +162,51 @@ module coupe_longue() {
         trait([x_cl/2, y_pet_h+5.2],[x_cl/2, y_pet_h+1]);
         trait([(x_cl+Lk)/2, y_pet_h+e_noire+5.2],[(x_cl+Lk)/2, y_pet_h+e_noire+0.5]);
         txt([xm0-2, -e_bloc/2], "LED avant", 1.6, "right");
-        txt([xm1+e_cache+2, -e_bloc/2], "LED arriere", 1.6);
+        trait([Lk+fente/2, y_bloc_b],[Lk+fente/2, y_bloc_b-9]);
+        txt([Lk+fente/2, y_bloc_b-10.3], "DENT DU PCB EN PEIGNE dans sa fente — la LED injecte,", 1.6, "center");
+        txt([Lk+fente/2, y_bloc_b-12.6], "le FR4 fait barriere, et le PCB s'indexe tout seul", 1.6, "center");
+        txt([xm1+e_cache+2, -e_bloc/2], "dos du peigne", 1.6);
         txt([0, y_pet_h+e_noire+11], "B — COUPE EN LONG D'UNE BLANCHE", 2.6);
-        txt([0, y_arr_b-5], "trame de points DENSIFIEE en s'eloignant de chaque LED : c'est ce qui egalise la luminosite", 1.6);
+        txt([0, y_arr_b-11], "trame de points DENSIFIEE en s'eloignant de chaque LED : c'est ce qui egalise la luminosite", 1.6);
+    }
+}
+
+// ---------------------------------------------------------------- C
+// VUE DE DESSUS de la zone arriere : c'est le seul plan ou se voient les PONTS
+// qui retiennent chaque touche au dos, et les dents du PCB dans leurs fentes.
+module vue_dessus() {
+    n = 3;
+    for (i = [0:n-1]) {
+        x0 = i*pas_w;
+        color(C_PMMA) translate([x0+0.6, 0]) square([pas_w-1.2, Lk*0.45]);   // touche
+        // ponts : la fente s'arrete avant les bords, ce qui retient la touche
+        color(C_PMMA) translate([x0+0.6, Lk*0.45]) square([pont, fente]);
+        color(C_PMMA) translate([x0+pas_w-0.6-pont, Lk*0.45]) square([pont, fente]);
+    }
+    color(C_PMMA) translate([0, Lk*0.45+fente]) square([n*pas_w, dos]);      // dos
+    // PCB en peigne, pose par-dessus
+    color(C_PCB) translate([-2, Lk*0.45+fente+1.5]) square([n*pas_w+4, dos-2]);
+    for (i = [0:n-1]) {
+        xd = i*pas_w + pas_w/2 - e_pcb*2;
+        color(C_PCB) translate([xd, Lk*0.45]) square([e_pcb*4, fente+1.6]);
+        color(C_LED) translate([xd+0.6, Lk*0.45+0.3]) square([e_pcb*4-1.2, 1.0]);
+    }
+    if (etiquettes) {
+        trait([0.6+pont/2, Lk*0.45+fente],[0.6+pont/2, Lk*0.45+fente+dos+5]);
+        txt([0.6+pont/2, Lk*0.45+fente+dos+6.3], "PONT — retient la touche au dos ; sa largeur arbitre fuite lumineuse / solidite", 1.6);
+        trait([pas_w/2, Lk*0.45+0.8],[pas_w/2, -5]);
+        txt([pas_w/2, -6.3], "dent du PCB + LED, dans la fente", 1.6, "center");
+        trait([n*pas_w*0.75, Lk*0.45+fente+dos/2],[n*pas_w+6, Lk*0.45+fente+dos+4]);
+        txt([n*pas_w+6.5, Lk*0.45+fente+dos+4], "dos du peigne + PCB en peigne", 1.6);
+        txt([0, Lk*0.45+fente+dos+13], "C — VUE DE DESSUS, ZONE ARRIERE", 2.6);
     }
 }
 
 coupe_courante();
 translate([0,-52]) coupe_longue();
+translate([0,-142]) vue_dessus();
 
 if (etiquettes) {
-    txt([0, y_arr_b-74], "film + noires = UN SEUL sous-ensemble remplacable : la « peau » du clavier", 1.8);
-    txt([0, y_arr_b-77.5], str("couches minces exagerees x", exag_mince, " ; cotes reelles en regard"), 1.4);
+    txt([0, y_arr_b-168], "film + noires = UN SEUL sous-ensemble remplacable : la « peau » du clavier", 1.8);
+    txt([0, y_arr_b-171.5], str("couches minces exagerees x", exag_mince, " ; cotes reelles en regard"), 1.4);
 }
