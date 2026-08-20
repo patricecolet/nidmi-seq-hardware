@@ -214,8 +214,9 @@ demandaient 340 mm pour 296 disponibles.
 ## Assemblage du clavier (`coupe_cellule.scad`)
 
 Deux coupes : **A — courante** (en travers, au droit d'une noire et d'une coupe de
-scie) et **B — rive avant** (où le cache capture le film et où la LED injecte).
-Tracées explicitement en 2D, pas découpées dans un modèle 3D.
+scie) et **B — en long d'une blanche** (le seul plan où se voient l'injection des
+LED et la **cloison transversale**). Tracées explicitement en 2D, pas découpées
+dans un modèle 3D.
 
 ```sh
 openscad -o coupe_cellule.png --imgsize=1800,1250 --projection=o \
@@ -243,6 +244,25 @@ Le **film + les noires** forment la « **peau** » du clavier : la surface touch
 les électrodes, la garde. C'est la pièce d'usure, **pincée sous les caches** et
 remplaçable en deux vis — pas collée. Un bord capturé ne se décolle pas ; il n'y
 a plus d'arête où un ongle s'insère, et c'est toujours par là que ça commence.
+
+**Deux symboles par touche.** Une **cloison transversale** (coupe + lamelle) au
+milieu de la blanche la partage en **deux zones optiques indépendantes** : la LED
+**avant** éclaire la zone 1, la LED **arrière** la zone 2. Chacune porte son
+symbole gravé. Aucun prisme asymétrique, aucune sélectivité approximative — deux
+guides bout à bout.
+
+Dans chaque zone, la **trame de points se densifie en s'éloignant de sa LED** :
+c'est ce qui égalise la luminosité sur la longueur.
+
+> ⚠️ **Conséquence : le dos du peigne disparaît.** La LED arrière exige une tranche
+> libre au fond de chaque touche, et un dos commun laisserait en plus la lumière
+> arrière se répartir entre toutes les blanches. Les touches deviennent donc des
+> **pièces réellement séparées** — ce que le film rend possible, puisque c'est lui
+> qui unifie désormais l'ensemble (film par-dessus, mousse et plaque arrière qui
+> poussent, caches qui pincent).
+>
+> **Prix à payer : 16 pièces indépendantes à positionner** au lieu d'une. Prévoir
+> un gabarit de montage, ou des ergots d'indexation sur la plaque arrière.
 
 > **Point dur restant : le repérage.** Les traits de gravure de l'ITO doivent
 > tomber au-dessus des coupes de scie, à mieux de 0,5 mm sur 300 mm. Ce n'est pas

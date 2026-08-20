@@ -102,41 +102,69 @@ module coupe_courante() {
     }
 }
 
-module coupe_rive() {
-    Lr = L*0.55;
+// ---------------------------------------------------------------- B
+// Coupe EN LONG d'une blanche : c'est le seul plan ou se voient l'injection des
+// LED et la CLOISON TRANSVERSALE qui coupe la touche en deux zones lumineuses
+// independantes — une par symbole.
+Lk      = 58;      // longueur d'une blanche
+x_cl    = 26;      // abscisse de la cloison transversale
+Lb      = 36;      // longueur d'une noire (posee a l'arriere)
+
+module coupe_longue() {
     color(C_PMMA) difference() {
-        translate([0,y_bloc_b]) square([Lr,e_bloc]);
-        for (x=[6:2.4:Lr-2]) translate([x,y_bloc_b]) circle(d=p_grav*1.6,$fn=16);
+        translate([0,y_bloc_b]) square([Lk,e_bloc]);
+        translate([x_cl-larg_coupe/2, y_bloc_b-0.1]) square([larg_coupe, e_bloc+0.2]);
+        // zone 1 : trame qui se densifie en s'eloignant de la LED avant
+        for (x=[3:3.4:x_cl-2])  translate([x,y_bloc_b]) circle(d=p_grav*(0.9+x/x_cl),$fn=16);
+        // zone 2 : trame qui se densifie en s'eloignant de la LED arriere
+        for (x=[x_cl+2:3.4:Lk-3]) translate([x,y_bloc_b]) circle(d=p_grav*(0.9+(Lk-x)/(Lk-x_cl)),$fn=16);
     }
-    color(C_FOND) translate([0,y_fond_b]) square([Lr,ep(e_fond)]);
-    color(C_MOUS) translate([0,y_mou_b])  square([Lr,e_mousse]);
-    color(C_ARR)  translate([-e_cache,y_arr_b]) square([Lr+e_cache,e_arriere]);
-    color(C_ITO)  translate([2,y_ito_b]) square([Lr-2, ep(e_ito)]);
-    color(C_PET)  translate([-1.5,y_pet_b]) square([Lr+1.5, ep(e_pet)]);
+    color(C_LAM) translate([x_cl-0.35, y_bloc_b]) square([0.7, e_bloc]);
 
-    x_pcb = -(jeu_led + e_pcb);
-    color(C_PCB) translate([x_pcb, y_bloc_b+1]) square([e_pcb, e_bloc-2]);
-    color(C_LED) translate([x_pcb+e_pcb, -e_bloc/2-led_c/2]) square([jeu_led, led_c]);
+    color(C_FOND) translate([0,y_fond_b]) square([Lk,ep(e_fond)]);
+    color(C_MOUS) translate([0,y_mou_b])  square([Lk,e_mousse]);
+    color(C_ARR)  translate([-e_cache,y_arr_b]) square([Lk+2*e_cache,e_arriere]);
+    color(C_ITO)  translate([1.5,y_ito_b]) square([Lk-3, ep(e_ito)]);
+    color(C_PET)  translate([-1.5,y_pet_b]) square([Lk+3, ep(e_pet)]);
 
-    x_mur = x_pcb - e_cache;
+    // noire posee a l'arriere, sur le film
+    color(C_NOIRE) translate([Lk-Lb, y_pet_h]) square([Lb, e_noire]);
+
+    // PCB + LED avant et arriere
+    for (cote = [0,1]) {
+        xp = cote==0 ? -(jeu_led+e_pcb) : Lk+jeu_led;
+        color(C_PCB) translate([xp, y_bloc_b+1]) square([e_pcb, e_bloc-2]);
+        xl = cote==0 ? xp+e_pcb : Lk;
+        color(C_LED) translate([xl, -e_bloc/2-led_c/2]) square([jeu_led, led_c]);
+    }
+    // caches en L, avant et arriere, qui PINCENT le film
+    xm0 = -(jeu_led+e_pcb) - e_cache;
+    xm1 = Lk + jeu_led + e_pcb;
     color(C_CACHE) union() {
-        translate([x_mur,y_arr_b]) square([e_cache, y_pet_h - y_arr_b + e_cache]);
-        translate([x_mur,y_pet_h]) square([e_cache+7, e_cache]);
+        translate([xm0,y_arr_b]) square([e_cache, y_pet_h-y_arr_b+e_cache]);
+        translate([xm0,y_pet_h]) square([e_cache+6, e_cache]);
+        translate([xm1,y_arr_b]) square([e_cache, y_pet_h+e_noire-y_arr_b+e_cache]);
+        translate([xm1-6,y_pet_h+e_noire]) square([e_cache+6, e_cache]);
     }
 
     if (etiquettes) {
-        trait([x_mur+4, y_pet_h+e_cache],[x_mur+12, y_pet_h+e_cache+5]);
-        txt([x_mur+12.5, y_pet_h+e_cache+5], "le cache PINCE le film — aucun bord colle, aucune arete ou un ongle s'insere");
-        trait([x_pcb+e_pcb/2, y_bloc_b+1],[x_pcb+e_pcb/2, y_bloc_b-4]);
-        txt([x_pcb+e_pcb/2, y_bloc_b-5.3], "PCB de tranche + LED : injection dans le bloc", 1.6);
-        txt([0, y_pet_h+e_noire+8.5], "B — RIVE AVANT", 2.6);
+        trait([x_cl, y_bloc_b],[x_cl, y_bloc_b-5]);
+        txt([x_cl, y_bloc_b-6.3], "CLOISON TRANSVERSALE — coupe + lamelle : deux zones optiques independantes", 1.6, "center");
+        txt([x_cl/2, y_pet_h+6], "zone 1 — symbole A", 1.7, "center");
+        txt([(x_cl+Lk)/2, y_pet_h+e_noire+6], "zone 2 — symbole B", 1.7, "center");
+        trait([x_cl/2, y_pet_h+5.2],[x_cl/2, y_pet_h+1]);
+        trait([(x_cl+Lk)/2, y_pet_h+e_noire+5.2],[(x_cl+Lk)/2, y_pet_h+e_noire+0.5]);
+        txt([xm0-2, -e_bloc/2], "LED avant", 1.6, "right");
+        txt([xm1+e_cache+2, -e_bloc/2], "LED arriere", 1.6);
+        txt([0, y_pet_h+e_noire+11], "B — COUPE EN LONG D'UNE BLANCHE", 2.6);
+        txt([0, y_arr_b-5], "trame de points DENSIFIEE en s'eloignant de chaque LED : c'est ce qui egalise la luminosite", 1.6);
     }
 }
 
 coupe_courante();
-translate([0,-48]) coupe_rive();
+translate([0,-52]) coupe_longue();
 
 if (etiquettes) {
-    txt([0, y_arr_b-54], "film + noires = UN SEUL sous-ensemble remplacable : la « peau » du clavier", 1.8);
-    txt([0, y_arr_b-57.5], str("couches minces exagerees x", exag_mince, " ; cotes reelles en regard"), 1.4);
+    txt([0, y_arr_b-74], "film + noires = UN SEUL sous-ensemble remplacable : la « peau » du clavier", 1.8);
+    txt([0, y_arr_b-77.5], str("couches minces exagerees x", exag_mince, " ; cotes reelles en regard"), 1.4);
 }
