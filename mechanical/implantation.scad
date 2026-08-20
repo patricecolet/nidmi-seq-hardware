@@ -78,8 +78,14 @@ btn_l     = 17;
 btn_pitch = 20;
 
 /* [Ruban capacitif] */
-ruban_l   = 136;         // reduit de 180 : boutons + ruban ne tenaient pas
+// Rendu a sa cote du BOM (180) : la reduction a 136 n'etait imposee que par la
+// rangee de boutons, qui est passee en colonnes. La bande entre clavier et ecran
+// est desormais libre sur toute la largeur -> voir l'echo "ruban : ... dispo".
+// Position confirmee par le MicroFreak, dont le ruban tactile est juste
+// au-dessus des touches.
+ruban_l   = 180;
 ruban_w   = 10;
+ruban_h   = 3;           // epaisseur au rendu (visibilite ; 1.5 disparaissait)
 
 /* [Connectique — tranche arriere] */
 jack_d    = 6;           // PJ-320A
@@ -196,7 +202,7 @@ module boutons(p) {
             color(C_BTN) cube([btn_w, btn_l, 5]);
 }
 
-module ruban(p) { translate(p) color(C_RUBAN) cube([ruban_l, ruban_w, 1.5]); }
+module ruban(p) { translate(p) color(C_RUBAN) cube([ruban_l, ruban_w, ruban_h]); }
 
 module clavier(p) {
     translate([p[0], p[1], 2]) {
@@ -243,12 +249,14 @@ if (fonc) {
     encodeurs([marge + scr_w + jeu_rang, y_rang1 + (rang1_h - enc_h)/2]);
 }
 if (!fonc) boutons([marge, y_rang2]);
-if (fonc || !avec_kb) ruban([marge, y_rang3]);
+// Centre dans la bande libre entre le clavier et la rangee haute.
+if (fonc || !avec_kb) ruban([marge + (util_w - ruban_l)/2, y_rang3]);
 else                  ruban([marge + n_btn*btn_pitch + jeu_rang, y_rang2 + 4]);
 connectique();
 
 echo(str("VARIANTE ", variante, "  ->  facade ", F_W, " x ", F_H, " mm"));
 echo(str("  zone utile ", util_w, " x ", util_h,
          "   rangee haute ", rang1_h, " mm de profondeur"));
+echo(str("  ruban ", ruban_l, " mm   (dispo dans la bande : ", util_w, " mm)"));
 if (fonc) echo(str("  rangee haute ", rang1_w_fonc, " mm de large   CrowPanel 7\" carte ~",
                    scr_w, " x ", scr_h, " (actif ", scr_win_w, " x ", scr_win_h, ")"));
