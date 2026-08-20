@@ -51,7 +51,24 @@ surélevée, aftertouch polyphonique obtenu en mesurant la surface de contact du
 > réclame. On était parti d'un bloc ; on en est sorti pour un problème de pollution lumineuse
 > **non encore mesuré**. Mesurer d'abord, découper ensuite.
 
-## 3. Vérifier les interférences avant d'annoncer un empilement
+## 3. Demander avant de dessiner, et procéder par couches
+
+**Erreur commise cinq fois de suite** (assemblage du clavier, 2026-08-21) : construire un
+modèle complet à partir d'une phrase décrivant une géométrie, au lieu de demander confirmation.
+Chaque interprétation fausse a coûté un aller-retour **de toute façon**, plus un rendu jeté.
+La seule fois où la question a été posée, le dessin était juste du premier coup.
+
+**Deviner n'est pas plus rapide.** Éviter la question pour ne pas paraître piétiner produit
+l'inverse.
+
+- Sur une géométrie ambiguë : **reformuler en deux lignes** ce qu'on a compris, demander
+  confirmation, *puis* modéliser.
+- **Procéder par couches** : d'abord le plus grossier (enveloppe, cotes), faire valider, puis
+  ajouter un niveau de détail. Jamais un ensemble complet qui sera faux partout.
+- Le point d'ambiguïté récurrent de ce projet : **est-ce que ça traverse ou pas, et par quel
+  plan on coupe**. Le nommer explicitement pour chaque pièce nouvelle.
+
+## 4. Vérifier les interférences avant d'annoncer un empilement
 
 Deux pièces ne peuvent pas occuper le même volume. **Erreur commise** : les caches du clavier
 étaient modélisés en blocs pleins traversant les touches — ils les masquaient entièrement.
@@ -60,7 +77,7 @@ Un cache, un capot, une bordure sont des **profilés** (L, U), pas des parallél
 Avant d'affirmer qu'un empilement tient : passer chaque paire de pièces voisines en revue,
 et vérifier que les jeux existent réellement dans le modèle.
 
-## 4. Regarder le rendu avant d'affirmer ce qu'il montre
+## 5. Regarder le rendu avant d'affirmer ce qu'il montre
 
 **Erreur commise plusieurs fois** : rendus annoncés comme probants alors qu'ils étaient vides,
 mal cadrés, ou que les pièces transparentes y étaient invisibles.
@@ -71,7 +88,7 @@ mal cadrés, ou que les pièces transparentes y étaient invisibles.
 - Si une pièce est faite pour être cachée (cache, PCB de tranche), **aucune vue assemblée ne la
   montrera** — prévoir une vue dédiée avec les masquants désactivés, ou une coupe.
 
-## 5. Cotes sourcées, cotes estimées
+## 6. Cotes sourcées, cotes estimées
 
 - Sur toute grandeur **normalisée ou documentée**, chercher la référence sur le web **avant**
   de modéliser. **Erreur commise** : plusieurs messages perdus à raisonner de mémoire sur la
@@ -82,7 +99,7 @@ mal cadrés, ou que les pièces transparentes y étaient invisibles.
   à la base. Sur une façade plate, c'est la base qui compte. Prendre la mauvaise donne des
   proportions visiblement fausses.
 
-## 6. La fabrication fait partie du dessin
+## 7. La fabrication fait partie du dessin
 
 Sortir les conséquences de fabrication **dans le même mouvement** que la géométrie, pas trois
 messages plus tard. **Erreur commise** : la longueur de coupe et l'état de chant sont arrivés
@@ -98,7 +115,7 @@ après coup — et ont changé le procédé, puis le nombre de pièces.
 - **ce qui reste faisable à la main** : la gravure au dos veut au contraire une surface
   diffusante, donc Dremel.
 
-## 7. Ce que l'utilisateur sait et que je ne peux pas chercher
+## 8. Ce que l'utilisateur sait et que je ne peux pas chercher
 
 Patrice démonte des claviers pour les réparer et conçoit de la lutherie numérique. Son savoir
 porte sur les **modes de défaillance réels**, ce qu'un atelier accepte de faire, et ce qu'un
