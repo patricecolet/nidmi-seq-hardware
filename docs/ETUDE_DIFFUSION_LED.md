@@ -207,3 +207,45 @@ l'émetteur, il s'allume au lieu d'être imprimé. Deux réserves :
   pas des pas. Un « 12 » gravé en permanence sur une touche qui joue parfois un ré est une
   légende fausse la moitié du temps. → soit chiffre discret assumé comme décor, soit légende
   reportée sur l'écran.
+
+## Cloisons entre touches — mesuré (2026-08-21)
+
+**Montage retenu : trait de scie traversant entre blanches**, bloc uni dans la partie cachée
+(peigne), film transparent collé par-dessus. Le film **unifie la surface et bloque la poussière**
+— une fente ouverte sur un instrument joué se remplit de crasse et devient inintéressable.
+
+**Résultat d'essai :**
+
+| cloison | lumière qui passe |
+|---|---|
+| trait de scie **nu** | « un tout petit peu » |
+| trait de scie + **lamelle noire** | **rien du tout** |
+
+**Deux prédictions théoriques corrigées par la mesure :**
+
+1. **Une lame d'air nue ne réfléchit PAS la lumière guidée.** La normale d'une paroi verticale
+   est horizontale, or la lumière guidée voyage presque à l'horizontale : elle frappe la cloison
+   bien sous l'angle critique (42° pour PMMA/air) et la traverse. Seuls les rayons les plus
+   inclinés (> 42° du plan de la plaque) sont réfléchis, et ils sont minoritaires.
+   → **C'est l'ABSORPTION qui fait la barrière**, pas la réflexion totale. Elle agit à tous les
+   angles.
+
+2. **Mais l'atténuation nue est bien meilleure que la théorie ne le laissait craindre**, parce
+   qu'un trait de scie n'est pas une paroi optique : c'est une surface **dépolie**. Elle diffuse
+   au lieu de transmettre — ce qui traverse ne repart plus en faisceau guidé et s'éteint.
+   → ⚠️ **La rugosité est un ATOUT ici, pas un défaut.** Corrige un conseil antérieur (« polir
+   les parois de cloison ») qui ne valait que pour un mécanisme de réflexion totale inapplicable.
+   **Aucun polissage n'est requis dans les fentes.**
+
+> **La tranche d'INJECTION reste l'exception** : elle doit être nette. Une face dépolie à
+> l'entrée disperse le flux avant qu'il n'entre dans le guide.
+
+**Ce qui compte pour une cloison** : sa **profondeur** (elle doit occuper une bonne part de
+l'épaisseur du guide), pas sa largeur — une interface n'a pas d'épaisseur. Fine et profonde,
+jamais large et superficielle. Une découpe traversante est donc le cas idéal, et elle permet en
+plus de **glisser une lamelle noire** dans le trait, ce qu'une rainure borgne ne permet pas.
+
+> Point restant à vérifier : **le film continu collé par-dessus peut lui-même conduire un peu de
+> lumière** d'une touche à l'autre. Au droit d'une fente il a de l'air dessus et dessous, donc il
+> devient localement un mini-guide qui enjambe la coupure. Effet probablement faible (film très
+> mince) mais à mesurer, pas à supposer.
