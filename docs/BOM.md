@@ -71,6 +71,33 @@
   *touch* ESP32-S3, sous plexi. **Rôle : assignable** (choisi à l'écran). Pas de
   composant externe (R série éventuelle).
 
+### 🟡 2026-08-20 — piste CrowPanel 7,0″ (écran + ESP32-S3 intégrés)
+
+L'implantation de façade (`mechanical/implantation.scad`) libère la place d'un **7 pouces** :
+avec 3 molettes de chaque côté de l'écran et les boutons en colonnes, la rangée haute fait
+303,8 mm. Le **CrowPanel ESP32-S3 7,0″** (Elecrow, 800×480, actif 153,84 × 85,63 mm) embarque
+la puce **et** l'écran, ce qui supprimerait la nappe FPC 40 broches et le routage des ~20
+lignes RGB — l'obstacle qui avait fait écarter un 5″ RGB au profit du 4,0″ SPI.
+
+⚠️ **Deux modèles, et la différence est décisive :**
+
+| | broches libres | verdict |
+|---|---|---|
+| **CrowPanel 7.0** (24,90 $) | aucun connecteur de broches — Crowtail seulement : 2× I2C, IO38, UART0 | **ne peut pas être le cerveau** |
+| **CrowPanel Advance 7.0** | ~10 libres, dont IO2/IO4/IO5/IO6 ; l'écran prend ~20 broches (16 data + DE IO42, HSYNC/VSYNC IO40/41, PCLK IO39) ; I2C sur GPIO15/16 | **candidat crédible** |
+
+Une dizaine de broches suffit au cerveau : I2C (2× MCP23017 + MCP4728), UART vers B et C
+plus MIDI, et le ruban tactile.
+
+🔴 **Point de risque : le ruban.** Il demande ~5 canaux tactiles, et seules 4 des broches
+libres nommées tombent dans la plage tactile du S3. Surtout, **on a mesuré (2026-08-19) que
+« touch-capable » ne veut pas dire « mesure » : sur 14 canaux annoncés d'une carte S3, 4
+seulement rendaient des valeurs exploitables** (cf. `docs/ESSAI_ITO_ESP32.md`, `firmware/scan_touch`).
+→ Passer `scan_touch` sur la carte réelle avant de figer, et prévoir que le ruban puisse
+migrer vers l'ESP32-B ou C.
+
+Refs : espboards.dev/esp32/elecrow-crowpanel-advance-7-esp32-s3/ · elecrow.com/wiki
+
 ## 6. Écran — 4,0″ 480×320 SPI 🟡 + ⚠️ impact boîtier
 - **Contrôleur** : 🟢 **ILI9488** (choix utilisateur ; 18 bpp, OK en *partial
   refresh*). ST7796 = alternative plus rapide (même PCB) si jamais dispo.
