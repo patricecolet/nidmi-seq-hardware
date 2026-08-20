@@ -28,11 +28,18 @@ gap_w       = 1.2;     // trait de découpe entre blanches
 Wh          = 58;      // longueur d'une blanche
 Bh          = 36;      // longueur d'une noire (piano réel : ~0,63 × blanche)
 black_ratio = 0.404;   // largeur noire / pas — 9.5/23.5 sur un piano réel
+// Convention de répartition des talons de blanche :
+//   "groupes" — talons égaux DANS chaque groupe, mais différents d'un groupe a
+//               l'autre (do-re-mi vs fa-sol-la-si). C'est la geometrie du piano :
+//               offsets symetriques et sol# exactement sur la ligne de pas.
+//   "egaux"   — les 7 talons de l'octave tous egaux. Egalement auto-coherent,
+//               mais offsets non symetriques et sol# hors ligne.
+tail_mode   = "groupes";
 key_clr     = 0.8;     // garde autour des noires (creusée dans les blanches)
 
 /* [Épaisseurs] */
 t_blanches  = 10;      // guide de lumière
-t_noires    = 4;       // plaque sombre posée dessus
+t_noires    = 5;       // plaque sombre posée dessus (5 mm : plus facile a sourcer)
 t_pcb       = 1.6;
 t_cache     = 2;
 
@@ -62,21 +69,26 @@ C_CACHE = [0.22, 0.22, 0.24];
 // sont aussi, mais d'une AUTRE valeur. D'où l'irrégularité : do# est décalé à
 // gauche de sa limite, ré# à droite, sol# tombe exactement dessus.
 Wb   = black_ratio * pitch_w;
-tal1 = (3*pitch_w - 2*Wb) / 3;
-tal2 = (4*pitch_w - 3*Wb) / 4;
+tal_u = (7*pitch_w - 5*Wb) / 7;                                  // convention "egaux"
+tal1 = tail_mode == "egaux" ? tal_u : (3*pitch_w - 2*Wb) / 3;
+tal2 = tail_mode == "egaux" ? tal_u : (4*pitch_w - 3*Wb) / 4;
 Ww   = pitch_w - gap_w;
 
 function white_left(i) = kb_x0 + i*pitch_w;
 function white_cx(i)   = white_left(i) + Ww/2;
 function has_black(i)  = let(n = i % 7) (n==0 || n==1 || n==3 || n==4 || n==5);
 
+// Depart du groupe fa-sol-la-si : la limite mi|fa tombe sur la ligne de pas en
+// convention "groupes", mais sur le cumul des talons en convention "egaux".
+grp2 = tail_mode == "egaux" ? 3*tal_u + 2*Wb : 3*pitch_w;
+
 function black_cx(i) =
     let(o = floor(i/7), n = i % 7, x0 = kb_x0 + o*7*pitch_w)
       n==0 ? x0 + tal1 + Wb/2
     : n==1 ? x0 + 2*tal1 + 1.5*Wb
-    : n==3 ? x0 + 3*pitch_w + tal2 + Wb/2
-    : n==4 ? x0 + 3*pitch_w + 2*tal2 + 1.5*Wb
-    :        x0 + 3*pitch_w + 3*tal2 + 2.5*Wb;
+    : n==3 ? x0 + grp2 + tal2 + Wb/2
+    : n==4 ? x0 + grp2 + 2*tal2 + 1.5*Wb
+    :        x0 + grp2 + 3*tal2 + 2.5*Wb;
 
 black_list = [ for (i = [0 : white_n-2]) if (has_black(i)) black_cx(i) ];
 
@@ -155,8 +167,9 @@ function r2(x) = round(x*100)/100;
 
 module cotes() {
     txt([kb_w/2, kb_y0 - 26], str("pas ", pitch_w, " mm   (piano reel 23.5)"), 4.2);
-    txt([kb_w/2, kb_y0 - 33], str("noire ", r2(Wb), "   talon do-re-mi ", r2(tal1),
-                                  "   talon fa-sol-la-si ", r2(tal2)), 3.2);
+    txt([kb_w/2, kb_y0 - 33], str("talons : ", tail_mode, "   noire ", r2(Wb),
+                                  "   do-re-mi ", r2(tal1),
+                                  "   fa-sol-la-si ", r2(tal2)), 3.2);
     txt([kb_w/2, kb_y0 + Wh + 38], str(white_n, " blanches + ", len(black_list),
                                        " noires   largeur ", r2(kb_w), " mm"), 4.2);
     txt([kb_w/2, kb_y0 + Wh + 31],
