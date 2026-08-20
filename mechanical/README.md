@@ -270,23 +270,18 @@ Trois fonctions pour une pièce :
 - **le FR4 fait la barrière optique** dans la zone du dos — vernis épargne noir,
   il remplace la lamelle à cet endroit.
 
-**Rien ne traverse le bloc à l'arrière.** La découpe est une **poche fraisée dans
-la face inférieure**, sur la **moitié de la largeur** de chaque touche. Il reste
-4 mm de matière au-dessus (sur 10) : **le peigne n'est jamais sectionné**, et
-c'est toute cette épaisseur qui retient la touche au dos — pas des ponts étroits.
+**Rien ne traverse au milieu de la touche.** La **cloison qui sépare les deux
+zones n'entame que la mi-épaisseur** (5 mm sur 10) : c'est suffisant pour bloquer
+la lumière entre elles, et rien n'a besoin d'être soutenu au milieu — ni cache,
+ni PCB.
 
-**Le PCB arrière est posé à plat au fond**, dans une découpe de la mousse, avec
-une LED sous chaque poche, éclairant vers le haut. Circuit ordinaire, montage
-classique, aucune insertion par la tranche, aucune dent verticale.
+**Les deux LED restent en tranche**, avant et arrière, avec leur **PCB inséré dans
+le plexi**. La **fente arrière n'occupe que la moitié de la largeur** de la
+touche : l'autre moitié reste pleine et retient la touche au dos.
 
-> **À vérifier au banc** : une LED qui éclaire vers le haut envoie une partie de
-> son flux presque perpendiculairement, et celui-là ressort aussitôt par la face
-> avant au lieu d'être guidé. En théorie un chanfrein à 45° au fond de la poche le
-> renverrait vers l'avant. Mais l'émission est Lambertienne et les parois de la
-> poche renvoient déjà une part — et sur ce projet, **deux prédictions optiques
-> a priori ont déjà été démenties par la mesure, dans le bon sens**. Essai : une
-> poche à la fraise dans une chute, une LED dessous, et l'on regarde si la touche
-> s'éclaire ou seulement le dessus.
+> ⚠️ **La coupe B passe par la moitié PLEINE.** C'est indispensable : une coupe par
+> la moitié ouverte montrerait un peigne sectionné, ce qu'il n'est pas. La fente
+> arrière et la dent du PCB se voient dans la **vue C** uniquement.
 
 > **Point dur restant : le repérage.** Les traits de gravure de l'ITO doivent
 > tomber au-dessus des coupes de scie, à mieux de 0,5 mm sur 300 mm. Ce n'est pas

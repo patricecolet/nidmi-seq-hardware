@@ -109,33 +109,34 @@ module coupe_courante() {
 Lk      = 52;      // longueur utile d'une blanche
 x_cl    = 24;      // abscisse de la cloison transversale
 Lb      = 32;      // longueur d'une noire (posee a l'arriere)
-poche_l = 12;      // longueur de la POCHE fraisee dans la face INFERIEURE
-poche_h = 6;       // profondeur de la poche : il reste (e_bloc - poche_h) de matiere
-                   // AU-DESSUS, et c'est elle qui tient la touche au dos
-fente   = poche_l; // (compat.)
+fente   = 2.2;     // fente arriere qui recoit la dent du PCB (1.6 de FR4 + jeu).
+                   // Elle n'occupe que la MOITIE de la largeur : l'autre moitie
+                   // retient la touche au dos.
+p_cloison = 5;     // LA CLOISON DU MILIEU N'ENTAME QUE LA MOITIE DE L'EPAISSEUR.
+                   // Suffisant pour bloquer la lumiere entre les deux zones, et
+                   // rien n'a besoin d'etre soutenu au milieu de la touche —
+                   // ni cache, ni PCB.
 dos     = 8;       // dos du peigne : ce qui tient les touches ensemble
-pont    = 2.0;     // pont de matiere de chaque cote, qui retient la touche
+Lt      = Lk + fente + dos;   // longueur totale du bloc
 
 module coupe_longue() {
     color(C_PMMA) difference() {
-        translate([0,y_bloc_b]) square([Lk+poche_l+dos, e_bloc]);
-        translate([x_cl-larg_coupe/2, y_bloc_b-0.1]) square([larg_coupe, e_bloc+0.2]);
-        translate([Lk, y_bloc_b-0.1]) square([poche_l, poche_h+0.1]);
+        translate([0,y_bloc_b]) square([Lt, e_bloc]);
+        translate([x_cl-larg_coupe/2, y_bloc_b-0.1]) square([larg_coupe, p_cloison+0.1]);
         // zone 1 : trame qui se densifie en s'eloignant de la LED avant
         for (x=[3:3.4:x_cl-2])  translate([x,y_bloc_b]) circle(d=p_grav*(0.9+x/x_cl),$fn=16);
         // zone 2 : trame qui se densifie en s'eloignant de la LED arriere
         for (x=[x_cl+2:3.4:Lk-3]) translate([x,y_bloc_b]) circle(d=p_grav*(0.9+(Lk-x)/(Lk-x_cl)),$fn=16);
     }
-    color(C_LAM) translate([x_cl-0.35, y_bloc_b]) square([0.7, e_bloc]);
+    color(C_LAM) translate([x_cl-0.35, y_bloc_b]) square([0.7, p_cloison]);
 
-    color(C_FOND) translate([0,y_fond_b]) square([Lk+poche_l+dos,ep(e_fond)]);
+    color(C_FOND) translate([0,y_fond_b]) square([Lt,ep(e_fond)]);
     color(C_MOUS) difference() {
-        translate([0,y_mou_b]) square([Lk+poche_l+dos, e_mousse]);
-        translate([Lk-1, y_mou_b-0.1]) square([poche_l+2, e_mousse+0.2]);
+        translate([0,y_mou_b]) square([Lt, e_mousse]);
     }
-    color(C_ARR)  translate([-e_cache,y_arr_b]) square([Lk+poche_l+dos+2*e_cache,e_arriere]);
-    color(C_ITO)  translate([1.5,y_ito_b]) square([Lk+poche_l+dos-3, ep(e_ito)]);
-    color(C_PET)  translate([-1.5,y_pet_b]) square([Lk+poche_l+dos+3, ep(e_pet)]);
+    color(C_ARR)  translate([-e_cache,y_arr_b]) square([Lt+2*e_cache,e_arriere]);
+    color(C_ITO)  translate([1.5,y_ito_b]) square([Lt-3, ep(e_ito)]);
+    color(C_PET)  translate([-1.5,y_pet_b]) square([Lt+3, ep(e_pet)]);
 
     // noire posee a l'arriere, sur le film
     color(C_NOIRE) translate([Lk-Lb, y_pet_h]) square([Lb, e_noire]);
@@ -144,15 +145,12 @@ module coupe_longue() {
     color(C_PCB) translate([-(jeu_led+e_pcb), y_bloc_b+1]) square([e_pcb, e_bloc-2]);
     color(C_LED) translate([-jeu_led, -e_bloc/2-led_c/2]) square([jeu_led, led_c]);
 
-    // PCB ARRIERE : POSE A PLAT AU FOND, dans une decoupe de la mousse. Sa LED
-    // eclaire vers le HAUT, dans la poche fraisee sous le bloc. Le bloc n'est
-    // jamais tranche : la matiere au-dessus de la poche tient la touche au dos.
-    color(C_PCB) translate([Lk-1, y_mou_b]) square([poche_l+2, e_pcb]);
-    color(C_LED) translate([Lk + poche_l/2 - led_c/2, y_mou_b + e_pcb])
-        square([led_c, led_c*0.5]);
+    // Rien a dessiner a l'arriere : CETTE COUPE PASSE PAR LA MOITIE PLEINE de la
+    // touche. La fente arriere et la dent du PCB sont dans l'AUTRE moitie — voir
+    // la vue C. C'est pour cela que le peigne n'apparait pas sectionne.
 
     xm0 = -(jeu_led+e_pcb) - e_cache;
-    xm1 = Lk + poche_l + dos;
+    xm1 = Lt;
     color(C_CACHE) union() {
         translate([xm0,y_arr_b]) square([e_cache, y_pet_h-y_arr_b+e_cache]);
         translate([xm0,y_pet_h]) square([e_cache+6, e_cache]);
@@ -161,18 +159,21 @@ module coupe_longue() {
     }
 
     if (etiquettes) {
-        trait([x_cl, y_bloc_b],[x_cl, y_bloc_b-5]);
-        txt([x_cl, y_bloc_b-6.3], "CLOISON TRANSVERSALE — coupe + lamelle : deux zones optiques independantes", 1.6, "center");
+        trait([x_cl, y_bloc_b],[x_cl, y_bloc_b-12.2]);
+        txt([x_cl, y_bloc_b-13.5], "CLOISON TRANSVERSALE a mi-epaisseur : deux zones optiques independantes", 1.6, "center");
         txt([x_cl/2, y_pet_h+6], "zone 1 — symbole A", 1.7, "center");
         txt([(x_cl+Lk)/2, y_pet_h+e_noire+6], "zone 2 — symbole B", 1.7, "center");
         trait([x_cl/2, y_pet_h+5.2],[x_cl/2, y_pet_h+1]);
         trait([(x_cl+Lk)/2, y_pet_h+e_noire+5.2],[(x_cl+Lk)/2, y_pet_h+e_noire+0.5]);
         txt([xm0-2, -e_bloc/2], "LED avant", 1.6, "right");
-        trait([Lk+poche_l/2, y_bloc_b+poche_h],[Lk+poche_l/2, y_bloc_b+poche_h+6]);
-        txt([Lk+poche_l/2, y_bloc_b+poche_h+7.3],
-            str("il reste ", e_bloc-poche_h, " mm de matiere AU-DESSUS : le peigne n'est jamais tranche"), 1.6, "center");
-        trait([Lk+poche_l/2, y_mou_b],[Lk+poche_l/2, y_mou_b-6]);
-        txt([Lk+poche_l/2, y_mou_b-7.3], "PCB A PLAT au fond, dans une decoupe de la mousse — LED vers le haut", 1.6, "center");
+        trait([x_cl, y_bloc_b+p_cloison],[x_cl, y_bloc_b+p_cloison+5]);
+        txt([x_cl-14, y_bloc_b+p_cloison+6.3],
+            str("la cloison n'entame que ", p_cloison, " mm sur ", e_bloc,
+                " — rien a soutenir au milieu"), 1.6);
+        trait([Lk+fente/2, y_bloc_b],[Lk+fente/2, y_bloc_b-6]);
+        txt([Lk+fente/2, y_bloc_b-7.3],
+            "COUPE PASSANT PAR LA MOITIE PLEINE — la fente arriere et le PCB", 1.6, "center");
+        txt([Lk+fente/2, y_bloc_b-9.6], "sont dans l'autre moitie (voir C) : le peigne n'est pas sectionne", 1.6, "center");
         txt([xm1+e_cache+2, -e_bloc/2], "dos du peigne", 1.6);
         txt([0, y_pet_h+e_noire+11], "B — COUPE EN LONG D'UNE BLANCHE", 2.6);
         txt([0, y_arr_b-11], "trame de points DENSIFIEE en s'eloignant de chaque LED : c'est ce qui egalise la luminosite", 1.6);
@@ -186,31 +187,31 @@ module vue_dessus() {
     n  = 3;
     yk = Lk*0.45;
     lk = pas_w - 1.2;
-    lp = lk/2;                 // LA POCHE OCCUPE LA MOITIE DE LA TOUCHE
+    lf = lk/2;                 // LA FENTE ARRIERE OCCUPE LA MOITIE DE LA TOUCHE
+    ld = lf - 0.6;
 
-    // le bloc est CONTINU : touches et dos d'une seule piece
-    color(C_PMMA) translate([0.6, 0]) square([n*pas_w - 1.2, yk + poche_l + dos]);
-    for (i = [0:n-1]) {        // traits de scie entre touches, jusqu'au dos
-        if (i > 0) color([1,1,1]) translate([i*pas_w-0.6, -0.1]) square([1.2, yk+poche_l+0.1]);
+    color(C_PMMA) translate([0.6, 0]) square([n*pas_w-1.2, yk+fente+dos]);
+    for (i = [1:n-1])          // traits de scie entre touches, arretes au dos
+        color([1,1,1]) translate([i*pas_w-0.6, -0.1]) square([1.2, yk+fente+0.1]);
+    for (i = [0:n-1])          // fente arriere : moitie ouverte seulement
+        color([1,1,1]) translate([i*pas_w+0.6, yk]) square([lf, fente]);
+
+    color(C_PCB) translate([-2, yk+fente+1.2]) square([n*pas_w+4, dos-2.4]);
+    for (i = [0:n-1]) {
+        xd = i*pas_w + 0.6 + (lf-ld)/2;
+        color(C_PCB) translate([xd, yk]) square([ld, fente+1.4]);
+        color(C_LED) translate([xd+ld/2-led_c/2, yk+0.3]) square([led_c, 1.0]);
     }
-    // poches fraisees au DOS du bloc (vues en transparence)
-    for (i = [0:n-1])
-        color([0.62,0.72,0.80]) translate([i*pas_w + 0.6, yk]) square([lp, poche_l]);
-    // PCB a plat, avec ses LED sous chaque poche
-    color(C_PCB) translate([-2, yk+2]) square([n*pas_w+4, poche_l-4]);
-    for (i = [0:n-1])
-        color(C_LED) translate([i*pas_w + 0.6 + lp/2 - led_c/2, yk + poche_l/2 - led_c/2])
-            square([led_c, led_c]);
 
     if (etiquettes) {
-        x1 = 0.6 + lp + (lk-lp)/2;
-        trait([x1, yk+poche_l/2],[x1, yk+poche_l+dos+5]);
-        txt([x1, yk+poche_l+dos+6.4], "la MOITIE PLEINE de la touche — aucune decoupe traversante", 1.6);
-        xd0 = 0.6 + lp/2;
-        trait([xd0, yk+poche_l/2],[xd0, -5]);
-        txt([xd0, -6.4], "POCHE au dos, sur la moitie de la touche ; LED du PCB dessous", 1.6, "center");
-        txt([0, -10.5], "le bloc reste d'un seul tenant : le peigne n'est jamais sectionne", 1.6);
-        txt([0, yk+poche_l+dos+13], "C — VUE DE DESSUS, ZONE ARRIERE", 2.6);
+        x1 = 0.6 + lf + (lk-lf)/2;
+        trait([x1, yk+fente/2],[x1, yk+fente+dos+5]);
+        txt([x1, yk+fente+dos+6.4], "la MOITIE PLEINE retient la touche au dos — c'est par la que passe la coupe B", 1.6);
+        xd0 = 0.6 + lf/2;
+        trait([xd0, yk+fente/2],[xd0, -5]);
+        txt([xd0, -6.4], "fente sur la MOITIE de la largeur + dent du PCB avec sa LED", 1.6, "center");
+        txt([0, -10.5], "rien ne traverse au milieu de la touche : la cloison des deux zones n'entame que la mi-epaisseur", 1.6);
+        txt([0, yk+fente+dos+13], "C — VUE DE DESSUS, ZONE ARRIERE", 2.6);
     }
 }
 
