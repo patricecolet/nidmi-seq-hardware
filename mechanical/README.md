@@ -270,10 +270,18 @@ Trois fonctions pour une pièce :
 - **le FR4 fait la barrière optique** dans la zone du dos — vernis épargne noir,
   il remplace la lamelle à cet endroit.
 
-Deux cotes à fixer : la **largeur de fente**, imposée par le PCB (1,6 mm + jeu,
-soit ~2,2), et la **largeur des ponts**, qui arbitre entre fuite lumineuse et
-solidité. Congés et trous d'arrêt au pied des ponts — ce sont des concentrations
-de contrainte dans une matière cassante.
+**La fente occupe la MOITIÉ de la touche**, l'autre moitié restant pleine : **un
+seul pont large** plutôt que deux étroits. Moins d'amorce de rupture dans une
+matière cassante, et la dent du PCB — près de 9 mm de large — a la place d'y
+loger sa LED et ses pistes.
+
+L'objection optique ne tient pas : **le dos ne reçoit presque rien**. La LED est
+dans la fente, tournée vers l'avant, et le FR4 derrière elle arrête ce qui
+partirait en arrière. Le pont large ne laisse donc passer qu'une lumière qui
+n'existe quasiment pas.
+
+Cote à fixer : la **profondeur de fente** (épaisseur du PCB + jeu d'insertion,
+~2,2 mm). Congés au pied du pont — c'est là que ça casserait.
 
 > **Point dur restant : le repérage.** Les traits de gravure de l'ITO doivent
 > tomber au-dessus des coupes de scie, à mieux de 0,5 mm sur 300 mm. Ce n'est pas

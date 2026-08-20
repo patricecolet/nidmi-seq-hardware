@@ -175,30 +175,40 @@ module coupe_longue() {
 // VUE DE DESSUS de la zone arriere : c'est le seul plan ou se voient les PONTS
 // qui retiennent chaque touche au dos, et les dents du PCB dans leurs fentes.
 module vue_dessus() {
-    n = 3;
+    n  = 3;
+    yk = Lk*0.45;              // profondeur de touche montree
+    lk = pas_w - 1.2;          // largeur utile d'une touche
+    lf = lk/2;                 // LA FENTE OCCUPE LA MOITIE DE LA TOUCHE
+    ld = lf - 1.6;             // dent du PCB : la fente moins le jeu
+
     for (i = [0:n-1]) {
-        x0 = i*pas_w;
-        color(C_PMMA) translate([x0+0.6, 0]) square([pas_w-1.2, Lk*0.45]);   // touche
-        // ponts : la fente s'arrete avant les bords, ce qui retient la touche
-        color(C_PMMA) translate([x0+0.6, Lk*0.45]) square([pont, fente]);
-        color(C_PMMA) translate([x0+pas_w-0.6-pont, Lk*0.45]) square([pont, fente]);
+        x0 = i*pas_w + 0.6;
+        color(C_PMMA) translate([x0, 0]) square([lk, yk]);          // touche
+        // moitie pleine = UN SEUL PONT LARGE, qui retient la touche au dos
+        color(C_PMMA) translate([x0+lf, yk]) square([lk-lf, fente]);
     }
-    color(C_PMMA) translate([0, Lk*0.45+fente]) square([n*pas_w, dos]);      // dos
-    // PCB en peigne, pose par-dessus
-    color(C_PCB) translate([-2, Lk*0.45+fente+1.5]) square([n*pas_w+4, dos-2]);
+    color(C_PMMA) translate([0, yk+fente]) square([n*pas_w, dos]);  // dos
+
+    // PCB en peigne : dos + une dent par touche, dans la moitie ouverte
+    color(C_PCB) translate([-2, yk+fente+1.2]) square([n*pas_w+4, dos-2]);
     for (i = [0:n-1]) {
-        xd = i*pas_w + pas_w/2 - e_pcb*2;
-        color(C_PCB) translate([xd, Lk*0.45]) square([e_pcb*4, fente+1.6]);
-        color(C_LED) translate([xd+0.6, Lk*0.45+0.3]) square([e_pcb*4-1.2, 1.0]);
+        xd = i*pas_w + 0.6 + (lf-ld)/2;
+        color(C_PCB) translate([xd, yk]) square([ld, fente+1.2]);
+        color(C_LED) translate([xd + ld/2 - led_c/2, yk+0.3]) square([led_c, 1.0]);
     }
+
     if (etiquettes) {
-        trait([0.6+pont/2, Lk*0.45+fente],[0.6+pont/2, Lk*0.45+fente+dos+5]);
-        txt([0.6+pont/2, Lk*0.45+fente+dos+6.3], "PONT — retient la touche au dos ; sa largeur arbitre fuite lumineuse / solidite", 1.6);
-        trait([pas_w/2, Lk*0.45+0.8],[pas_w/2, -5]);
-        txt([pas_w/2, -6.3], "dent du PCB + LED, dans la fente", 1.6, "center");
-        trait([n*pas_w*0.75, Lk*0.45+fente+dos/2],[n*pas_w+6, Lk*0.45+fente+dos+4]);
-        txt([n*pas_w+6.5, Lk*0.45+fente+dos+4], "dos du peigne + PCB en peigne", 1.6);
-        txt([0, Lk*0.45+fente+dos+13], "C — VUE DE DESSUS, ZONE ARRIERE", 2.6);
+        x1 = 0.6 + lf + (pas_w-1.2-lf)/2;
+        trait([x1, yk+fente],[x1, yk+fente+dos+5]);
+        txt([x1, yk+fente+dos+6.4], "PONT — la MOITIE PLEINE de la touche la retient au dos", 1.6);
+        xd0 = 0.6 + lf/2;
+        trait([xd0, yk+0.8],[xd0, -5]);
+        txt([xd0, -6.4], "dent du PCB + LED, dans la moitie ouverte", 1.6, "center");
+        txt([0, -10.5], "un pont LARGE plutot que deux etroits : moins d'amorce de rupture en matiere cassante", 1.6);
+        txt([0, -13.5], "et le dos ne recoit presque rien — la LED regarde l'avant, le FR4 arrete ce qui part en arriere", 1.6);
+        trait([n*pas_w*0.8, yk+fente+dos/2],[n*pas_w+6, yk+fente+dos+4]);
+        txt([n*pas_w+6.5, yk+fente+dos+4], "dos du peigne + PCB en peigne", 1.6);
+        txt([0, yk+fente+dos+13], "C — VUE DE DESSUS, ZONE ARRIERE", 2.6);
     }
 }
 
