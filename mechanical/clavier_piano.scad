@@ -20,6 +20,12 @@ show_blanches = true;
 show_noires   = true;
 show_pcb      = true;
 show_caches   = true;
+vue_plan      = false; // true = vue a plat lisible : blanches OPAQUES, noires
+                       // noires, sans PCB ni caches. Sert a verifier a l'oeil que
+                       // les proportions sont celles d'un vrai piano.
+coupe         = false; // true = coupe transversale : seul moyen de voir les PCB
+                       // de tranche et les caches, qui sont justement faits pour
+                       // etre invisibles une fois assembles.
 
 /* [Géométrie clavier] */
 white_n     = 16;      // blanches (do → ré sur 2 octaves + 1 ton)
@@ -27,7 +33,11 @@ pitch_w     = 18.5;    // PAS des blanches (entraxe). Piano réel : 23.5
 gap_w       = 1.2;     // trait de découpe entre blanches
 Wh          = 58;      // longueur d'une blanche
 Bh          = 36;      // longueur d'une noire (piano réel : ~0,63 × blanche)
-black_ratio = 0.404;   // largeur noire / pas — 9.5/23.5 sur un piano réel
+// Sur un piano a queue : 9.5/23.5 = 0.404. Mais les MINI-CLAVIERS du commerce
+// (Akai, Arturia, Novation) elargissent leurs noires plus que la reduction ne le
+// voudrait — une noire trop etroite se rate, d'autant plus en capacitif.
+// 0.48 -> 8.9 mm au pas de 18.5. A recaler en mesurant un clavier reel.
+black_ratio = 0.48;
 // Convention de répartition des talons de blanche :
 //   "groupes" — talons égaux DANS chaque groupe, mais différents d'un groupe a
 //               l'autre (do-re-mi vs fa-sol-la-si). C'est la geometrie du piano :
@@ -56,8 +66,8 @@ kb_x0 = 0;
 kb_y0 = 0;
 
 // ---------------- COULEURS ----------------
-C_ACRYL = [0.80, 0.88, 0.95, 0.35];
-C_NOIR  = [0.13, 0.13, 0.16, 0.92];
+C_ACRYL = (vue_plan || coupe) ? [0.90, 0.93, 0.92] : [0.80, 0.88, 0.95, 0.35];
+C_NOIR  = (vue_plan || coupe) ? [0.08, 0.08, 0.09] : [0.13, 0.13, 0.16, 0.92];
 C_PCB   = [0.05, 0.35, 0.18];
 C_LED   = [1.00, 0.75, 0.25];
 C_CACHE = [0.22, 0.22, 0.24];
@@ -143,19 +153,29 @@ module pcb_noires() {
             cube([led_size, led_h, min(led_size, t_noires)]);
 }
 
-// Caches : masquent les PCB de tranche et dessinent le bord du clavier
+// Caches : masquent les PCB de tranche et dessinent le bord du clavier.
+// PROFIL EN L — un mur vertical devant le PCB + une levre qui recouvre le dessus
+// des touches. Un bloc plein occuperait le volume des touches et les masquerait.
 module cache_avant() {
-    prof = pcb_gap + t_pcb + t_cache + cache_ov;
-    color(C_CACHE)
-        translate([kb_x0 - t_cache, kb_y0 + cache_ov - prof, -t_cache + 2*explode])
-            cube([kb_w + 2*t_cache, prof, t_blanches + t_cache]);
+    y_mur = kb_y0 - (pcb_gap + t_pcb + t_cache);
+    color(C_CACHE) translate([0, 0, 2*explode]) union() {
+        translate([kb_x0 - t_cache, y_mur, -t_cache])
+            cube([kb_w + 2*t_cache, t_cache, t_blanches + 2*t_cache]);
+        translate([kb_x0 - t_cache, y_mur, t_blanches])
+            cube([kb_w + 2*t_cache, (kb_y0 - y_mur) + cache_ov, t_cache]);
+    }
 }
 
 module cache_arriere() {
-    prof = cache_ov + pcb_gap + t_pcb + t_cache;
-    color(C_CACHE)
-        translate([kb_x0 - t_cache, kb_y0 + Wh - cache_ov, -t_cache + 2*explode])
-            cube([kb_w + 2*t_cache, prof, t_blanches + t_noires + t_cache]);
+    y_dos = kb_y0 + Wh;
+    y_mur = y_dos + pcb_gap + t_pcb;
+    h     = t_blanches + t_noires;
+    color(C_CACHE) translate([0, 0, 2*explode]) union() {
+        translate([kb_x0 - t_cache, y_mur, -t_cache])
+            cube([kb_w + 2*t_cache, t_cache, h + 2*t_cache]);
+        translate([kb_x0 - t_cache, y_dos - cache_ov, h])
+            cube([kb_w + 2*t_cache, (y_mur + t_cache) - (y_dos - cache_ov), t_cache]);
+    }
 }
 
 // ---------------- CÔTES ----------------
@@ -182,11 +202,23 @@ module cotes() {
 }
 
 // ---------------- ASSEMBLAGE ----------------
-if (show_blanches) plaque_blanches();
-if (show_noires)   plaque_noires();
-if (show_pcb)    { pcb_blanches(); pcb_noires(); }
-if (show_caches) { cache_avant(); cache_arriere(); }
-if (show_dims)     cotes();
+coupe_x = black_cx(0);          // coupe passant par la 1re noire (do#)
+
+module tout() {
+    if (show_blanches) plaque_blanches();
+    if (show_noires)   plaque_noires();
+    if (show_pcb && !vue_plan)    { pcb_blanches(); pcb_noires(); }
+    if (show_caches && !vue_plan) { cache_avant(); cache_arriere(); }
+}
+
+if (coupe)
+    difference() {
+        tout();
+        translate([-500, -300, -300]) cube([500 + coupe_x, 600, 600]);
+    }
+else tout();
+
+if (show_dims && !coupe) cotes();
 
 echo(str("pas=", pitch_w, "  noire=", Wb, "  talon CDE=", tal1, "  talon FGAB=", tal2));
 echo(str("largeur clavier=", kb_w, "   echelle vs piano reel=", pitch_w/23.5));
