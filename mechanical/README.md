@@ -89,11 +89,14 @@ Le facteur d'échelle est donc **0,787**… ce qui tombe précisément sur le fo
 Ce n'est donc pas un compromis bâtard mais un standard établi, avec lequel les
 joueurs sont déjà familiers.
 
-> ⚠️ La **noire tombe à 7,47 mm** par mise à l'échelle stricte, contre 9,5 mm sur
-> un piano. Les claviers mini-touches élargissent en général leurs noires plus que
-> l'échelle ne le voudrait, et une noire étroite est moins fiable à toucher en
-> capacitif. Essayer `black_ratio` entre 0,45 et 0,50 (→ 8,3 à 9,3 mm) avant de
-> figer. Le paramètre est en tête de fichier.
+La mise à l'échelle stricte donnerait une **noire de 7,47 mm** contre 9,5 mm sur
+un piano — étroite, et d'autant moins fiable à toucher en capacitif. Les claviers
+mini-touches du commerce (Akai, Arturia, Novation) élargissent leurs noires plus
+que la réduction ne le voudrait. `black_ratio` est donc réglé à **0,48 → 8,9 mm**.
+
+> ⚠️ Valeur **estimée**, à recaler en mesurant la largeur d'une noire sur un
+> clavier réel. Le pas de 18–19 mm des mini-claviers est en revanche une donnée
+> fiable, et le modèle est à 18,5.
 
 ## Édition interactive
 Ouvrir `facade.scad` dans l'app OpenSCAD → fenêtre de preview, on tourne/zoome,
