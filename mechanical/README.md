@@ -90,29 +90,59 @@ Ce n'est donc pas un compromis bâtard mais un standard établi, avec lequel les
 joueurs sont déjà familiers.
 
 **Largeur des noires — attention à la cote.** Une noire de piano est
-**tronconique** : ~9,5 mm au sommet (où le doigt se pose) mais ~13 mm à la base.
-Vue de dessus, et à plus forte raison sur une façade **plate** sans aucun fruit,
-c'est la **base** qui fait la largeur apparente. `black_ratio` = 13/23,5 =
-**0,55 → 10,2 mm**. Prendre la cote du sommet donne des noires visiblement
-maigres — erreur commise puis corrigée ici.
+**tronconique** : ~9,5 mm au sommet (où le doigt se pose) mais **13,7 mm à la
+base**. Vue de dessus, et à plus forte raison sur une façade **plate** sans aucun
+fruit, c'est la **base** qui fait la largeur apparente. Cotes normalisées :
+blanche 23,5 mm, noire 13,7 mm → `black_ratio` = **0,583**. Prendre la cote du
+sommet donne des noires visiblement maigres.
 
-**Talons des blanches** (la partie étroite, entre les noires). Sur un vrai piano
-ils ne sont **ni tous égaux, ni égaux par groupe** : les blanches mordues d'**un
-seul côté** (do, mi, fa, si) ont un talon **plus large** que celles mordues des
-**deux côtés** (ré, sol, la). Le modèle par défaut (`tails = undef`) approxime
-avec des talons égaux dans chaque groupe — suffisant pour dégrossir.
+**Talons des blanches** (partie étroite entre les noires). Des talons **tous
+égaux sont mathématiquement impossibles** : il faudrait résoudre en même temps
+`3W = 3w + 2B` (groupe do-ré-mi) et `4W = 4w + 3B` (groupe fa-sol-la-si), ce qui
+n'admet de solution que pour `B = 0`, donc sans noires. L'arrangement optimal des
+facteurs de piano, et le défaut du modèle :
 
-Pour la géométrie exacte, renseigner les sept cotes mesurées sur un clavier
-réel :
+| | talon |
+|---|---|
+| do, ré, mi | `W − 2B/3` |
+| fa, sol, la, si | `W − 3B/4` |
 
-```scad
-// exemple d'un piano — octave 165 mm, noire 13 mm
-tails = [15, 14, 15, 14.5, 13.5, 13.5, 14.5] * (pitch_w / 23.571);
-```
+L'écart entre les deux vaut `B/12` — c'est le minimum atteignable.
+Refs : [mathpages](https://www.mathpages.com/home/kmath043.htm) ·
+[quadibloc](http://quadibloc.com/other/cnv05.htm) ·
+[PianoReport](https://pianoreport.com/piano-key-size/)
+
+`tails = [...]` permet de forcer les sept cotes pour coller à un clavier
+particulier.
 
 > **Contrainte** : somme des 7 talons + 5 × largeur de noire = 7 × pas. Sinon les
 > talons dérivent par rapport aux faces avant, qui restent à pas égal. Le modèle
 > vérifie et le signale par un `echo`.
+
+### Les deux plaques découpées, et le travail que ça représente
+
+```sh
+openscad -o plaque_blanches.png --imgsize=2000,560 --projection=o \
+  --camera=147,29,60,0,0,0,330 -D 'vue_plan=true' -D 'piece="blanches"' clavier_piano.scad
+openscad -o plaque_noires.png --imgsize=2000,560 --projection=o \
+  --camera=147,29,60,0,0,0,330 -D 'vue_plan=true' -D 'piece="noires"' clavier_piano.scad
+```
+
+| plaque | matière | pièces | longueur de coupe |
+|---|---|---|---|
+| blanches | acrylique clair **10 mm** | 16 | **4,03 m** (dont 22 encoches de 36,8 mm) |
+| noires | acrylique teinté **5 mm** | 11 | **1,03 m** |
+| | | **27** | **5,06 m** |
+
+> **Découpe laser, pas Dremel.** Ces 4 mètres sont des **chants optiques** : ce
+> sont eux qui font fonctionner le guide de lumière, donc chacun doit être poli.
+> Le laser fond la matière au lieu de l'arracher et sort des chants
+> **naturellement polis, de qualité optique** — on obtient gratuitement ce que le
+> Dremel imposerait de polir à la main sur 4 mètres. Pour un guide de lumière ce
+> n'est pas un confort mais une condition de fonctionnement.
+>
+> Le Dremel reste l'outil de la **gravure au dos**, qui veut au contraire une
+> surface diffusante.
 
 ## Édition interactive
 Ouvrir `facade.scad` dans l'app OpenSCAD → fenêtre de preview, on tourne/zoome,
