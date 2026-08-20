@@ -36,6 +36,27 @@ vue_plan      = false; // true = vue a plat lisible : blanches OPAQUES, noires
 plaques_entieres = true;
 dos              = 5;   // profondeur du dos (doit rester <= cache_ov pour etre cache)
 
+// SEPARATION DES TOUCHES — "rainure" (defaut) ou "decoupe".
+//
+// Sur un clavier CAPACITIF, ce qui separe les touches c'est le dessin de
+// l'ELECTRODE et les gardes, pas la matiere. Rien ne bouge : decouper le plexi
+// sous les noires n'a aucune justification mecanique, et cree au contraire des
+// porte-a-faux et des amorces de fissure dans une matiere cassante.
+//
+// L'Arturia MicroFreak fait exactement cela : clavier capacitif plat, blanches
+// separees par de simples reliefs peu profonds ("shallow ridges"), noires
+// portees par une couche legerement surelevee.
+//   refs : soundonsound.com/reviews/arturia-microfreak, musicradar.com
+//
+// "rainure" : bloc PLEIN, rainures peu profondes cote face avant. Solide, et le
+//             creux sert en meme temps de LOGEMENT DE POSITIONNEMENT pour la
+//             plaque des noires, qui s'auto-aligne au collage.
+// "decoupe" : touches reellement separees. Ne se justifie que si les essais
+//             montrent que la pollution lumineuse d'une touche a l'autre est
+//             redhibitoire — a MESURER avant de s'y engager.
+separation = "rainure";
+rainure_p  = 1.0;   // profondeur des rainures (et du logement des noires)
+
 piece         = "tout"; // "tout" | "blanches" | "noires" — isole une plaque pour
                         // juger le travail de decoupe, ou pour exporter un DXF
 coupe         = false; // true = coupe transversale : seul moyen de voir les PCB
@@ -169,6 +190,23 @@ module arrets_2d() {
                 circle(d = arret_d, $fn = 24);
 }
 
+// Contour des 16 blanches, sans dos : sert de negatif pour tracer les rainures.
+module whites_shape_2d() {
+    difference() {
+        for (i = [0 : white_n-1])
+            translate([white_left(i), kb_y0]) square([Ww, Wh]);
+        blacks_2d(key_clr, conge_r);
+    }
+}
+
+// Creux a graver dans le bloc plein : tout ce qui n'est pas une touche.
+module creux_2d() {
+    difference() {
+        translate([kb_x0, kb_y0]) square([kb_w, Wh]);
+        whites_shape_2d();
+    }
+}
+
 module whites_2d() {
     difference() {
         union() {
@@ -198,11 +236,24 @@ module noires_2d() {
 
 // ---------------- 3D ----------------
 module plaque_blanches() {
-    color(C_ACRYL) linear_extrude(t_blanches) whites_2d();
+    color(C_ACRYL)
+        if (separation == "rainure")
+            // Bloc PLEIN, rainures gravees en face avant. Aucun porte-a-faux,
+            // aucune amorce de fissure, et le creux loge les noires.
+            difference() {
+                translate([kb_x0, kb_y0, 0]) cube([kb_w, Wh, t_blanches]);
+                translate([0, 0, t_blanches - rainure_p])
+                    linear_extrude(rainure_p + 0.1) creux_2d();
+            }
+        else
+            linear_extrude(t_blanches) whites_2d();
 }
 
 module plaque_noires() {
-    color(C_NOIR) translate([0, 0, t_blanches + explode])
+    // Elle descend dans le creux : auto-alignement au collage, et le relief
+    // apparent vaut t_noires - rainure_p.
+    z = t_blanches - (separation == "rainure" ? rainure_p : 0);
+    color(C_NOIR) translate([0, 0, z + explode])
         linear_extrude(t_noires) noires_2d();
 }
 

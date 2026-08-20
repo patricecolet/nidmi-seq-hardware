@@ -28,7 +28,30 @@ C'est le critère qui prime, et il s'applique **pendant** le dessin, pas en rele
 - Si la solidité et l'optique s'opposent (chants polis, épaisseurs), **le dire explicitement**
   au lieu d'arbitrer en silence.
 
-## 2. Vérifier les interférences avant d'annoncer un empilement
+## 2. Ne pas confondre la géométrie de la pièce et celle de l'électrode
+
+**Erreur commise** : avoir découpé le plexi sous les touches noires « pour séparer les
+électrodes », créant porte-à-faux et amorces de fissure dans une matière cassante.
+
+Sur un clavier **capacitif**, ce qui sépare les touches c'est le **dessin de l'électrode** et
+les **gardes à la masse**. Le plexi n'est que diélectrique et guide de lumière. **Rien ne
+bouge** : il n'y a donc aucune raison mécanique de le découper.
+
+**Avant de retirer de la matière, se demander quelle fonction l'exige.** Une découpe se
+justifie par un mouvement, un passage, ou une isolation optique **mesurée** — pas par une
+séparation qui se règle au niveau de l'électrode.
+
+Référence : l'Arturia MicroFreak est un clavier capacitif **plat**, blanches séparées par de
+simples reliefs peu profonds (« shallow ridges »), noires portées par une couche légèrement
+surélevée, aftertouch polyphonique obtenu en mesurant la surface de contact du doigt.
+([Sound On Sound](https://www.soundonsound.com/reviews/arturia-microfreak),
+[MusicRadar](https://www.musicradar.com/reviews/arturia-microfreak))
+
+> Partir de la forme la plus **solide** (le bloc plein) et n'enlever que ce qu'une fonction
+> réclame. On était parti d'un bloc ; on en est sorti pour un problème de pollution lumineuse
+> **non encore mesuré**. Mesurer d'abord, découper ensuite.
+
+## 3. Vérifier les interférences avant d'annoncer un empilement
 
 Deux pièces ne peuvent pas occuper le même volume. **Erreur commise** : les caches du clavier
 étaient modélisés en blocs pleins traversant les touches — ils les masquaient entièrement.
@@ -37,7 +60,7 @@ Un cache, un capot, une bordure sont des **profilés** (L, U), pas des parallél
 Avant d'affirmer qu'un empilement tient : passer chaque paire de pièces voisines en revue,
 et vérifier que les jeux existent réellement dans le modèle.
 
-## 3. Regarder le rendu avant d'affirmer ce qu'il montre
+## 4. Regarder le rendu avant d'affirmer ce qu'il montre
 
 **Erreur commise plusieurs fois** : rendus annoncés comme probants alors qu'ils étaient vides,
 mal cadrés, ou que les pièces transparentes y étaient invisibles.
@@ -48,7 +71,7 @@ mal cadrés, ou que les pièces transparentes y étaient invisibles.
 - Si une pièce est faite pour être cachée (cache, PCB de tranche), **aucune vue assemblée ne la
   montrera** — prévoir une vue dédiée avec les masquants désactivés, ou une coupe.
 
-## 4. Cotes sourcées, cotes estimées
+## 5. Cotes sourcées, cotes estimées
 
 - Sur toute grandeur **normalisée ou documentée**, chercher la référence sur le web **avant**
   de modéliser. **Erreur commise** : plusieurs messages perdus à raisonner de mémoire sur la
@@ -59,7 +82,7 @@ mal cadrés, ou que les pièces transparentes y étaient invisibles.
   à la base. Sur une façade plate, c'est la base qui compte. Prendre la mauvaise donne des
   proportions visiblement fausses.
 
-## 5. La fabrication fait partie du dessin
+## 6. La fabrication fait partie du dessin
 
 Sortir les conséquences de fabrication **dans le même mouvement** que la géométrie, pas trois
 messages plus tard. **Erreur commise** : la longueur de coupe et l'état de chant sont arrivés
@@ -75,7 +98,7 @@ après coup — et ont changé le procédé, puis le nombre de pièces.
 - **ce qui reste faisable à la main** : la gravure au dos veut au contraire une surface
   diffusante, donc Dremel.
 
-## 6. Ce que l'utilisateur sait et que je ne peux pas chercher
+## 7. Ce que l'utilisateur sait et que je ne peux pas chercher
 
 Patrice démonte des claviers pour les réparer et conçoit de la lutherie numérique. Son savoir
 porte sur les **modes de défaillance réels**, ce qu'un atelier accepte de faire, et ce qu'un
