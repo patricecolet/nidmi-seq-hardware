@@ -130,6 +130,41 @@ migrer vers l'ESP32-B ou C.
 
 Refs : espboards.dev/esp32/elecrow-crowpanel-advance-7-esp32-s3/ · elecrow.com/wiki
 
+## 5b. Moteur audio interne — OPTION RÉSERVÉE 🟡 (2026-08-20)
+
+**Décision : place réservée dans le boîtier, réalisation reportée.** Le but initial reste de
+piloter des machines externes en MIDI ; le moteur audio ferait de l'instrument un autre objet.
+
+**Matériel visé** (celui du XVA1 de René Ceballos, déjà en possession) :
+
+| | réf | cotes |
+|---|---|---|
+| FPGA | **Digilent Cmod A7-35T** (Xilinx Artix-7 35T, DIP 48 broches) | 17,78 × 69,85 mm, ~12 mm avec support |
+| DAC | **PCM5102A** — *pas* l'UDA1334A du XVA1 | ~40 × 25 × 7 mm |
+
+**Pourquoi le PCM5102A** : il **ne demande pas de MCLK** (il la régénère du BCLK), ce qui évite
+de produire et router une horloge à 256×fs côté FPGA. 112 dB de SNR, 32 bits/384 kHz, sortie
+**2,1 V RMS** — vrai niveau ligne pour attaquer un étage symétrique. Éviter les modules bon
+marché : décalage de niveau incorrect et découplages absents, décrochage au-dessus de 48 kHz.
+
+**Réservation** : volume de **62 × 70 mm, 12 mm de haut** en cavité arrière. En plan la façade
+est saturée — la réservation est un volume, pas une surface.
+
+**Sortie audio symétrique, 2 canaux.** Deux conséquences :
+- **Étage de sortie** : driver différentiel (DRV134, THAT1646, ou paire d'AOP), ou sortie
+  *impedance-balanced* (point froid à la masse via résistance de même valeur) — presque aussi
+  efficace contre le mode commun, pour deux résistances.
+- 🔴 **Le connecteur est le poste dimensionnant, pas le FPGA.** Un TRS **6,35 mm** fait ~14 mm de
+  diamètre et **25-30 mm de profondeur**, contre ~5 mm pour un PJ-320A. Il deviendrait **le
+  composant le plus profond de l'instrument**, devant le CrowPanel (16 mm), et commanderait donc
+  la profondeur du boîtier. → arbitrer 6,35 mm (format symétrique usuel) contre 3,5 mm (compact).
+
+**Sur le multitimbral** : sur un moteur multiplexé dans le temps, il coûte de la **mémoire, pas
+des multiplieurs** — chaque voix lit les paramètres de sa partie, c'est un index de plus. Les
+voix restent **partagées** entre parties. Le poste cher est l'**effet par partie** (d'où les
+départs vers effets globaux). Une seule architecture de synthèse, plusieurs patchs : c'est ça
+qui reste gratuit.
+
 ## 6. Écran — 4,0″ 480×320 SPI 🟡 + ⚠️ impact boîtier
 - **Contrôleur** : 🟢 **ILI9488** (choix utilisateur ; 18 bpp, OK en *partial
   refresh*). ST7796 = alternative plus rapide (même PCB) si jamais dispo.

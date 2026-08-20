@@ -90,9 +90,34 @@ ruban_w   = 10;
 ruban_h   = 3;           // epaisseur au rendu (visibilite ; 1.5 disparaissait)
 
 /* [Connectique — tranche arriere] */
-jack_d    = 6;           // PJ-320A
+jack_d    = 6;           // PJ-320A (3,5 mm) : MIDI + CV
 n_jack    = 5;           // MIDI IN/OUT + CV GATE CLK RST
 usb_w     = 9;
+
+/* [Sortie audio SYMETRIQUE — 2 canaux, TRS] */
+// !! LE CONNECTEUR EST LE POSTE DIMENSIONNANT, pas le FPGA.
+//    PJ-320A (3,5 mm) : ~6 mm de diametre, ~5 mm de profondeur.
+//    TRS 6,35 mm      : ~12-15 mm de diametre, 25-30 mm DE PROFONDEUR
+//                       -> deviendrait le composant le plus profond de
+//                       l'instrument, devant le CrowPanel (16 mm).
+audio_sym   = true;
+audio_635   = true;      // true = TRS 6,35 mm ; false = PJ-320A 3,5 mm
+audio_d     = audio_635 ? 14 : 6;
+audio_prof  = audio_635 ? 28 : 5;
+n_audio     = 2;
+
+/* [Reservation moteur audio FPGA — volume en cavite arriere, pas en facade] */
+// Option gardee ouverte (cf. docs/BOM.md) : Cmod A7-35T (Artix-7, la puce du
+// XVA1) + DAC I2S UDA1334A. En PLAN la facade est saturee -> la reservation est
+// un VOLUME dans la cavite, sous les composants. Seule consequence visible :
+// deux jacks de sortie audio de plus sur la tranche arriere (ci-dessus).
+res_audio    = true;
+cmod_w       = 17.78;    // Cmod A7-35T : 0.7" x 2.75"
+cmod_l       = 69.85;
+cmod_h       = 12;       // ESTIME : carte + support DIP
+dac_w        = 40.0;     // UDA1334A : cotes constructeur
+dac_l        = 25.0;
+dac_h        = 7.1;
 
 // ---------------- COULEURS ----------------
 C_PLAQUE = [0.90, 0.90, 0.88];
@@ -214,11 +239,16 @@ module clavier(p) {
 
 // Connectique sur la tranche arriere
 module connectique() {
-    pas = (F_W - 2*marge) / (n_jack + 2);
+    n_tot = n_jack + n_audio;
+    pas = (F_W - 2*marge) / (n_tot + 2);
     for (i = [0 : n_jack-1])
         translate([marge + pas*(i+1), F_H, 1]) rotate([-90,0,0])
             color(C_CONN) cylinder(d = jack_d, h = 4, $fn = 24);
-    translate([marge + pas*(n_jack+1) - usb_w/2, F_H, 0])
+    // Sorties audio : plus grosses, groupees a droite
+    for (i = [0 : n_audio-1])
+        translate([marge + pas*(n_jack + i + 1), F_H, audio_d/2 - 2]) rotate([-90,0,0])
+            color([0.55,0.45,0.20]) cylinder(d = audio_d, h = 4, $fn = 24);
+    translate([marge + pas*(n_tot+1) - usb_w/2, F_H, 0])
         color(C_CONN) cube([usb_w, 4, 3.5]);
 }
 
@@ -259,5 +289,13 @@ echo(str("VARIANTE ", variante, "  ->  facade ", F_W, " x ", F_H, " mm"));
 echo(str("  zone utile ", util_w, " x ", util_h,
          "   rangee haute ", rang1_h, " mm de profondeur"));
 echo(str("  ruban ", ruban_l, " mm   (dispo dans la bande : ", util_w, " mm)"));
+if (res_audio)
+    echo(str("  reserve audio FPGA (cavite) : ", cmod_w + 4 + dac_w, " x ",
+             max(cmod_l, dac_l), " mm, hauteur ", max(cmod_h, dac_h),
+             "   [Cmod A7 ", cmod_w, "x", cmod_l, " + DAC ", dac_w, "x", dac_l, "]"));
+echo(str("  sortie audio ", audio_sym ? "SYMETRIQUE" : "asymetrique", " x", n_audio,
+         "   jack ", audio_635 ? "6,35 mm" : "3,5 mm",
+         " -> profondeur ", audio_prof, " mm",
+         audio_prof > 16 ? "  !! COMPOSANT LE PLUS PROFOND DE L'INSTRUMENT" : ""));
 if (fonc) echo(str("  rangee haute ", rang1_w_fonc, " mm de large   CrowPanel Advance carte ",
                    scr_w, " x ", scr_h, " (actif ", scr_win_w, " x ", scr_win_h, ")"));
