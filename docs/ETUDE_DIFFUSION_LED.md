@@ -144,3 +144,28 @@ l'entrefer coûte en capacitif contre ce qu'il rapporte en sélectivité optique
 Le critère change : il ne s'agit plus d'éclairer *depuis l'arrière* mais d'**injecter dans la
 tranche** du guide. La question devient celle du couplage LED→tranche (position, angle, logement
 fraisé), pas celle de l'émission frontale.
+
+## Touches noires : teinte, puissance et pilotage (points ouverts)
+
+Constat de départ : une plaque **teintée dans la masse** absorbe sur toute la longueur du guide
+— à l'aller **et** sur le trajet d'extraction. Augmenter la puissance de la LED ne fait que
+compenser une perte volontairement introduite, au prix du courant et de la chaleur.
+
+**Piste privilégiée : guide en acrylique CLAIR + masque noir opaque** (peinture ou film au dos,
+sauf au droit de la gravure). La touche est franchement noire à l'arrêt — plus qu'un teinté — le
+guide garde son rendement, et à l'allumage c'est la **gravure qui s'illumine sur fond noir**. Sur
+une touche de fonction, un symbole lumineux apparaissant dans le noir a plus d'allure qu'une
+touche entièrement éclairée.
+
+**Mesure préalable à toute commande** : la **transmission de la plaque candidate** (LED derrière,
+comparée à du clair). Un facteur 5 de perte ne se rattrape avec aucune LED raisonnable.
+
+**Monochrome pour les noires — à confronter à la VISION.** En vue PATTERN les noires portent les
+**fonctions**. Sans couleur il reste luminosité et clignotement pour distinguer leurs états
+(inactive / armée / active). Probablement suffisant pour 11 touches de fonction, contrairement aux
+16 pas où l'on distingue accent, swing et durée — mais à vérifier dans la VISION avant de figer.
+
+> ⚠️ **Conséquence BOM** : 11 LED blanches hors du bus SK6812 = **second circuit de pilotage**.
+> Les MCP23017 déjà présents ne font que du tout-ou-rien (pas de PWM) → il faudrait un driver LED
+> dédié sur l'I2C. **Avant d'accepter ce coût, tester si un SK6812 piloté en blanc plein suffit** :
+> un seul bus, une seule référence, un seul firmware. Test de dix minutes.
