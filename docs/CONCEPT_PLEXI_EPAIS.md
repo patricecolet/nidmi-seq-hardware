@@ -251,3 +251,110 @@ statique atteint bien plus facilement la broche. Le self-cap tolérant plusieurs
 - **Membrane** : épaisseur mini fiable au Dremel (1 mm risqué à la main ?).
 - **Fixation** de la carte électronique au dos + passage des fils.
 - Garde de masse / blindage entre cellules (éviter le cross-talk) — faisable en cuivre aussi.
+
+---
+
+# Technique d'électrode — arrêtée le 2026-08-21
+
+Aboutissement de la séance : le montage tient en **une feuille et un bloc**.
+
+## Le principe : graver le motif, ne pas découper le support
+
+**Une seule feuille d'ITO/PET continue** couvre tout le clavier. Pour séparer deux électrodes,
+il suffit d'**interrompre la couche d'ITO** (~100 nm) ; le PET reste entier. C'est la
+construction des dalles tactiles du commerce : un substrat, un conducteur **gravé en motif**.
+
+**Les électrodes sont des îlots, la garde est la mer.** On ne grave que des **traits fins** ;
+tout ce qui reste autour forme la garde, avec **une seule liaison à la masse**. Minimum de
+gravure, couverture de garde maximale entre cellules.
+
+> ⚠️ **Contrepartie** : une garde étendue près des électrodes **charge le capteur** (capacité
+> permanente vers la masse) et dégrade le rapport signal/ligne de base. Le paramètre d'arbitrage
+> est la **largeur du trait de séparation** — étroit protège mais charge, large fait l'inverse.
+> Ordre de grandeur courant : ~1 mm. **À mesurer sur le banc** (deux cellules, deux écarts).
+
+## Orientation : PET vers le doigt
+
+Le film est posé **PET vers le doigt, ITO vers le plexi**. Le PET (0,125 mm) devient la
+protection : la couche conductrice n'est jamais touchée. Trois bénéfices d'un seul geste —
+protection contre l'**abrasion** (une rayure coupe le conducteur), barrière **ESD** de plusieurs
+kV vers la broche de l'ESP32, et surface qui se **nettoie**.
+
+✅ **Aftertouch vérifié à travers le PET** : la marge reste suffisante (essai 2026-08-21).
+
+## Séparation entre touches : trait de scie + lamelle noire
+
+Trait de scie **traversant** entre blanches, bloc uni dans la partie cachée (peigne).
+Mesuré : trait nu → « un tout petit peu » de lumière passe ; **trait + lamelle noire → rien**.
+Détails et théorie : `ETUDE_DIFFUSION_LED.md`.
+
+**Placer les traits de gravure de l'ITO juste au-dessus des coupes de scie.** Un motif d'ITO
+gravé reste légèrement visible en lumière rasante (la réflectance change là où le conducteur a
+disparu — d'où les couches d'adaptation d'indice des dalles du commerce). En faisant coïncider
+les deux, le problème disparaît sans traitement.
+
+## Comment graver
+
+| voie | procédé | note |
+|---|---|---|
+| **Masque + chimie** *(recommandée)* | masque adhésif découpé à la CNC, puis **HCl dilué ~5 %, ~1 min** à température ambiante. Variante au pinceau : pâte **zinc + HCl** | le PET n'est pas attaqué |
+| Ablation laser | tracé direct des lignes, sans masque ni chimie | développée précisément pour éviter la photolitho |
+
+Contrôle : **ohmmètre** de part et d'autre d'un trait. Infini = gravé ; quelques kΩ = pont restant.
+Sécurité : ventilation, gants, lunettes ; zinc + HCl dégage de l'**hydrogène**.
+Réfs : [Tech Briefs](https://www.techbriefs.com/component/content/article/2552-ksc-12828) ·
+[laser scribing ITO, ScienceDirect](https://www.sciencedirect.com/science/article/abs/pii/S016943321001158X)
+
+### Précision requise — ce n'est pas là qu'on croit
+
+- **XY : ±0,1 mm largement suffisant.** Les traits font ~1 mm, le plus petit détail (largeur
+  d'une noire) fait ~8 mm.
+- 🔴 **Z : ne pas piloter en profondeur.** Retirer 100 nm d'ITO sans entamer 125 000 nm de PET,
+  c'est un rapport de 1 à 1250 — ni le film ni la plaque ne sont plats à ce niveau. Il faut une
+  **pression contrôlée** (outil sur ressort, principe du couteau traînant), pas une cote de
+  profondeur. **La voie masque + chimie est totalement insensible au Z** : c'est ce qui la rend
+  recommandable.
+- 🔴 **La vraie difficulté est le REPÉRAGE.** Les traits gravés doivent tomber au-dessus des
+  coupes de scie : il faut faire coïncider film et bloc à mieux de **0,5 mm sur 300 mm**. Ce
+  n'est pas une affaire de précision machine mais de **références de montage** — perçages de
+  repérage communs, ou usinage des deux pièces dans le même bridage. C'est classiquement là que
+  ce type d'assemblage échoue : chaque pièce est juste, et elles ne se superposent pas.
+
+## Tenue mécanique du film : pincé, pas collé
+
+**Le pourtour du film est capturé sous les caches** avant et arrière. Un bord pincé ne se décolle
+pas — il n'y a plus d'arête où un ongle s'insère, et c'est toujours par là que ça commence.
+L'adhésif ne fait que positionner.
+
+**Bénéfice décisif : le film devient un consommable.** Deux vis, on change la pièce d'usure. Sur
+un instrument joué des années, ça vaut mieux que de chercher la colle parfaite.
+
+**La colle nuit par deux mécanismes distincts :**
+
+1. **Capillarité dans les fentes** — aspirée dans le trait de scie, elle en fait un milieu
+   d'indice voisin du PMMA et **pontifie optiquement** les deux touches. → **la lamelle noire
+   bloque aussi la colle** : deux fonctions pour une pièce.
+2. **Adaptation d'indice sur la face avant** — une colle acrylique (~1,4–1,5) supprime la
+   réflexion totale et la lumière ressort **partout** au lieu de sortir aux points de gravure.
+   → **ne coller qu'au pourtour et dans la zone cachée**, laisser un film d'air sur les zones
+   tactiles.
+
+> **Dilatation différentielle** : PMMA ~70 × 10⁻⁶/K contre nettement moins pour le PET. Sur
+> 300 mm et 20 K, ~0,2 mm de différentiel. Un film rigidement collé sur tout son pourtour
+> **gondole** — cloques au milieu, là où le doigt se pose. Capture mécanique + adhésif **souple**
+> (mousse acrylique) pour absorber le glissement.
+>
+> Le **PET non traité est une surface à basse énergie** : face arrière traitée corona ou primaire,
+> sinon la tenue est de quelques mois.
+>
+> Usure : seule vraie parade, le **PET traité anti-rayure**.
+
+## Résistance des liaisons
+
+Chaque électrode rejoint son contact dans la zone cachée, **en ITO**, donc résistif. Une piste de
+2 mm × 100 mm = 50 carrés ≈ **5 kΩ** à 100 Ω/□. Le self-cap l'encaisse (il tolère plusieurs kΩ),
+mais c'est le haut de la fourchette → **pistes aussi larges que la place le permet**, contacts
+**regroupés au plus près**.
+
+Rappel utile : une électrode de blanche alimentée par un seul bout ne fait que ~2,8 carrés, soit
+**~280 Ω**. **Un seul contact par touche suffit** — pas de cadre périphérique.
