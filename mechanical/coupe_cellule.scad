@@ -145,9 +145,15 @@ module coupe_longue() {
     color(C_PCB) translate([-(jeu_led+e_pcb), y_bloc_b+1]) square([e_pcb, e_bloc-2]);
     color(C_LED) translate([-jeu_led, -e_bloc/2-led_c/2]) square([jeu_led, led_c]);
 
-    // Rien a dessiner a l'arriere : CETTE COUPE PASSE PAR LA MOITIE PLEINE de la
-    // touche. La fente arriere et la dent du PCB sont dans l'AUTRE moitie — voir
-    // la vue C. C'est pour cela que le peigne n'apparait pas sectionne.
+    // CETTE COUPE PASSE PAR LA MOITIE PLEINE : le bloc n'y est pas interrompu.
+    // La fente arriere, la dent du PCB et sa LED sont dans l'AUTRE moitie, donc
+    // DERRIERE le plan de coupe — figurees ici en teinte pale, comme un detail
+    // cache en dessin technique.
+    color([0.55,0.68,0.60]) translate([Lk + (fente-e_pcb)/2, y_bloc_b+0.5])
+        square([e_pcb, e_bloc-1]);
+    color([0.92,0.82,0.55]) translate([Lk + (fente-e_pcb)/2 - jeu_led - 1,
+                                       -e_bloc/2 - led_c/2])
+        square([jeu_led+1, led_c]);
 
     xm0 = -(jeu_led+e_pcb) - e_cache;
     xm1 = Lt;
@@ -160,20 +166,19 @@ module coupe_longue() {
 
     if (etiquettes) {
         trait([x_cl, y_bloc_b],[x_cl, y_bloc_b-12.2]);
-        txt([x_cl, y_bloc_b-13.5], "CLOISON TRANSVERSALE a mi-epaisseur : deux zones optiques independantes", 1.6, "center");
+        txt([x_cl, y_bloc_b-13.5], str("CLOISON TRANSVERSALE : elle n'entame que ", p_cloison, " mm sur ", e_bloc,
+            " — deux zones optiques, et rien a soutenir au milieu"), 1.6, "center");
         txt([x_cl/2, y_pet_h+6], "zone 1 — symbole A", 1.7, "center");
         txt([(x_cl+Lk)/2, y_pet_h+e_noire+6], "zone 2 — symbole B", 1.7, "center");
         trait([x_cl/2, y_pet_h+5.2],[x_cl/2, y_pet_h+1]);
         trait([(x_cl+Lk)/2, y_pet_h+e_noire+5.2],[(x_cl+Lk)/2, y_pet_h+e_noire+0.5]);
         txt([xm0-2, -e_bloc/2], "LED avant", 1.6, "right");
-        trait([x_cl, y_bloc_b+p_cloison],[x_cl, y_bloc_b+p_cloison+5]);
-        txt([x_cl-14, y_bloc_b+p_cloison+6.3],
-            str("la cloison n'entame que ", p_cloison, " mm sur ", e_bloc,
-                " — rien a soutenir au milieu"), 1.6);
+        trait([Lk+fente/2, -e_bloc/2],[Lk+fente+9, -e_bloc/2+7]);
+        txt([Lk+fente+9.5, -e_bloc/2+7], "LED ARRIERE + son PCB, en teinte pale :", 1.6);
+        txt([Lk+fente+9.5, -e_bloc/2+4.6], "ils sont DERRIERE le plan de coupe", 1.6);
         trait([Lk+fente/2, y_bloc_b],[Lk+fente/2, y_bloc_b-6]);
         txt([Lk+fente/2, y_bloc_b-7.3],
-            "COUPE PASSANT PAR LA MOITIE PLEINE — la fente arriere et le PCB", 1.6, "center");
-        txt([Lk+fente/2, y_bloc_b-9.6], "sont dans l'autre moitie (voir C) : le peigne n'est pas sectionne", 1.6, "center");
+            "coupe par la MOITIE PLEINE : le peigne n'est pas sectionne", 1.6, "center");
         txt([xm1+e_cache+2, -e_bloc/2], "dos du peigne", 1.6);
         txt([0, y_pet_h+e_noire+11], "B — COUPE EN LONG D'UNE BLANCHE", 2.6);
         txt([0, y_arr_b-11], "trame de points DENSIFIEE en s'eloignant de chaque LED : c'est ce qui egalise la luminosite", 1.6);
@@ -200,7 +205,7 @@ module vue_dessus() {
     for (i = [0:n-1]) {
         xd = i*pas_w + 0.6 + (lf-ld)/2;
         color(C_PCB) translate([xd, yk]) square([ld, fente+1.4]);
-        color(C_LED) translate([xd+ld/2-led_c/2, yk+0.3]) square([led_c, 1.0]);
+        color(C_LED) translate([xd+ld/2-led_c*0.8, yk+0.25]) square([led_c*1.6, 1.7]);
     }
 
     if (etiquettes) {
