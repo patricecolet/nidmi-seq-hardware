@@ -45,15 +45,17 @@ kb_h     = 58;
 kb_cache = 2;            // debord des caches de part et d'autre
 
 /* [Ecran — CrowPanel ESP32-S3 7,0" 800x480, 24,90 $ chez Elecrow] */
-// Surface ACTIVE : 153.84 x 85.63 mm — donnee constructeur, exacte.
-// Encombrement de la CARTE : NON PUBLIE sur la fiche produit -> valeur ESTIMEE
-// ci-dessous, a remplacer par une mesure sur l'exemplaire reel ou par le
-// schema/manuel telechargeables chez Elecrow.
-scr_win_w = 153.84;      // actif (exact)
-scr_win_h = 85.63;       // actif (exact)
-scr_bord  = 9;           // ESTIME : bordure carte autour de l'actif
-scr_w     = scr_win_w + 2*scr_bord;
-scr_h     = scr_win_h + 2*scr_bord;
+// Cotes CONSTRUCTEUR, toutes exactes (plus d'estimation) :
+//   carte    181.26 x 108.36 x 16 mm
+//   actif    153.84 x 85.63 mm
+// -> bordure 13.71 mm en largeur, 11.37 mm en hauteur (non symetrique).
+// !! L'EPAISSEUR DE 16 mm commande la profondeur du boitier : c'est le composant
+//    le plus epais de la facade, devant le clavier (10 mm de guide + 5 de noires).
+scr_win_w = 153.84;
+scr_win_h = 85.63;
+scr_w     = 181.26;
+scr_h     = 108.36;
+scr_t     = 16;
 
 /* [Encodeurs] */
 n_enc     = 6;           // Row Pas Valeur Velo Duree Master (CONCEPTION.md §2)
@@ -158,11 +160,10 @@ F_H = util_h + 2*marge;
 module plaque() { color(C_PLAQUE) cube([F_W, F_H, 2]); }
 
 module ecran(p, w, h) {
-    marge_cadre = 10;
     translate(p) {
         color(C_ECRAN) cube([w, h, 3]);
-        color(C_WIN) translate([marge_cadre, marge_cadre, 3])
-            cube([w - 2*marge_cadre, h - 2*marge_cadre, 0.6]);
+        color(C_WIN) translate([(w - scr_win_w)/2, (h - scr_win_h)/2, 3])
+            cube([scr_win_w, scr_win_h, 0.6]);
     }
 }
 
@@ -258,5 +259,5 @@ echo(str("VARIANTE ", variante, "  ->  facade ", F_W, " x ", F_H, " mm"));
 echo(str("  zone utile ", util_w, " x ", util_h,
          "   rangee haute ", rang1_h, " mm de profondeur"));
 echo(str("  ruban ", ruban_l, " mm   (dispo dans la bande : ", util_w, " mm)"));
-if (fonc) echo(str("  rangee haute ", rang1_w_fonc, " mm de large   CrowPanel 7\" carte ~",
+if (fonc) echo(str("  rangee haute ", rang1_w_fonc, " mm de large   CrowPanel Advance carte ",
                    scr_w, " x ", scr_h, " (actif ", scr_win_w, " x ", scr_win_h, ")"));
