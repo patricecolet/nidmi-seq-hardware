@@ -169,3 +169,41 @@ comparée à du clair). Un facteur 5 de perte ne se rattrape avec aucune LED rai
 > Les MCP23017 déjà présents ne font que du tout-ou-rien (pas de PWM) → il faudrait un driver LED
 > dédié sur l'I2C. **Avant d'accepter ce coût, tester si un SK6812 piloté en blanc plein suffit** :
 > un seul bus, une seule référence, un seul firmware. Test de dix minutes.
+
+## Essais de gravure — trois résultats (2026-08-20)
+
+**Pollution lumineuse entre touches : acceptable.** Mesuré sur le proto. C'est ce qui autorise
+le **bloc plein** (pas de découpe des touches) — cf. `CONCEPT_PLEXI_EPAIS.md` et
+`mechanical/clavier_piano.scad` (`separation = "rainure"`).
+
+**1. Gradient d'extraction — reliefs peu profonds près de la LED, de plus en plus prononcés en
+s'éloignant.** C'est le principe fondamental du guide latéral : chaque motif prélève de la
+lumière, donc le flux décroît le long du trajet. Une extraction **croissante avec la distance**
+compense et donne une luminosité uniforme. Même principe que les motifs des rétroéclairages de
+dalles LCD, clairsemés près des LED et denses à l'autre bout.
+
+**2. Les points extraient mieux qu'une rainure continue.** Deux raisons : un point diffuse dans
+toutes les directions là où une rainure renvoie surtout perpendiculairement ; et la **densité de
+points** se module finement, ce qui est le levier naturel pour réaliser le gradient du point 1
+— bien plus praticable au Dremel que de faire varier la profondeur de gravure.
+
+**3. Un fond sombre optimise le rendu.** Il *réduit* le flux total émis mais absorbe le halo
+parasite non extrait : les points ressortent nettement au lieu d'être noyés dans un fond diffus.
+C'est un gain de **contraste**, pas de flux. Bénéfice secondaire : il absorbe aussi la lumière
+rasante qui partirait vers les touches voisines — le fond sombre est donc en même temps un
+traitement **anti-pollution lumineuse**. Confirme la piste « guide clair + masque noir »
+envisagée pour les noires : elle vaut pour toute la façade.
+
+### Numéro de pas gravé — idée à arbitrer
+
+Graver le numéro de pas dans le motif d'extraction : le chiffre devient la légende **et**
+l'émetteur, il s'allume au lieu d'être imprimé. Deux réserves :
+
+- **Surface d'extraction faible** : un chiffre extrait bien moins qu'une plage de points, donc
+  il sera plus sombre. Combiné au gradient, les chiffres éloignés de la LED devront être plus
+  gras ou plus densément pointillés.
+- ⚠️ **Une gravure reste visible éteinte** (elle diffuse en lumière ambiante). Or la VISION fait
+  changer le sens des touches selon la vue : en ROLL les blanches sont un clavier chromatique,
+  pas des pas. Un « 12 » gravé en permanence sur une touche qui joue parfois un ré est une
+  légende fausse la moitié du temps. → soit chiffre discret assumé comme décor, soit légende
+  reportée sur l'écran.
