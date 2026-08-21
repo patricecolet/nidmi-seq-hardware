@@ -76,7 +76,16 @@
 - 🟢 **PLAY + REC = PB86-A2** (bi-couleur rouge/vert, 8 pins) ; **6 autres = PB86-A1**
   (mono, 6 pins). → LED : 2×bi (4 lignes) + 6×mono (6 lignes) = **10 lignes**.
 - Cotes : corps **12,4 × 17,0 mm**, course 2 mm, force 170 gf, SPDT, LED 1,8-2,4 V
-  / 20 mA. **Hauteur/cap non publiés** → récupérer du STEP GrabCAD (pb86-switches-1).
+  / 20 mA.
+- 🟢 **2026-08-21 — HAUTEUR CONNUE : 10 mm** entre la **surface du PCB** et la
+  **surface visible du cache** (relevé par l'utilisateur). Le PB86 n'est donc
+  **pas** le poste dimensionnant : il passe derrière l'écran (16) et le clavier
+  (16,3). Une estimation antérieure à 20 mm était fausse du double.
+  Le constructeur (**Honyone**) publie un dessin sans cotes ; la seule source
+  publique trouvée est [Adafruit](https://www.adafruit.com/product/5517) —
+  **17 × 12 × 14 mm**, capuchon compris. Autres cotes relevées : course
+  **2,0 ± 0,4 mm**, force **170 ± 50 gf**, **200 000 cycles** — à surveiller sur
+  PLAY et STOP, qui prendront l'essentiel des appuis.
 - 🔴 **IO** : 8 switches + LED bi-couleur (16 lignes) = ~24 IO → via **expandeur
   I2C (MCP23017 ×1-2)** ou driver LED dédié. À figer. LED PB86 **hors** bus SK6812.
 - **Diodes 🟢 → finalement AUCUNE** : les 16 lignes de LED imposent des **MCP23017**
@@ -185,9 +194,19 @@ démarrage*, pas *inutilisée* :
 → **Décision : le ruban migre sur l'ESP32-B ou C**, ce qui libère les 5 broches pour la liaison
 inter-puces. Le repli identifié devient la solution de base.
 
-🔴 **Encombrement de la carte : introuvable.** Ni la fiche produit ni espboards ne le publient.
-C'est la cote qui manque pour dessiner la boîte → **mesurer à réception**, ou récupérer le
-schéma/manuel chez Elecrow.
+🟢 **2026-08-21 — encombrement de la carte : COTES FOURNIES par l'utilisateur**, qui a passé
+la commande et relevé les dimensions. Elles ne figurent ni sur la fiche produit ni sur
+espboards : ne pas les « re-sourcer » sur le web, c'est ici la référence.
+
+| | cote |
+|---|---|
+| carte | **181,26 × 108,36 × 16 mm** |
+| zone active | **153,84 × 85,63 mm** |
+| bordure | 13,71 mm en largeur · 11,37 mm en hauteur (**non symétrique**) |
+
+Les 16 mm d'épaisseur font de l'écran le **composant dimensionnant du boîtier**, devant le
+clavier (10 mm de guide + 1 de plaque). C'est cette cote qui fixe la hauteur intérieure.
+Le blocage « pas de boîtier sans les cotes de l'écran » est **levé**.
 
 Réf. broches : espboards.dev/esp32/elecrow-crowpanel-advance-7-esp32-s3/
 
@@ -236,7 +255,13 @@ voix restent **partagées** entre parties. Le poste cher est l'**effet par parti
 départs vers effets globaux). Une seule architecture de synthèse, plusieurs patchs : c'est ça
 qui reste gratuit.
 
-## 6. Écran — 4,0″ 480×320 SPI 🟡 + ⚠️ impact boîtier
+## 6. Écran — 4,0″ 480×320 SPI ⛔ **PÉRIMÉ**
+
+> ⛔ **Cette section décrit l'écran ABANDONNÉ.** L'écran retenu et **commandé** est le
+> **CrowPanel Advance 7.0-HMI** — voir §5 ci-dessus, qui porte les cotes de référence.
+> Section gardée pour mémoire : elle documente pourquoi un module SPI séparé a été écarté
+> (nappe FPC, routage RGB), et son « impact boîtier » n'a plus cours.
+
 - **Contrôleur** : 🟢 **ILI9488** (choix utilisateur ; 18 bpp, OK en *partial
   refresh*). ST7796 = alternative plus rapide (même PCB) si jamais dispo.
 - Cotes : **PCB 61,74 × 108,04 mm**, **actif 55,68 × 83,52 mm**, ép. 1,6 mm,
@@ -263,7 +288,29 @@ qui reste gratuit.
 - Protection/jack : R série 1 kΩ, clamp **BAT54S**, 100 pF. **LDO 5 V propre**
   (MCP1700-5002) dédié DAC/Vref.
 
-## 9. Connectique 🟡
+## 9. Connectique 🟢 — **en bord de carte** (2026-08-21)
+
+> 🟢 **Plus de carte de connectique séparée, ni de fils vers la tranche.** Les
+> deux cartes latérales arrivent à 2 mm de la paroi arrière : les connecteurs y
+> sont soudés en bord de carte et traversent la paroi.
+>
+> | carte | contenu | occupé / dispo |
+> |---|---|---|
+> | **gauche** (ESP32-B) | USB-C + CV, GATE, CLK, RST | **71** / 71,5 mm |
+> | **droite** (ESP32-C) | MIDI IN, MIDI OUT + audio L/R | **62** / 71,5 mm |
+>
+> La répartition sépare l'**alimentation** (USB-C, sorties 5 V) des **sorties
+> audio**, tenues loin du convertisseur à découpage. L'entraxe de **12 mm** est
+> dicté par le diamètre des **fiches** (~9 mm de corps), pas par les embases.
+>
+> ⚠️ **Corrigé** : `n_jack` valait 5 alors que la liste en compte **six** — MIDI
+> IN, MIDI OUT, CV, GATE, CLK, RST. Il manquait un jack sur la tranche.
+>
+> 🟡 Les quatre CV sont du côté alimentation, donc côté bruit de découpage. Le CV
+> est le signal le plus sensible de l'instrument (12 bits, tension continue) : le
+> LDO 5 V dédié était déjà prévu, la proximité physique est à regarder au routage.
+
+
 - **USB-C** : **GT-USB-7010ASV** 16-pin (LCSC C2988369), 8,9 × 7,35 × 3,26 mm.
   **2× CC 5,1 kΩ** (Rd), TVS **USBLC6-2SC6**, polyfuse 0,5-1 A. D+/D- → GPIO19/20.
 - **Jacks 3,5 mm** : **PJ-320A** (THT, board-edge, Ø6 panneau, 12 × 5 × 5 mm) pour
@@ -275,7 +322,31 @@ qui reste gratuit.
 - Budget LED : 27× SK6812 ≈ 1,6 A crête → **plafonner luminosité** (USB-C 15 W).
 - CV en **0–5 V** → pas de rail +12 V. **LDO 5 V propre** dédié DAC/Vref (anti-bruit).
 
-## 11. Mécanique 🟢 (profondeur recalée)
+## 11. Mécanique — ⚠️ **chiffres périmés, voir `mechanical/implantation.scad -D plan=true`**
+
+> 🟢 **2026-08-21 — PLAN GLOBAL D'ENCOMBREMENT établi**, puis affiné en séance.
+> Modèle : `mechanical/implantation.scad` (3D par défaut, planche cotée avec
+> `-D plan=true`). Détail et justifications : `mechanical/README.md`.
+>
+> | | cote |
+> |---|---|
+> | façade | **337,26 × 226,36 mm** |
+> | hors-tout | **342,26 × 231,36 × 37,5 mm** (façade 2 + intérieur 33 + fond 2,5) |
+> | hauteur intérieure | 33 mm — minimale calculée **28,9** |
+> | poste dimensionnant | **le clavier**, 16,3 mm, devant l'écran à 16 |
+>
+> ⚠️ Les **25 mm** annoncés ci-dessous sont **périmés** : ils dataient du module
+> 4,0″ SPI. Le CrowPanel fait 16 mm d'épaisseur.
+>
+> 🟢 **La façade fait CACHE.** La pièce de plexi et l'écran passent **dessous** ;
+> le doigt les atteint par des ouvertures. Conséquence : le dos du peigne passe de
+> 18 à **24 mm** (cache 6 + jeux 3 + ruban 10 + bord arrière 5), donc la pièce de
+> plexi de 70 à **76 mm**.
+>
+> 🟢 **Pas d'inclinaison** — étudiée puis écartée pour le prototype : trop longue
+> à mettre au point pour ce qu'elle apporte. Les quatre directions examinées et ce
+> qui les départage sont dans `mechanical/README.md`.
+
 - Empilement (haut→bas) : plexi **2 mm** · **entrefer avant 7 mm** (dégage le corps
   EC11 ~6,5 + PB86 + module écran) · PCB **1,6 mm** · **cavité 12 mm** (3× ESP32 ~3 +
   connecteurs) · fond **2,5 mm**. → **profondeur totale ≈ 25 mm.**
@@ -284,6 +355,36 @@ qui reste gratuit.
   connecteurs). L'entrefer 7 mm = dégagement du corps des encodeurs entre les deux.
 - Jacks **PJ-320A board-edge** (~5 mm) + USB-C sur la **tranche arrière**, au niveau du
   PCB principal. Boîtier parois **2,5 mm**.
+
+## 12b. Les cartes 🟢 (2026-08-21)
+
+**Quatre cartes**, plus l'alimentation dont la position n'est pas décidée.
+
+| carte | taille | contenu |
+|---|---|---|
+| **latérale gauche** | **71,5 × 131,9 mm** (94 cm²) | double face : 4 PB86 + 3 EC11 devant, **ESP32-B** derrière |
+| **latérale droite** | idem | idem, **ESP32-C** |
+| **LED avant** | 294,8 × 8 mm, verticale | 16 LED, injection en tranche des blanches |
+| **LED du dessous** | 294,8 × 56 mm, ENIG 0,6–0,8 | 11 LED des noires + celles du ruban ; **posée sur le socle**, dans la découpe de la mousse |
+
+Les latérales sont dimensionnées **au maximum utilisable** (94 cm²), pas à
+l'emprise des commandes (71,5 cm²) — un tiers de plus. Limites : en largeur le
+CrowPanel descend à −16 alors que la carte est à −9,6 ; en profondeur le plexi
+descend à −16,3. Hauteur disponible : **8 mm au-dessus**, **23,4 en dessous**.
+
+**Les modules ESP32 sont au bord extérieur, couchés.** Trois raisons : ils ne
+coupent plus la carte en deux, leur **antenne PCB** se retrouve au bord du
+boîtier comme la note Espressif le demande, et le gain de surface (4,6 cm²) est
+accessoire. ⚠️ Si le sans-fil doit servir, la matière du boîtier compte — un
+capot métallique tue l'antenne.
+
+> 🟡 **Ouvert : ces deux cartes sont-elles identiques ?** L'implantation étant
+> boutons à l'extérieur / molettes à l'intérieur des deux côtés, la **même carte
+> tournée de 180°** présente le bon ordre de l'autre côté — un seul dessin, une
+> seule série, une seule relecture. Charger l'une de l'alimentation et l'autre du
+> moteur audio y ferait renoncer. Le moteur audio (Cmod A7 + DAC, 62 × 70) ne
+> tient de toute façon pas à plat entre les colonnes de commandes ; il demanderait
+> une carte fille dans les 23 mm sous la carte.
 
 ## 12. Budget IO / répartition 3 puces 🟡
 **Tactile = 32 canaux (27 touches + ruban ~5) → les 3 puces en font** :

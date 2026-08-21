@@ -19,7 +19,8 @@ show_dims     = true;
 show_blanches = true;
 show_noires   = true;
 show_pcb      = true;
-show_caches   = true;
+// 2026-08-21 : plus de caches — c'est la BOITE qui fait cet office (commit 18aa29c).
+show_caches   = false;
 vue_plan      = false; // true = vue a plat lisible : blanches OPAQUES, noires
                        // noires, sans PCB ni caches. Sert a verifier a l'oeil que
                        // les proportions sont celles d'un vrai piano.
@@ -34,7 +35,14 @@ vue_plan      = false; // true = vue a plat lisible : blanches OPAQUES, noires
 //    Le dos partage quand meme un peu de lumiere entre touches voisines : le
 //    garder AUSSI ETROIT que la tenue mecanique le permet, et mesurer.
 plaques_entieres = true;
-dos              = 5;   // profondeur du dos (doit rester <= cache_ov pour etre cache)
+// 2026-08-21 : ALIGNE SUR L'ARCHITECTURE ARRETEE (coupe_cellule.scad). Le dos
+// porte LE RUBAN : c'est la meme piece de plexi que les touches.
+// !! 24 et non 18 : le dos ne loge pas que le ruban, il doit aussi laisser a la
+//    FACADE de quoi CACHER le dos du peigne des noires et la zone de contact du
+//    film. Repartition calculee dans implantation.scad (kb_dos_mini) :
+//      cache 6 + jeux 3 + ruban 10 + bord arriere 5 = 24.
+//    Wh et dos DOIVENT suivre implantation.scad — l'echo le verifie.
+dos              = 24;
 
 // SEPARATION DES TOUCHES — "rainure" (defaut) ou "decoupe".
 //
@@ -67,8 +75,12 @@ coupe         = false; // true = coupe transversale : seul moyen de voir les PCB
 white_n     = 16;      // blanches (do → ré sur 2 octaves + 1 ton)
 pitch_w     = 18.5;    // PAS des blanches (entraxe). Piano réel : 23.5
 gap_w       = 1.2;     // trait de découpe entre blanches
-Wh          = 58;      // longueur d'une blanche
-Bh          = 36;      // longueur d'une noire (piano réel : ~0,63 × blanche)
+// 2026-08-21 : cotes de l'architecture arretee (coupe_cellule.scad).
+// !! Wh est la longueur TOTALE DE LA PIECE, DOS INCLUS — pas la partie avant.
+//    C'est y_dents = Wh - dos qui donne la fin des touches. Confondre les deux
+//    raccourcit la piece et le ruban se retrouve DANS LE VIDE, derriere le plexi.
+Wh          = 76;      // PIECE ENTIERE : 52 de zone de touches + 24 de dos
+Bh          = 32;      // longueur d'une noire (coupe_cellule.scad Lb)
 // LARGEUR DES NOIRES — attention a la cote choisie. Une noire de piano est
 // TRONCONIQUE : ~9.5 mm au sommet (ou le doigt se pose) mais 13.7 mm a la base.
 // Vue de dessus, et a plus forte raison sur une facade PLATE ou il n'y a aucun
@@ -110,7 +122,10 @@ arret_d     = 2.4;     // diametre ; doit etre > gap_w pour servir a quelque cho
 
 /* [Épaisseurs] */
 t_blanches  = 10;      // guide de lumière
-t_noires    = 5;       // plaque sombre posée dessus (5 mm : plus facile a sourcer)
+// 2026-08-21 : les noires ne sont plus une plaque rapportee mais un RELIEF DE
+// 1 mm USINE dans la plaque acrylique de 1 mm. La valeur ci-dessous ne sert plus
+// qu'a les rendre visibles en 3D.
+t_noires    = 1;       // relief usine, pas une piece
 t_pcb       = 1.6;
 t_cache     = 2;
 
@@ -120,7 +135,7 @@ pcb_h_noir  = 3.5;     // hauteur du PCB arrière (moins large : plaque fine)
 pcb_gap     = 1.0;     // jeu entre PCB et tranche (couplage LED)
 led_size    = 3.5;     // SK6812 3535
 led_h       = 1.6;
-cache_ov    = 6;       // recouvrement du cache (doit couvrir le dos)
+cache_ov    = 6;       // recouvrement du cache
 
 /* [Repère] */
 kb_x0 = 0;
@@ -162,12 +177,16 @@ function black_cx(i) = xstart(i) + T[i % 7] + Wb/2;
 black_list = [ for (i = [0 : white_n-2]) if (has_black(i)) black_cx(i) ];
 
 kb_w = white_n * pitch_w - gap_w;
-by0  = kb_y0 + Wh - Bh;
-
-// ---------------- 2D ----------------
 // Fin des DENTS : les touches s'arretent la, le dos occupe le reste.
+// (defini ICI, avant by0 qui s'en sert : OpenSCAD evalue dans l'ordre du fichier)
 y_dents = kb_y0 + Wh - (plaques_entieres ? dos : 0);
 
+// La noire fait Bh et BUTE SUR LE DOS. (Elle etait mesuree depuis le fond de la
+// piece, ce qui la faisait rogner par le dos : avec un dos de 18 il n'en restait
+// que 14 mm au lieu de 32.)
+by0  = y_dents - Bh;
+
+// ---------------- 2D ----------------
 // Emprise des noires, servant aussi a creuser les encoches des blanches.
 // Ne mord pas dans le dos, sinon le peigne se separerait en 16 morceaux.
 // Les angles CONVEXES de l'outil de coupe deviennent les angles CONCAVES de la

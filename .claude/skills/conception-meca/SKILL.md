@@ -120,3 +120,34 @@ après coup — et ont changé le procédé, puis le nombre de pièces.
 Patrice démonte des claviers pour les réparer et conçoit de la lutherie numérique. Son savoir
 porte sur les **modes de défaillance réels**, ce qu'un atelier accepte de faire, et ce qu'un
 doigt sent. **Le solliciter explicitement** plutôt que de conclure seul sur ces points-là.
+
+## 9. Un modèle de plus n'est jamais la solution
+
+**Erreur commise (2026-08-21)** : plutôt que de réparer `implantation.scad`, qui portait des cotes
+fausses, en avoir écrit un neuf à côté (`encombrement.scad`) — et laisser `boite.scad` traîner.
+Résultat en une séance : **trois modèles, trois claviers différents**, dont un où le ruban était
+placé dans une rangée derrière une pièce de plexi qui s'arrêtait avant lui.
+
+> « À chaque fois, au lieu de corriger, tu me rajoutes un fichier. C'est chronophage, ça embrouille
+> les pistes, et c'est comme ça qu'on crée des erreurs. »
+
+- **On corrige le fichier existant.** Si une vue manque, elle s'ajoute dedans (un paramètre de
+  mode), pas dans un fichier voisin.
+- Un modèle de plus = une cote de plus à tenir à jour = une contradiction en préparation.
+- Avant de créer un `.scad`, chercher lequel couvre déjà le sujet.
+
+## 10. Lire la sémantique d'un paramètre avant de le changer
+
+**Erreur commise (2026-08-21)**, deux fois de suite sur la même pièce. Dans `clavier_piano.scad`,
+`Wh` est la longueur **totale** de la pièce, dos inclus (`y_dents = Wh - dos`). Lu comme « la
+longueur de la blanche », il a été mis à 52 avec `dos = 18` — d'où une pièce de **52 mm au lieu de
+70**, et un ruban flottant 16 mm derrière le plexi.
+
+- **Chercher où la variable est UTILISÉE** avant de la modifier, pas seulement son commentaire.
+  Ici une seule ligne (`y_dents = Wh - dos`) disait tout.
+- Se méfier des **mots identiques dans deux fichiers** : `dos` vaut 18 dans `coupe_cellule.scad`
+  (la partie qui porte le ruban) et désigne dans `clavier_piano.scad` la partie non fendue.
+- Un module hérité peut inclure plus que son nom ne dit : `noires_2d()` incluait le **dos**, vestige
+  de la plaque teintée rapportée.
+- **Après un changement de cote, regarder le rendu de la pièce entière**, pas seulement vérifier
+  que le rendu passe sans erreur.

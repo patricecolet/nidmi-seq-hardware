@@ -211,6 +211,199 @@ demandaient 340 mm pour 296 disponibles.
 > 206 × 62). La modeste = la complète moins la rangée clavier — même
 > sous-ensemble électronique et même firmware d'interface possibles.
 
+## Plan global d'encombrement — `implantation.scad -D plan=true`
+
+> 🟢 **2026-08-21 — le boîtier peut être dessiné.** Les cotes du CrowPanel
+> Advance 7.0-HMI ont été **fournies par l'utilisateur**, qui a passé la commande
+> et relevé les dimensions : elles ne figurent ni sur la fiche produit ni sur
+> espboards. C'est la référence du projet — **ne pas chercher à les re-sourcer**.
+
+> ⚠️ **Un seul fichier, pas trois.** Le plan a d'abord été écrit dans un
+> `encombrement.scad` séparé, et `boite.scad` traînait encore à côté. Résultat :
+> **trois modèles avec trois cotes de clavier différentes** (58+5, 52+18, et un
+> ruban placé dans une rangée derrière le clavier). Les deux fichiers en trop ont
+> été **supprimés** et tout est revenu dans `implantation.scad`.
+>
+> **Règle qui en sort : on corrige le modèle existant, on n'en ajoute pas un à
+> côté.** Un modèle de plus, c'est une cote de plus à tenir à jour, et c'est comme
+> ça qu'on fabrique des contradictions.
+
+```sh
+# le PLAN (3 vues 2D cotées)
+openscad -o encombrement.png --imgsize=1500,2500 --projection=o \
+  --camera=175,-15,0,0,0,0,1900 --colorscheme=Tomorrow -D 'plan=true' implantation.scad
+
+# le modèle 3D de la façade (comportement par défaut, inchangé)
+openscad -o implantation_complete.png --imgsize=1400,1150 --projection=o \
+  --viewall --autocenter -D 'variante="complete"' implantation.scad
+```
+
+Chaque vue **nomme son plan de coupe** — c'est le point d'ambiguïté récurrent :
+
+| vue | plan de coupe |
+|---|---|
+| **A** dessus | aucun — façade de face, tranche arrière rabattue au-dessus |
+| **B** coupe longitudinale | vertical, axe avant-arrière, **au milieu** : traverse le clavier **et** l'écran |
+| **C** coupe transversale | vertical, gauche-droite, **au droit de la rangée haute** |
+
+Le clavier **en travers** n'est pas repris — `coupe_cellule.scad` le traite.
+
+### Ce que le plan donne
+
+| | cote |
+|---|---|
+| façade | **337,26 × 226,36 mm** (hors-tout 342,26 × 231,36) |
+| hauteur intérieure | **33 mm** — minimale calculée 32,6 |
+| hors-tout | **342 × 231 × 36,5 mm** |
+
+**La largeur est imposée par la rangée haute** (313,26 mm), pas par le clavier
+(298,8).
+
+### La façade est un cache, et le plexi passe dessous
+
+Décidé le 2026-08-21. La pièce de plexi n'affleure plus : elle est **sous la
+façade**, que le doigt atteint par **deux ouvertures** — une pour les touches,
+une pour le ruban. La bande de façade entre les deux **masque le dos du peigne
+des noires et la zone de contact du film**, et un bord arrière masque la fin du
+dos.
+
+> 🔴 **Conséquence : le dos ne pouvait pas rester à 18 mm.** Il ne loge pas que
+> le ruban ; il doit aussi donner à la façade de quoi cacher. Décompte :
+>
+> | | mm |
+> |---|---|
+> | cache (entre les deux ouvertures) | **6** 🔴 estimé |
+> | jeux d'ouverture (3 × 1) | 3 |
+> | ruban | 10 |
+> | bord arrière | **5** 🔴 estimé |
+> | **dos nécessaire** | **24** — il en manquait **6** |
+>
+> La pièce de plexi passe donc de 70 à **76 mm**, et la façade de 220,36 à
+> **226,36**. Les deux valeurs en rouge sont des estimations : la largeur du cache
+> devrait être dimensionnée sur l'encombrement réel de la reprise de contact
+> (piste d'argent + connecteur ZIF), qui n'est pas encore arrêtée.
+
+> ⚠️ `clavier_piano.scad` porte `Wh` et `dos` **en dur** (`use <>` n'importe pas
+> les variables). Ils doivent valoir ce que calcule `implantation.scad` —
+> **76 et 24**. Un echo le vérifie et crie `DESYNCHRONISE` sinon : c'est
+> exactement le décalage qui, la fois précédente, avait laissé le ruban hors du
+> plexi.
+
+> 🔴 **Le poste dimensionnant en hauteur n'est plus l'écran : c'est le PB86.**
+> À 20 mm il dépasse les 16 mm du CrowPanel. Or cette cote est **estimée** — le
+> BOM note « hauteur/cap non publiés → STEP GrabCAD (`pb86-switches-1`) ». Tant
+> qu'elle n'est pas relevée, l'épaisseur de l'instrument n'est pas figée.
+>
+> Les **~25 mm** du BOM §11 sont périmés : ils dataient du module 4,0″.
+
+> 🟡 **Pas encore placés** : le PCB principal, les deux ESP32 et le câblage. Leur
+> volume est réservé (12,6 mm) mais leur position attend le KiCad. Les zones
+> **jaunes** sont ce qui reste libre.
+
+### Les cartes, et la place qu'elles ont
+
+Quatre cartes identifiées, plus l'alimentation qui n'est pas placée.
+
+| carte | taille | note |
+|---|---|---|
+| **latérale gauche** (ESP32-B) | **71,5 × 131,9 mm** — 94 cm² | double face : boutons + molettes devant, ESP32 derrière |
+| **latérale droite** (ESP32-C) | idem | idem |
+| **LED avant** | 294,8 × 8 mm, verticale | 16 LED, injection en tranche des blanches |
+| **LED du dessous** | 294,8 × 56 mm | posée sur le socle, dans la découpe de la mousse |
+
+**Les latérales sont dimensionnées au maximum utilisable**, pas à l'emprise des
+commandes. La rangée de boutons et molettes ne fait que 66 × 108,36 (71,5 cm²) ;
+en prenant tout ce qui est libre à cette hauteur on obtient **94 cm², soit un
+tiers de plus**. Les limites sont réelles, pas arbitraires :
+
+- **en largeur**, jusqu'au bord de l'écran — au-delà, le CrowPanel descend à
+  −16 mm alors que la carte est à −9,6 : elle ne peut pas passer dessous ;
+- **en profondeur**, de l'arrière du clavier à la paroi arrière — vers l'avant, la
+  pièce de plexi descend à −16,3 et barre le passage.
+
+Hauteur disponible : **8 mm au-dessus** de la carte pour les composants
+traversants, **23,4 mm en dessous** pour tout le reste. La carte s'arrête à 2 mm
+de la paroi arrière, donc l'USB-C et des jacks peuvent y être **en bord de carte**.
+
+**La connectique est en bord de carte**, plus de carte de connectique séparée ni
+de fils vers la tranche : les latérales arrivent à 2 mm de la paroi arrière.
+
+| | contenu | occupé / dispo |
+|---|---|---|
+| **gauche** | USB-C + CV, GATE, CLK, RST | **71** / 71,5 mm |
+| **droite** | MIDI IN, MIDI OUT + audio L/R | **62** / 71,5 mm |
+
+La répartition sépare l'**alimentation** (USB-C et les sorties 5 V, à gauche) des
+**sorties audio** (à droite, loin du convertisseur à découpage, et du côté où
+irait le moteur audio). L'entraxe de 12 mm n'est pas dicté par les embases mais
+par le **diamètre des fiches** : une fiche 3,5 fait ~9 mm de corps, il faut
+pouvoir la saisir. Le côté gauche est plein à 0,5 mm près.
+
+> ⚠️ **Corrigé au passage** : `n_jack` valait **5** alors que son propre
+> commentaire listait six jacks — MIDI IN, MIDI OUT, CV, GATE, CLK, RST. Il
+> manquait donc un jack sur la tranche depuis le début.
+
+> 🟡 Reste ouvert : ces deux cartes sont-elles **identiques** ? L'implantation
+> étant boutons à l'extérieur et molettes à l'intérieur des deux côtés, la même
+> carte tournée de 180° présente le bon ordre de l'autre côté — un seul dessin,
+> une seule série. Charger l'une de l'alimentation et l'autre du moteur audio y
+> ferait renoncer.
+
+### Trois erreurs de dessin corrigées le jour même
+
+**Les noires étaient tracées en bande pleine.** La position était juste mais la
+lecture fausse : la bande coupait le plexi en deux et laissait croire que **la
+pièce s'arrêtait avant le ruban**, alors qu'elle est d'un seul tenant — 52 mm de
+blanches plus 18 de dos. Les onze noires sont maintenant tracées séparément, aux
+décalages de facteur de piano, pour qu'on voie les **talons des blanches** passer
+entre elles. C'est l'article 2 du skill `conception-meca` : le relief des noires
+est **usiné dans la plaque**, il n'interrompt rien.
+
+**La coupe B montrait un relief de noire qui n'existe pas là.** Prise au milieu,
+elle tombe entre **si et do** — deux blanches adjacentes.
+
+**Le clavier était dessiné en un bloc de 16,3 mm**, ce qui le faisait paraître
+plus épais que l'écran. Faux : **le plexi ne fait que 10 mm**, donc *moins* que
+les 16 de l'écran. Les 6 mm restants sont la **suspension** — mousse et socle.
+Les couches sont désormais distinctes et cotées.
+
+### Cotes réconciliées entre les trois modèles
+
+`clavier_piano.scad` portait encore la géométrie d'avant l'architecture arrêtée.
+Aligné sur `coupe_cellule.scad` :
+
+| | avant | après |
+|---|---|---|
+| **pièce entière** (`Wh`) | 58 | **70** |
+| dos du peigne (`dos`) | 5 | **18** — il porte le ruban |
+| noire (`Bh` / `Lb`) | 36 | **32** |
+| noires (`t_noires`) | plaque teintée 5 mm | **relief usiné de 1 mm** |
+| caches | affichés | **supprimés** — c'est la boîte qui fait cet office |
+
+> 🔴 **Le piège qui a fait rater le clavier deux fois : `Wh` est la longueur
+> TOTALE de la pièce, dos inclus** — et non la partie avant. C'est
+> `y_dents = Wh - dos` qui donne la fin des touches. En lisant `Wh` comme « la
+> blanche » et en posant `Wh = 52, dos = 18`, on obtient une pièce de **52 mm**,
+> pas de 70 : le plexi s'arrête alors **16 mm avant le ruban**, qui flotte dans le
+> vide. Bon réglage : `Wh = 70`, `dos = 18`.
+>
+> Deux conséquences ont dû être corrigées dans la foulée :
+> - `by0` mesurait la noire **depuis le fond de la pièce**, donc le dos la
+>   rognait — avec un dos de 18 il n'en restait que 14 mm au lieu de 32. La noire
+>   part maintenant de `y_dents - Bh` : elle fait `Bh` et **bute sur le dos**.
+> - `noires_2d()` **inclut `dos_2d()`**, héritage de l'époque où les noires
+>   étaient une plaque teintée rapportée avec son propre dos. Utilisé tel quel, le
+>   dos sortait tout noir et le ruban disparaissait dessous. Le modèle 3D appelle
+>   donc `blacks_2d()`, qui ne donne que le relief.
+>
+> 🟡 **Reste à trancher** : `clavier_piano.scad` sépare les blanches sur toute la
+> zone de touche (52 mm), alors que `coupe_cellule.scad` arrête le trait de scie à
+> **20 mm**. Les deux ne peuvent pas être vrais.
+
+> ⚠️ `use <>` n'importe **que les modules et fonctions, pas les variables**. Les
+> décalages des noires sont donc recopiés dans `implantation.scad` (`noires_plan`)
+> pour la vue de dessus du plan, et doivent suivre `clavier_piano.scad`.
+
 ## Assemblage du clavier (`coupe_cellule.scad`)
 
 > ### 🟢 2026-08-21 — architecture arrêtée en séance de conception
@@ -310,6 +503,24 @@ Deux règles quelle que soit la solution retenue :
 > sur la jonction. Le risque reste faible ici — plages espacées de millimètres,
 > 3,3 V, boîtier clos, et pilotage en charge-décharge plutôt qu'en continu.
 
+### La carte LED du dessous, et la découpe de la mousse
+
+🔴 **La carte LED est POSÉE SUR LE SOCLE, et la mousse est découpée pour elle.**
+Point rappelé par l'utilisateur le 2026-08-21 après avoir été perdu une fois —
+il ne doit plus l'être. Trois conséquences :
+
+- **Elle ne s'ajoute pas à l'empilement.** Elle vit *dans* l'épaisseur de la
+  mousse, pas entre le bloc et elle. Le clavier reste à 16,3 mm sous la face
+  touchée.
+- **La mousse est le ressort ; la découper lui retire de l'appui** là où la carte
+  passe, c'est-à-dire sous les noires et sous le ruban — donc sur presque toute la
+  largeur. Il faut vérifier ce qu'il reste comme surface d'appui, et où, sinon le
+  bloc s'appuie sur une couronne et fléchit au milieu.
+- **La cote tombe juste, mais sans marge** : carte ENIG 0,6–0,8 + SK6812 3535
+  ~1,9 = **~2,7 mm** au-dessus du socle, pour **3 mm** de mousse. La LED affleure
+  sous le bloc sans entrer dans la poche — l'air est conservé, ce qui est
+  exactement ce qu'on veut pour garder le cône à ±42°.
+
 ### Serrage
 
 **Ne jamais serrer du rigide sur du rigide** : la pression devient imprévisible et
@@ -338,41 +549,19 @@ linéaire (le PWM l'est, la perception non) — la courbe se règle à l'œil.
 > 🟡 **`clavier_piano.scad` modélise encore les noires en plaque teintée de 5 mm**
 > — à réconcilier quand les cotes seront figées.
 
-## Implantation de façade — deux variantes (`implantation.scad`)
+## Coupe d'une cellule (`coupe_cellule.scad`) — ⛔ **VERSION PÉRIMÉE, gardée pour mémoire**
 
-Toutes les cotes de façade sont **calculées depuis les composants** : changer une
-dimension de composant recalcule l'objet, et les totaux sortent en `echo`. Le
-clavier est **importé** de `clavier_piano.scad`, pas redessiné.
+> ⛔ **Ce qui suit décrit l'architecture d'AVANT le 2026-08-21** : deux plaques séparées
+> par un entrefer de 1,5 mm, plaque avant de 2 mm, noires en relief rapporté de 3 mm,
+> 18,7 mm d'empilement. **Remplacée** par « Assemblage du clavier » plus haut — plaque
+> continue de 1 mm, relief usiné dedans, film plaqué sur le bloc.
+>
+> 🟡 **Un point de cette section reste ouvert et n'a pas été rejugé** : l'argument optique
+> qui justifiait l'entrefer. L'ITO plaqué contre la face du guide met celui-ci en
+> **réflexion totale frustrée** (l'indice du PET est proche de celui du PMMA) — la lumière
+> sortirait sur tout le trajet au lieu de sortir aux points gravés. L'architecture actuelle
+> a ramené l'entrefer à un **film d'air de ~0,1 mm**. Est-ce suffisant ? **À trancher.**
 
-```sh
-openscad -o implantation_complete.png --imgsize=1400,1150 --projection=o \
-  --viewall --autocenter -D 'variante="complete"' implantation.scad
-openscad -o implantation_modeste.png --imgsize=1400,1150 --projection=o \
-  --viewall --autocenter -D 'variante="modeste"' implantation.scad
-```
-
-| variante | façade | contenu |
-|---|---|---|
-| **complete** | **328 × 185 mm** | clavier 27 touches, écran, 6 encodeurs, 8 boutons, ruban 136 mm |
-| **modeste** | **230 × 141 mm** | idem **sans clavier** — module de bureau, notes par MIDI externe |
-
-**Le 6ᵉ encodeur passe** (décision 🔴 du BOM §3), en **deux rangées de trois** au
-pas de 30 mm. En une seule rangée de six au pas de 33 il fallait 306 mm pour 296
-disponibles ; en 2×3 la rangée haute ne fait plus que 206 mm de large.
-
-**Le ruban passe de 180 à 136 mm** : boutons + ruban sur une même rangée
-demandaient 340 mm pour 296 disponibles.
-
-> **Place disponible pour l'écran : 206 mm de large**, contre 108 pour le module
-> 4,0″ actuel. Un **7 pouces** (≈165 × 100 mm) rentre en largeur sans rien
-> déplacer ; il coûte ~38 mm de profondeur (façade complète ~223 mm) et remplit
-> le quadrant supérieur droit, actuellement vide.
-
-> **Les deux variantes partagent la même rangée haute** (écran + encodeurs,
-> 206 × 62). La modeste = la complète moins la rangée clavier — même
-> sous-ensemble électronique et même firmware d'interface possibles.
-
-## Coupe d'une cellule (`coupe_cellule.scad`)
 
 Coupe **en travers du clavier** : deux blanches et la noire posée à cheval.
 Dessinée **explicitement en 2D** plutôt que découpée dans un modèle 3D — ce qu'on

@@ -76,8 +76,9 @@
 
 | ✓ | Item | Note | Prio | Qté | Fournisseur | Prix |
 |---|---|---|---|---|---|---|
-| ☐ | PCB **carte horizontale sous le bloc** | porte les LED des noires **et** du ruban ; s'appuie sur le socle | **Essentiel** | | | |
-| ☐ | PCB **tranche avant** | 16 LED + peut porter les plages de contact | **Essentiel** | | | |
+| ☐ | PCB **carte horizontale sous le bloc** | 294,8 × 56 mm — LED des noires **et** du ruban ; **posée sur le socle**, dans la **découpe de la mousse** | **Essentiel** | 1 | | |
+| ☐ | PCB **tranche avant** | 294,8 × 8 mm, verticale — 16 LED, injection dans les blanches | **Essentiel** | 1 | | |
+| ☐ | PCB **latéral** (double face) | **71,5 × 131,9 mm** — 4 PB86 + 3 EC11 devant, ESP32-S3 au dos, connecteurs en bord de carte | **Essentiel** | 2 | | |
 | ☐ | Finition **or chimique (ENIG)**, ép. 0,6–0,8 mm | plat et non oxydable — indispensable pour un contact par pression | **Essentiel** | | | |
 | ☐ | Connecteur **FFC/ZIF** | si la queue de film est retenue | Optionnel | | | |
 

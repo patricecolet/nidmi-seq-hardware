@@ -40,6 +40,19 @@ e_fond   = 0.05;   // fond sombre absorbant, FENETRE sous chaque noire
 e_mousse = 3.0;    // LE RESSORT : pousse tout contre la levre du cadre
 e_socle  = 2.0;    // socle rigide — c'est LUI la reference des LED
 
+// !! LA CARTE LED EST POSEE SUR LE SOCLE, ET LA MOUSSE EST DECOUPEE POUR ELLE.
+//    (rappele par l'utilisateur le 2026-08-21 ; ne pas le reperdre)
+//    Consequences :
+//      - la carte LED ne s'AJOUTE PAS a l'empilement : elle vit DANS l'epaisseur
+//        de la mousse. Le clavier reste a e_plaque+...+e_mousse+e_socle.
+//      - la mousse est le RESSORT : la decouper lui retire de la surface d'appui
+//        la ou elle passe, c'est-a-dire sous les noires et sous le ruban. Il faut
+//        donc verifier ce qui reste comme appui, et ou.
+//      - carte (0,6-0,8 ENIG) + LED (SK6812 3535, ~1,9) = ~2,7 mm au-dessus du
+//        socle, pour 3 mm de mousse : la LED affleure sous le bloc sans entrer
+//        dans la poche. L'air est conserve — c'est ce qu'on veut (cone a +/-42 deg).
+decoupe_mousse = true;   // la mousse est evidee au droit de la carte LED
+
 /* [Decoupes du bloc] */
 larg_coupe = 1.2;  // trait de scie entre blanches
 p_scie     = 20;   // PROFONDEUR du trait : il s'arrete a 20 mm, donc il n'y a
