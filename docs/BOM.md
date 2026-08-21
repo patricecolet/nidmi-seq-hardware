@@ -16,6 +16,24 @@
 ## 2. Clavier piano — touches capacitives (27) 🟢 / LED 🟡
 - **Électrodes** : cuivre sur PCB (pas de composant). 16 blanches notchées **17 mm**
   + 11 noires **12 mm**, anneau/garde de masse, **R série 470 Ω–2 kΩ / canal**.
+- 🟢 **2026-08-21 — PLAQUE ACRYLIQUE CONTINUE, relief usiné dedans.** Une plaque
+  de **1 mm** par-dessus l'ITO, avec le relief des noires (**+1 mm**) usiné dans la
+  masse. Elle pince le film sur toute sa surface, protège l'électrode partout,
+  supprime la colle. Deux options écartées le même jour : le **clavier lisse**
+  (pas de repère au doigt, refusé) et le **relief rapporté de 3 mm** (l'aftertouch
+  passe à travers 0,125 mm et pas à travers 10 — à 3 mm les noires l'auraient
+  perdu alors que les blanches l'auraient gardé).
+  🔴 **À mesurer avant de figer : l'aftertouch à 1–2 mm.** C'est le chiffre dont
+  dépend toute l'architecture. Détail : `mechanical/README.md`.
+- 🟢 **2026-08-21 — contact par piste d'ARGENT sérigraphiée**, jamais sur l'ITO nu.
+  ~0,01 Ω/□ contre ~100 pour l'ITO, donc la distribution reste **sur le film** et
+  sort par une queue unique dans un connecteur à charnière. Contrainte
+  **perpendiculaire uniquement**, et film **ancré au niveau du contact** (dilatation
+  différentielle acrylique/PET : 0,3 mm sur la longueur du clavier).
+- 🟢 **2026-08-21 — éclairage des noires PAR EN DESSOUS**, une LED par touche sur
+  une carte horizontale posée sur le socle. Le trait de scie s'arrête à **20 mm**,
+  donc le bloc est continu sous les noires. Supprimés : cloison transversale et
+  2ᵉ symbole, lamelles noires, fente arrière. Le 2ᵉ symbole est reporté sur l'écran.
 - **LED RGB par touche** : **27× SK6812 3535** (top-emit, 3,5 × 3,5 × ~1,5-1,9 mm),
   bus 1-fil 800 kbps GRB, **~60 mA/LED** à blanc plein. Variante reverse **MINI-E**
   (3,2 × 2,8 mm) si éclairage par découpe PCB. 🟡 figer 3535 vs MINI-E selon cellule.
@@ -71,6 +89,52 @@
   *touch* ESP32-S3, sous plexi. **Rôle : assignable** (choisi à l'écran). Pas de
   composant externe (R série éventuelle).
 
+### 🟢 2026-08-20 — géométrie d'interpolation, d'après AT11805
+
+Source : **AT11805 — Capacitive Touch Long Slider Design with PTC** (Atmel-42479B, 07/2015).
+<http://ww1.microchip.com/downloads/en/AppNotes/Atmel-42479-Capacitive-Touch-Long-Slider-Design-with-PTC_AT11805_ApplicationNote.pdf>
+
+**Ce qui ne s'applique PAS ici.** La note plafonne le slider *self-cap* à **3 canaux et
+20–60 mm**, au motif que de grandes électrodes saturent la plage de mesure du périphérique
+**PTC d'Atmel**. C'est une limite de *leur* puce et de *leur* bibliothèque, pas de la physique,
+et nous n'utilisons ni l'une ni l'autre. Sur notre matériel : ligne de base mesurée
+**~47 000 counts pour un plafond à 4 194 303**, soit 1 % de la plage ; et une électrode de ruban
+à 5 canaux fait **~360 mm²** contre **~720 mm²** pour une blanche — **plus petite que ce qui
+mesure déjà avec des centaines de fois la marge**. Aucun risque de saturation.
+(cf. `docs/ESSAI_ITO_ESP32.md`)
+
+**Ce qui s'applique — c'est de la géométrie, donc indépendant du fabricant.**
+
+- **Interpolation spatiale** (dents entrelacées) : praticable **jusqu'à 200 mm**. Nos 180 mm
+  passent, sans grande marge. Au-delà la note bascule sur l'interpolation résistive
+  (diviseurs entre sous-électrodes, R totale 2–10 kΩ, 300 mm en deux couches, 350 en une).
+- **Cotes de dents** : **4 mm maximum** entre deux dents consécutives, **0,25 mm minimum en
+  pointe**. Sous 0,25, la surface sous le doigt s'effondre en bord de segment → décrochage
+  du signal au passage d'un segment à l'autre.
+- **Linéarité** : en tout point, la surface perdue par une électrode doit être exactement celle
+  gagnée par sa voisine. C'est ce qui rend la position lisible.
+- **Épaisseur de façade admise : 0,5 à 2 mm.** Notre PET fait 0,125 mm → large. (Constantes
+  diélectriques tabulées : PMMA 2,8 · Mylar 3 · FR-4 5,2 · verre 7,8.)
+
+**Découpage retenu — 5 canaux sur 180 mm.** N canaux → **N−1 segments**, dont 2 de bout et
+N−3 de milieu. Formules de la note (vérifiées sur son propre exemple 240 mm / 7 canaux → 50 et
+20 mm) :
+
+    longueur_segment_milieu = (L × 1,25) / (N − 1)
+    longueur_segment_bout   = [L − longueur_segment_milieu × (N − 3)] / 2
+
+→ **segments de bout 33,75 mm · segments de milieu 56,25 mm** (2 × 33,75 + 2 × 56,25 = 180).
+Des segments de bout plus courts que ceux du milieu, c'est ce qui ramène la **zone morte de
+10 % à 3 %** : **~5,4 mm** à chaque extrémité au lieu de 18.
+
+**Ce que les 5 canaux apportent sur 3** : à 3 canaux il n'y a que **deux segments de 90 mm**, et
+la linéarité doit tenir sur toute cette longueur. À 5, chaque segment fait 56 mm → **~14 dents
+au lieu de ~28**, motif ITO plus simple à graver et linéarité à tenir sur deux fois moins de
+longueur. (À 7 canaux : segments de 37,5 mm, ~9 dents — mais 7 canaux tactiles à trouver.)
+
+**Sans effet sur la décision broches** : à 5 canaux le ruban ne tient toujours pas sur les 5
+broches libres du CrowPanel sans supprimer l'UART. La migration vers l'ESP32-B ou C reste acquise.
+
 ### 🟡 2026-08-20 — piste CrowPanel 7,0″ (écran + ESP32-S3 intégrés)
 
 L'implantation de façade (`mechanical/implantation.scad`) libère la place d'un **7 pouces** :
@@ -111,6 +175,12 @@ démarrage*, pas *inutilisée* :
 - **Conflit sur les 5 broches restantes** : le **ruban** demande ~5 canaux tactiles et l'**UART**
   vers B et C en demande 2 à 4. Les deux ne tiennent pas. (IO2/4/5/6/8 sont bien dans la plage
   tactile du S3, donc le ruban serait faisable — mais alors plus rien pour l'UART.)
+
+> 🟢 **2026-08-21 — mise à jour.** Le ruban vit sur le **dos du peigne**, même
+> pièce de plexi que les touches, et ses LED sont **sous le bloc** sur la même
+> carte horizontale que celles des noires. Il n'y a plus de PCB de tranche partagé.
+> Côté canaux tactiles, la décision ci-dessous est inchangée : 5 canaux ne tiennent
+> pas sur les broches libres du CrowPanel sans supprimer l'UART.
 
 → **Décision : le ruban migre sur l'ESP32-B ou C**, ce qui libère les 5 broches pour la liaison
 inter-puces. Le repli identifié devient la solution de base.

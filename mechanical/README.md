@@ -213,106 +213,130 @@ demandaient 340 mm pour 296 disponibles.
 
 ## Assemblage du clavier (`coupe_cellule.scad`)
 
-Trois vues : **A — coupe courante** (en travers, au droit d'une noire et d'une
-coupe de scie), **B — coupe en long d'une blanche** (le seul plan où se voient
-l'injection des LED et la **cloison transversale**), et **C — vue de dessus de la
-zone arrière** (le seul plan où se voient les **ponts** et les **dents du PCB**).
-Tracées explicitement en 2D, pas découpées dans un modèle 3D.
+> ### 🟢 2026-08-21 — architecture arrêtée en séance de conception
+>
+> Trois décisions structurent tout le reste. Elles remplacent le clavier plat et
+> le peigne rapporté, tous deux abandonnés le même jour.
+
+**1 — Une plaque continue d'acrylique par-dessus l'ITO**, avec le relief des
+noires **usiné dedans**. Elle pince le film sur toute sa surface, protège
+l'électrode partout et supprime la colle. Le doigt voit 1 mm sur une blanche,
+2 mm sur une noire.
+
+> 🔴 **Le seul chiffre qui verrouille le reste : l'aftertouch à 1–2 mm.**
+> Mesuré : à travers **0,125 mm** (PET seul) la marge suffit ; à travers **10 mm**
+> le contact est détecté mais l'aftertouch est perdu. L'intervalle n'est pas sondé.
+> Se pince en un quart d'heure en empilant des chutes de PET sur une électrode et
+> en relevant la dynamique entre effleurement et appui franc.
+> **Une noire en relief rapporté de 3 mm était condamnée par là** : aftertouch sur
+> les blanches et pas sur les noires, intenable sur un clavier.
+
+**2 — Un seul film ITO pour tout**, touches et ruban gravés d'un seul coup. Un
+seul calage, figé par le **masque** et non par le montage.
+
+**3 — Trois éclairages indépendants.** Les blanches par la tranche avant, en
+lumière guidée, extraite par la gravure. Les **noires et le ruban par en
+dessous**, sur une **même carte horizontale**.
+
+> **L'argument optique qui rend le point 3 possible.** Une LED couplée par
+> l'**air** n'émet dans le PMMA qu'à **±42°** — exactement l'angle critique. Tout
+> sort donc au premier contact et **rien ne passe en mode guidé** : cette lumière
+> ne peut pas voyager horizontalement, donc elle n'interagit pas avec la gravure
+> des blanches. Deux corollaires à ne jamais oublier :
+> - **ne rien coller sous ces LED** — un indice ~1,5 rouvrirait le cône à 90° et
+>   l'isolement disparaîtrait ;
+> - **satiner le dessous de la plaque**, jamais la face inférieure du bloc, qui
+>   renverrait de la lumière en mode guidé.
+
+### Ce qui a été supprimé, et ce que ça rapporte
+
+| supprimé | pourquoi | gain |
+|---|---|---|
+| cloison transversale + 2ᵉ symbole | l'écran porte le détail | 16 rainures et 16 lamelles en moins |
+| lamelle noire des traits de scie | apportait plus de problèmes que de solutions | 15 pièces en moins |
+| fente arrière + PCB partagé par la tranche | les LED sont passées dessous | une lame verticale en moins |
+
+Le trait de scie **s'arrête à 20 mm** au lieu de descendre jusqu'à l'arrière :
+plus aucun trait sous les noires ni sous le ruban, le bloc reste continu à
+l'arrière, et les dents passent de porte-à-faux de 52 mm à des entailles de 20.
+Le peigne cesse d'être la pièce fragile du projet.
+
+Ce que portait le 2ᵉ symbole se répartit : **l'écran** prend le détail, la **LED
+de la blanche** porte la grille métrique en fond sous l'état actif, et **un trait
+de scie sur quatre** marqué donne le repère au doigt — les 16 blanches sont déjà
+une rangée de 16 pas uniformes, il suffit de la marquer.
+
+### Les cinq vues
+
+**A** coupe en travers avant (moins de 20 mm du bord : la seule zone fendue) ·
+**B** coupe en travers arrière au droit d'une noire (bloc continu, poche et LED
+par en dessous) · **C** coupe en long d'une blanche jusqu'au ruban · **D** vue de
+dessus du bloc (ce qui est usiné, et où) · **E** le film à plat.
 
 ```sh
-openscad -o coupe_cellule.png --imgsize=1400,2300 --projection=o \
-  --camera=54,-88,0,0,0,0,525 coupe_cellule.scad
+openscad -o coupe_cellule.png --imgsize=1500,3000 --projection=o \
+  --camera=58,-192,0,0,0,0,1080 --colorscheme=Tomorrow coupe_cellule.scad
 ```
 
 | couche | ép. | rôle |
 |---|---|---|
-| touches **noires** | 3 mm | collées **sur** le film — même sous-ensemble |
-| **PET** | 0,125 mm | la surface touchée **et** la protection |
+| **plaque acrylique** | 1 mm | la surface touchée · relief des noires usiné dedans (+1 mm) |
+| **PET** | 0,125 mm | porteur du film |
 | **ITO gravé** | ~0 | îlots d'électrodes ; la **garde est la mer** autour |
-| film d'air | ~0,1 mm | le film n'est collé qu'au **pourtour** |
-| **bloc PMMA** | 10 mm | guide de lumière · LED en tranche avant · gravure au dos · **coupes de scie + lamelles noires** entre blanches |
-| fond sombre | ~0,05 mm | absorbe le halo non extrait |
-| mousse | 3 mm | pousse tout vers l'avant |
-| plaque arrière | 2 mm | vissée en périphérie |
-| | **≈ 15,3 mm** | + 3 mm de relief pour les noires |
+| film d'air | ~0,1 mm | le film est **plaqué** par la plaque, pas collé |
+| **bloc PMMA** | 10 mm | guide de lumière des blanches · traits de scie sur 20 mm · poches par le dessous |
+| fond sombre | ~0,05 mm | absorbe le halo non extrait · **fenêtre** sous chaque noire |
+| mousse | 3 mm | **le ressort** — à faible déformation rémanente |
+| socle | 2 mm | référence **rigide** des LED |
 
-**Deux pièces, deux sous-ensembles.**
+### Contact de l'électrode
 
-Le **bloc** porte l'optique et la mécanique : guide, gravure, coupes de scie,
-lamelles. Il ne s'use pas.
+**On ne contacte jamais l'ITO directement.** L'industrie sérigraphie par-dessus
+une piste d'**argent** — le liseré sombre au pourtour des dalles tactiles — et
+c'est l'argent qu'on contacte. L'encre d'argent fait ~0,01 Ω/□ contre ~100 Ω/□
+pour l'ITO, soit des milliers de fois moins : **la distribution peut donc rester
+sur le film** et sortir par une queue unique dans un connecteur à charnière.
 
-Le **film + les noires** forment la « **peau** » du clavier : la surface touchée,
-les électrodes, la garde. C'est la pièce d'usure, **pincée sous les caches** et
-remplaçable en deux vis — pas collée. Un bord capturé ne se décolle pas ; il n'y
-a plus d'arête où un ongle s'insère, et c'est toujours par là que ça commence.
+Deux règles quelle que soit la solution retenue :
 
-**Deux symboles par touche.** Une **cloison transversale** (coupe + lamelle) au
-milieu de la blanche la partage en **deux zones optiques indépendantes** : la LED
-**avant** éclaire la zone 1, la LED **arrière** la zone 2. Chacune porte son
-symbole gravé. Aucun prisme asymétrique, aucune sélectivité approximative — deux
-guides bout à bout.
+- la contrainte sur l'ITO doit être **uniquement perpendiculaire** à la surface.
+  Jamais de cisaillement, jamais de traction : il fissure.
+- **ancrer le film au niveau du contact** et le laisser flotter à l'autre bout.
+  L'acrylique se dilate ~4× plus que le PET — **0,3 mm** sur la longueur du
+  clavier pour 20 °C — et un film pincé aux deux bouts se met en tension.
 
-Dans chaque zone, la **trame de points se densifie en s'éloignant de sa LED** :
-c'est ce qui égalise la luminosité sur la longueur.
+> 🟡 L'argent migre sous tension continue en milieu humide. Parade proportionnée :
+> surimpression diélectrique laissant les plages nues, ou vernis de tropicalisation
+> sur la jonction. Le risque reste faible ici — plages espacées de millimètres,
+> 3,3 V, boîtier clos, et pilotage en charge-décharge plutôt qu'en continu.
 
-**Le PCB arrière est un PEIGNE, et il résout l'injection arrière sans sacrifier
-le dos.** Pour chaque touche, une **fente transversale** est taillée à la jonction
-touche/dos, laissant de petits **ponts** sur les côtés qui retiennent la touche.
-Une **dent du PCB** entre dans cette fente : sa LED injecte dans la tranche
-arrière que la fente vient de créer.
+### Serrage
 
-Trois fonctions pour une pièce :
+**Ne jamais serrer du rigide sur du rigide** : la pression devient imprévisible et
+l'acrylique fissure. La **mousse est le ressort** ; les vis ne fixent qu'une
+position, la mousse la convertit en force. Elle pousse le bloc contre la lèvre du
+cadre supérieur, ce qui référence la face touchée sur une pièce **rigide** — c'est
+ce qui garantit que la distance LED↔surface, donc le **diamètre des taches**,
+reste identique d'une touche à l'autre.
 
-- **le bloc reste d'un seul tenant** — on ne retombe pas sur 16 pièces
-  indépendantes, et le repérage reste celui d'une pièce unique ;
-- **le PCB s'indexe tout seul** dans ses fentes : une partie du positionnement
-  devient automatique au lieu d'être soigneuse ;
-- **le FR4 fait la barrière optique** dans la zone du dos — vernis épargne noir,
-  il remplace la lamelle à cet endroit.
+On dimensionne donc un **écrasement**, pas un couple. Vis M3 dans des écrous logés
+en poches usinées, jamais de taraudage dans l'acrylique, un point tous les 50 à
+80 mm, et des **trous de passage surdimensionnés** à cause de la dilatation.
 
-**Rien ne traverse au milieu de la touche.** La **cloison qui sépare les deux
-zones n'entame que la mi-épaisseur** (5 mm sur 10) : c'est suffisant pour bloquer
-la lumière entre elles, et rien n'a besoin d'être soutenu au milieu — ni cache,
-ni PCB.
+### Ruban
 
-**Les deux LED restent en tranche**, avant et arrière, avec leur **PCB inséré dans
-le plexi**. La **fente arrière n'entame que 7 mm sur 10, par le dessous** : rien
-ne traverse, la matière du dessus reste continue et retient la touche au dos sur
-toute sa largeur. La demi-largeur n'est donc plus une nécessité mécanique — elle
-peut être élargie si l'optique le demande.
+Sur le dos du peigne, même pièce de plexi — 24 mm de profondeur de façade libérés
+puisqu'il n'a plus de rangée propre. **5 canaux**, interpolation spatiale, cotes
+d'AT11805 : segments de bout **33,75 mm**, de milieu **56,25 mm** sur 180, zone
+morte ramenée de 10 % à **3 %**, dents **4 mm** max et **0,25 mm** mini en pointe.
 
-> **Le PCB arrière prend appui sur LE SOCLE**, à travers une découpe de la mousse
-> — et non sur la mousse. Une mousse se comprime : la distance LED↔tranche
-> varierait d'une touche à l'autre, donc la luminosité aussi.
+C'est un **témoin**, pas un vu-mètre : peu de LED et **interpolation lumineuse**
+entre voisines, le recouvrement des halos faisant glisser la tache. Critère de
+choix du pas : **pas ≤ largeur du halo**, à mesurer au banc. Le fondu ne sera pas
+linéaire (le PWM l'est, la perception non) — la courbe se règle à l'œil.
 
-**Aucune découpe ne traverse le bloc.** Cloison du milieu (5 mm sur 10) et fente
-arrière (7 sur 10) sont toutes deux **partielles, par le dessous**. Seuls les
-traits de scie entre blanches traversent, et ils s'arrêtent au dos.
-
-> ⚠️ **La coupe B passe par la moitié PLEINE.** C'est indispensable : une coupe par
-> la moitié ouverte montrerait un peigne sectionné, ce qu'il n'est pas. La fente
-> arrière et la dent du PCB se voient dans la **vue C** ; dans la coupe B ils sont
-> figurés en **teinte pâle**, comme un détail caché.
-
-**Le dos du peigne fait 18 mm**, et pas moins. C'est lui qui tient les 16 touches
-ensemble, et c'est la pièce la plus exposée : l'acrylique ne plie pas, il casse.
-Un dos mince percé de 16 fentes est fragile **avant même d'être monté** — à
-l'usinage, au débridage, à la manipulation. C'est là que ça casserait, pas en
-service. Valeur **estimée**, à confirmer sur la première pièce.
-
-> Coût : clavier de 66 à **76 mm** de profondeur, façade complète de 232 à
-> **242 mm**. Ces 10 mm sont entièrement en **zone cachée** sous le cache arrière —
-> ils n'entament ni la surface jouée ni la place de l'écran.
-
-> **Point dur restant : le repérage.** Les traits de gravure de l'ITO doivent
-> tomber au-dessus des coupes de scie, à mieux de 0,5 mm sur 300 mm. Ce n'est pas
-> une affaire de précision machine — la CNC est dix fois trop précise pour ça —
-> mais de **références de montage** communes aux deux pièces. C'est là que ce type
-> d'assemblage échoue d'habitude : chaque pièce juste, et les deux qui ne se
-> superposent pas.
-
-Technique complète : `../docs/CONCEPT_PLEXI_EPAIS.md`, section « Technique
-d'électrode ».
+> 🟡 **`clavier_piano.scad` modélise encore les noires en plaque teintée de 5 mm**
+> — à réconcilier quand les cotes seront figées.
 
 ## Implantation de façade — deux variantes (`implantation.scad`)
 
